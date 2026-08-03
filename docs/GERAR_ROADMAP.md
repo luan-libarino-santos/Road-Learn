@@ -12,8 +12,10 @@ Este guia explica o formato JSON aceito pelo sistema e como criar roadmaps compl
 
 Templates:
 
-- [`templates/roadmap.template.json`](templates/roadmap.template.json) — um roadmap enriquecido
-- [`templates/roadmaps-lote.template.json`](templates/roadmaps-lote.template.json) — vários de uma vez
+- [`templates/roadmap-html.json`](templates/roadmap-html.json) — fundamentos de HTML
+- [`templates/roadmap-php-basico-intermediario.json`](templates/roadmap-php-basico-intermediario.json) — PHP do básico ao intermediário
+- [`templates/roadmap-codeigniter4-introducao.json`](templates/roadmap-codeigniter4-introducao.json) — introdução ao CodeIgniter 4
+- [`templates/roadmap-legislacao-tributaria-erp.json`](templates/roadmap-legislacao-tributaria-erp.json) — legislação tributária aplicada a ERP
 
 ---
 
@@ -420,7 +422,7 @@ Content-Type: application/json
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/roadmaps/import" `
   -ContentType "application/json" `
-  -InFile "docs\templates\roadmap.template.json"
+  -InFile "docs\templates\roadmap-html.json"
 ```
 
 ---

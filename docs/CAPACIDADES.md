@@ -1,4 +1,4 @@
-# O que o Sistema de Aprendizado faz
+# O que o Road-Learn faz
 
 Aplicação local para **planejar, acompanhar e organizar roadmaps de estudo**. O foco não é só “completei N tarefas”, e sim **domínio de competências**, com dependências em grafo, revisão espaçada e métricas de tempo — tudo no navegador, sem conta e sem banco externo.
 
@@ -90,8 +90,8 @@ Exemplo mental: a tarefa “Criar CRUD” pode somar Routing + Controllers + Bla
 
 ## 5. Importar via JSON
 
-Template Laravel completo em `docs/templates/roadmap.template.json`.  
-Prompt atualizado em `docs/GERAR_ROADMAP.md` (pede `competencias` + vínculo nas tarefas).
+Exemplos completos estão disponíveis em `docs/templates/`.
+O prompt atualizado em `docs/GERAR_ROADMAP.md` inclui `competencias` e o vínculo com as tarefas.
 
 ---
 

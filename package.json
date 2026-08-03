@@ -1,9 +1,29 @@
 {
-  "name": "sistema-roadmaps",
+  "name": "road-learn",
   "version": "1.0.0",
-  "description": "Sistema de gestão de roadmaps com Node.js e armazenamento JSON",
+  "description": "Aplicação web para criar, organizar e acompanhar roadmaps de aprendizado.",
   "type": "module",
   "main": "server/index.js",
+  "author": "Luan Libarino Santos",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luan-libarino-santos/Road-Learn.git"
+  },
+  "bugs": {
+    "url": "https://github.com/luan-libarino-santos/Road-Learn/issues"
+  },
+  "homepage": "https://github.com/luan-libarino-santos/Road-Learn#readme",
+  "keywords": [
+    "roadmap",
+    "aprendizado",
+    "estudos",
+    "planejamento",
+    "express"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js"
