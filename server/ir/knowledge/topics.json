@@ -1,0 +1,302 @@
+{
+  "middleware": {
+    "label": "Middleware",
+    "aliases": ["middleware", "middlewares", "http middleware", "pipeline", "filter", "filtro", "filters"],
+    "synonyms": ["request pipeline", "http pipeline", "middleware stack", "before filter", "after filter"]
+  },
+  "autenticacao": {
+    "label": "Autenticação",
+    "aliases": ["autenticacao", "autenticação", "auth", "authentication", "login", "logout", "sign in", "sign out"],
+    "synonyms": ["authorization", "oauth", "jwt", "sanctum", "passport", "session auth", "guard"]
+  },
+  "rotas": {
+    "label": "Rotas",
+    "aliases": ["rotas", "routing", "route", "routes", "router", "endpoint", "endpoints", "route group"],
+    "synonyms": ["url routing", "route model binding", "resource routes", "named routes"]
+  },
+  "crud": {
+    "label": "CRUD",
+    "aliases": ["crud", "create read update delete", "resource controller", "resource controllers"],
+    "synonyms": ["rest resource", "scaffold crud"]
+  },
+  "validacao": {
+    "label": "Validação",
+    "aliases": ["validacao", "validação", "validation", "validator", "validate", "form request", "rules", "validation rules"],
+    "synonyms": ["input validation", "form validation", "request validation"]
+  },
+  "deploy": {
+    "label": "Deploy",
+    "aliases": ["deploy", "deployment", "production", "producao", "produção", "hosting", "homologacao", "homologação"],
+    "synonyms": ["ci cd", "cicd", "forge", "vapor", "heroku", "production deploy"]
+  },
+  "cache": {
+    "label": "Cache",
+    "aliases": ["cache", "caching", "memcached", "opcache", "cache driver", "cache store"],
+    "synonyms": ["query cache", "response cache", "cache tag"]
+  },
+  "testes": {
+    "label": "Testes",
+    "aliases": ["testes", "test", "tests", "testing", "phpunit", "pest", "tdd", "feature test", "unit test", "jest", "vitest"],
+    "synonyms": ["integration test", "e2e test", "assertion", "test coverage"]
+  },
+  "orm": {
+    "label": "ORM",
+    "aliases": ["orm", "eloquent", "models", "query builder", "migration", "migrations", "seeders", "seeder", "relationship", "relationships"],
+    "synonyms": ["active record", "belongs to", "has many", "hasone", "belongs to many"]
+  },
+  "semantica": {
+    "label": "HTML Semântico",
+    "aliases": ["semantica", "semântica", "semantic html", "html semantico", "html semântico", "semantic markup"],
+    "synonyms": ["section", "article", "header", "footer", "nav", "main", "landmark"]
+  },
+  "queues": {
+    "label": "Filas",
+    "aliases": ["queues", "queue", "filas", "fila", "job", "jobs", "worker", "horizon", "dispatch"],
+    "synonyms": ["background job", "async processing", "job queue"]
+  },
+  "interfaces": {
+    "label": "Interfaces",
+    "aliases": ["interface", "interfaces", "implements", "declaração de interface", "interface typescript"],
+    "synonyms": ["contract", "contrato", "shape", "estrutura de objeto"]
+  },
+  "type_aliases": {
+    "label": "Type Aliases",
+    "aliases": ["type alias", "type aliases", "alias de tipo", "union type", "union types", "intersection type", "tipo uniao", "tipo união"],
+    "synonyms": ["literal type", "mapped type", "conditional type"]
+  },
+  "generics": {
+    "label": "Generics",
+    "aliases": ["generics", "generic types", "tipo generico", "tipo genérico", "type parameter", "parametro de tipo", "parâmetro de tipo"],
+    "synonyms": ["generic constraint", "generic function"]
+  },
+  "enums": {
+    "label": "Enums",
+    "aliases": ["enum", "enums", "enumeracao", "enumeração", "enum typescript"],
+    "synonyms": ["const enum", "string enum", "numeric enum"]
+  },
+  "decorators": {
+    "label": "Decorators",
+    "aliases": ["decorator", "decorators", "experimentaldecorators", "class decorator", "method decorator", "property decorator", "parameter decorator", "decorador", "decoradores", "decorator de classe", "decorator de método", "decorator de propriedade", "decorator de parâmetro"],
+    "synonyms": ["typescript decorators", "metadata reflection", "metaprogramming"]
+  },
+  "containers": {
+    "label": "Containers",
+    "aliases": ["container", "containers", "containerizacao", "containerização", "namespaces", "cgroups"],
+    "synonyms": ["linux container", "container runtime", "oci container"]
+  },
+  "images": {
+    "label": "Imagens Docker",
+    "aliases": ["docker image", "docker images", "imagem docker", "imagens docker", "docker pull", "docker hub"],
+    "synonyms": ["image layers", "container image", "base image"]
+  },
+  "dockerfile": {
+    "label": "Dockerfile",
+    "aliases": ["dockerfile", "docker file", "multi-stage", "multi stage", "multistage", "docker build"],
+    "synonyms": ["docker build", "image build", "healthcheck docker"]
+  },
+  "docker_compose": {
+    "label": "Docker Compose",
+    "aliases": ["docker compose", "docker-compose", "compose file", "docker compose yml", "docker-compose.yml"],
+    "synonyms": ["compose stack", "compose services", "compose override"]
+  },
+  "volumes": {
+    "label": "Volumes",
+    "aliases": ["volume", "volumes", "bind mount", "bind mounts", "persistencia", "persistência", "docker volume"],
+    "synonyms": ["named volume", "volume mount", "data persistence"]
+  },
+  "networks": {
+    "label": "Redes Docker",
+    "aliases": ["docker network", "docker networks", "bridge network", "bridge driver", "rede docker"],
+    "synonyms": ["container network", "network driver", "dns docker"]
+  },
+  "kubernetes": {
+    "label": "Kubernetes",
+    "aliases": ["kubernetes", "k8s", "kubectl", "pod", "pods", "deployment", "deployments", "service kubernetes"],
+    "synonyms": ["minikube", "kind cluster", "helm chart", "ingress"]
+  },
+  "cicd": {
+    "label": "CI/CD",
+    "aliases": ["ci cd", "cicd", "ci/cd", "pipeline", "pipelines", "github actions", "gitlab ci", "continuous integration"],
+    "synonyms": ["continuous deployment", "build pipeline", "workflow yaml"]
+  },
+  "forms": {
+    "label": "Formulários HTML",
+    "aliases": ["formulario", "formulário", "formularios", "formulários", "html form", "html forms", "input type", "fieldset"],
+    "synonyms": ["form validation html", "form element", "label input"]
+  },
+  "tables": {
+    "label": "Tabelas HTML",
+    "aliases": ["tabela html", "tabelas html", "html table", "html tables", "thead", "tbody", "colspan", "rowspan"],
+    "synonyms": ["data table html", "table accessibility"]
+  },
+  "links": {
+    "label": "Links e Navegação",
+    "aliases": ["hyperlink", "hyperlinks", "anchor", "href", "navegacao", "navegação", "link interno", "link externo"],
+    "synonyms": ["internal link", "external link", "anchor tag"]
+  },
+  "dom": {
+    "label": "DOM",
+    "aliases": ["dom", "document object model", "document tree", "arvore dom", "árvore dom"],
+    "synonyms": ["dom manipulation", "dom api", "queryselector"]
+  },
+  "acessibilidade": {
+    "label": "Acessibilidade",
+    "aliases": ["acessibilidade", "accessibility", "a11y", "aria", "wcag", "screen reader", "leitor de tela"],
+    "synonyms": ["accessible web", "focus management", "alt text"]
+  },
+  "seo": {
+    "label": "SEO",
+    "aliases": ["seo", "meta tags", "meta tag", "open graph", "og tags", "structured data", "json-ld"],
+    "synonyms": ["search engine optimization", "meta description", "canonical url"]
+  },
+  "performance_web": {
+    "label": "Performance Web",
+    "aliases": ["performance web", "web performance", "core web vitals", "lighthouse", "cls", "lcp", "fid"],
+    "synonyms": ["page speed", "lazy loading", "critical css"]
+  },
+  "joins": {
+    "label": "JOINs SQL",
+    "aliases": ["join", "joins", "inner join", "left join", "right join", "cross join", "self join"],
+    "synonyms": ["table join", "sql join", "join query"]
+  },
+  "sql_queries": {
+    "label": "Consultas SQL",
+    "aliases": ["select sql", "consulta sql", "consultas sql", "sql query", "sql queries", "where clause", "order by"],
+    "synonyms": ["dml", "select statement", "filter sql"]
+  },
+  "indexes": {
+    "label": "Índices",
+    "aliases": ["indice sql", "índice sql", "indices sql", "índices sql", "index sql", "index mysql", "explain", "query plan", "database index"],
+    "synonyms": ["btree index", "composite index", "fulltext index"]
+  },
+  "transactions": {
+    "label": "Transações",
+    "aliases": ["transacao", "transação", "transacoes", "transações", "transaction", "transactions", "commit", "rollback", "acid"],
+    "synonyms": ["isolation level", "database transaction", "begin transaction"]
+  },
+  "ddl": {
+    "label": "DDL e Modelagem",
+    "aliases": ["ddl", "create table", "alter table", "drop table", "modelagem", "schema", "database schema"],
+    "synonyms": ["database design", "normalization", "er diagram"]
+  },
+  "subqueries": {
+    "label": "Subqueries e CTEs",
+    "aliases": ["subquery", "subqueries", "subconsulta", "subconsultas", "cte", "ctes", "common table expression", "with clause"],
+    "synonyms": ["nested query", "derived table"]
+  },
+  "mvc": {
+    "label": "Arquitetura MVC",
+    "aliases": ["mvc", "model view controller", "arquitetura mvc", "separation of concerns"],
+    "synonyms": ["controller view model", "mvc pattern", "request response cycle"]
+  },
+  "controllers": {
+    "label": "Controllers",
+    "aliases": ["controller", "controllers", "controlador", "controladores", "action method"],
+    "synonyms": ["resource controller", "api controller", "base controller"]
+  },
+  "views": {
+    "label": "Views e Templates",
+    "aliases": ["view", "views", "template", "templates", "blade template", "layout", "layouts", "partial"],
+    "synonyms": ["view engine", "template inheritance", "sections blade"]
+  },
+  "api_rest": {
+    "label": "API REST",
+    "aliases": ["api rest", "rest api", "restful", "restful api", "json api", "resource api", "http api"],
+    "synonyms": ["status code", "api endpoint", "api resource", "cors api"]
+  },
+  "seguranca_web": {
+    "label": "Segurança Web",
+    "aliases": ["seguranca web", "segurança web", "csrf", "xss", "sql injection", "sql injection prevention", "escapamento"],
+    "synonyms": ["web security", "input sanitization", "security headers"]
+  },
+  "oop": {
+    "label": "Orientação a Objetos",
+    "aliases": ["oop", "poo", "orientacao a objetos", "orientação a objetos", "classe", "classes", "objeto", "objetos", "heranca", "herança", "polimorfismo", "encapsulamento", "readonly", "constructor", "__construct"],
+    "synonyms": ["inheritance", "polymorphism", "class method", "abstract class"]
+  },
+  "pdo": {
+    "label": "PDO",
+    "aliases": ["pdo", "php pdo", "prepared statement", "prepared statements", "statement prepare"],
+    "synonyms": ["database driver", "parameter binding", "fetch mode"]
+  },
+  "sessoes": {
+    "label": "Sessões e Cookies",
+    "aliases": ["sessao", "sessão", "sessoes", "sessões", "session", "sessions", "cookie", "cookies", "flash data"],
+    "synonyms": ["session storage", "session driver", "remember me"]
+  },
+  "namespaces": {
+    "label": "Namespaces e Autoload",
+    "aliases": ["namespace", "namespaces", "autoload", "autoloading", "psr-4", "psr4", "composer autoload"],
+    "synonyms": ["use statement", "class loading", "vendor autoload"]
+  },
+  "async_await": {
+    "label": "Async/Await",
+    "aliases": ["async await", "async/await", "promise", "promises", "callback hell", "event loop"],
+    "synonyms": ["asynchronous javascript", "fetch api", "promise chain"]
+  },
+  "branches": {
+    "label": "Branches Git",
+    "aliases": ["branch", "branches", "git branch", "merge branch", "feature branch", "main branch"],
+    "synonyms": ["git flow", "branch strategy", "checkout branch"]
+  },
+  "commits": {
+    "label": "Commits Git",
+    "aliases": ["commit", "commits", "git commit", "git log", "git diff", "staging area", "git add"],
+    "synonyms": ["conventional commits", "commit message", "amend commit"]
+  },
+  "flexbox": {
+    "label": "Flexbox",
+    "aliases": ["flexbox", "flex box", "display flex", "flex container", "flex item"],
+    "synonyms": ["flex direction", "justify content", "align items"]
+  },
+  "grid": {
+    "label": "CSS Grid",
+    "aliases": ["css grid", "grid layout", "grid template", "grid area", "grid column"],
+    "synonyms": ["display grid", "grid track", "responsive grid"]
+  },
+  "blade": {
+    "label": "Blade",
+    "aliases": ["blade", "blade template", "blade templates", "blade directive", "blade directives"],
+    "synonyms": ["blade component", "blade layout", "@extends blade"]
+  },
+  "livewire": {
+    "label": "Livewire",
+    "aliases": ["livewire", "laravel livewire", "livewire component", "wire:model"],
+    "synonyms": ["full stack laravel", "livewire alpine"]
+  },
+  "aggregacao": {
+    "label": "Agregação SQL",
+    "aliases": ["agregacao", "agregação", "group by", "having", "funcoes agregadas", "funções agregadas", "aggregate function sql"],
+    "synonyms": ["aggregate function", "sql aggregation", "grouping sets"]
+  },
+  "arrays": {
+    "label": "Arrays",
+    "aliases": ["arrays", "array", "array_map", "array_filter", "array_reduce", "array_push", "array_key_exists", "in_array", "foreach", "associativo", "associativos", "indexado", "indexados", "multidimensional", "spread operator"],
+    "synonyms": ["indexed array", "associative array", "php array functions", "array merge"]
+  },
+  "loops": {
+    "label": "Loops e Iteração",
+    "aliases": ["loop", "loops", "iteracao", "iteração", "for loop", "while loop", "do-while", "do while", "foreach", "break", "continue", "estrutura de repeticao", "estrutura de repetição"],
+    "synonyms": ["iteration statements", "control flow loops", "nested loops"]
+  },
+  "exceptions": {
+    "label": "Exceptions e Erros",
+    "aliases": ["exception", "exceptions", "excecao", "exceção", "try catch", "error handling", "stack trace"],
+    "synonyms": ["throw catch", "custom exception", "exception handler"]
+  },
+  "regex": {
+    "label": "Regex",
+    "aliases": ["regex", "regexp", "regular expression", "expressao regular", "expressão regular", "pattern matching"],
+    "synonyms": ["preg_match", "regex pattern", "character class"]
+  },
+  "monitoramento": {
+    "label": "Monitoramento e Logs",
+    "aliases": ["monitoramento", "logging", "logs", "docker logs", "observability", "metrics", "prometheus"],
+    "synonyms": ["log driver", "health check", "container stats"]
+  },
+  "hooks": {
+    "label": "React Hooks",
+    "aliases": ["hooks", "usestate", "useeffect", "usecallback", "usememo", "use ref", "custom hook", "custom hooks"],
+    "synonyms": ["react hook", "state hook", "effect hook"]
+  }
+}

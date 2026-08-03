@@ -1,0 +1,110 @@
+{
+  "laravel": {
+    "label": "Laravel",
+    "aliases": ["laravel", "artisan", "blade", "eloquent", "livewire", "sanctum", "horizon", "inertia", "filament"],
+    "officialDocs": ["laravel.com"],
+    "versionPattern": "laravel"
+  },
+  "php": {
+    "label": "PHP",
+    "aliases": ["php", "composer", "phpunit", "pest", "psr", "namespace", "trait", "superglobais"],
+    "officialDocs": ["php.net"],
+    "versionPattern": "php"
+  },
+  "codeigniter": {
+    "label": "CodeIgniter",
+    "aliases": ["codeigniter", "codeigniter4", "ci4", "spark", "appstarter"],
+    "officialDocs": ["codeigniter.com"],
+    "versionPattern": "codeigniter"
+  },
+  "html": {
+    "label": "HTML",
+    "aliases": ["html", "html5", "dom", "markup", "hypertext", "doctype"],
+    "officialDocs": ["developer.mozilla.org", "web.dev"],
+    "versionPattern": null
+  },
+  "css": {
+    "label": "CSS",
+    "aliases": ["css", "css3", "stylesheet", "flexbox", "grid", "media query", "media queries"],
+    "officialDocs": ["developer.mozilla.org", "web.dev"],
+    "versionPattern": null
+  },
+  "javascript": {
+    "label": "JavaScript",
+    "aliases": ["javascript", "js", "nodejs", "node", "npm", "es6", "ecmascript", "vanilla js"],
+    "officialDocs": ["developer.mozilla.org", "nodejs.org"],
+    "versionPattern": "node"
+  },
+  "typescript": {
+    "label": "TypeScript",
+    "aliases": ["typescript", "ts", "typed", "type script", "tipado", "tipagem", "tsx", "tsconfig", "experimentaldecorators", "nestjs", "angular"],
+    "officialDocs": ["typescriptlang.org", "developer.mozilla.org"],
+    "versionPattern": null
+  },
+  "python": {
+    "label": "Python",
+    "aliases": ["python", "pip", "venv", "virtualenv", "asyncio", "django", "flask", "fastapi", "pandas"],
+    "officialDocs": ["python.org", "docs.python.org"],
+    "versionPattern": "python"
+  },
+  "mysql": {
+    "label": "MySQL",
+    "aliases": ["mysql", "mariadb", "sql", "innodb", "mysql8", "mysql 8"],
+    "officialDocs": ["dev.mysql.com", "mariadb.com"],
+    "versionPattern": "mysql"
+  },
+  "docker": {
+    "label": "Docker",
+    "aliases": ["docker", "compose", "dockerfile", "container", "containers", "docker hub", "dockerhub"],
+    "officialDocs": ["docs.docker.com"],
+    "versionPattern": null
+  },
+  "kubernetes": {
+    "label": "Kubernetes",
+    "aliases": ["kubernetes", "k8s", "kubectl", "minikube", "kind", "helm", "pod", "pods"],
+    "officialDocs": ["kubernetes.io"],
+    "versionPattern": null
+  },
+  "git": {
+    "label": "Git",
+    "aliases": ["git", "github", "gitlab", "bitbucket", "gitflow", "repositório", "repositorio"],
+    "officialDocs": ["git-scm.com", "docs.github.com"],
+    "versionPattern": null
+  },
+  "react": {
+    "label": "React",
+    "aliases": ["react", "reactjs", "react.js", "jsx", "hooks", "nextjs", "next.js"],
+    "officialDocs": ["react.dev"],
+    "versionPattern": null
+  },
+  "vue": {
+    "label": "Vue",
+    "aliases": ["vue", "vuejs", "vue.js", "nuxt", "nuxtjs", "pinia"],
+    "officialDocs": ["vuejs.org"],
+    "versionPattern": null
+  },
+  "redis": {
+    "label": "Redis",
+    "aliases": ["redis", "cache redis", "redis cache"],
+    "officialDocs": ["redis.io"],
+    "versionPattern": null
+  },
+  "java": {
+    "label": "Java",
+    "aliases": ["java", "jdk", "spring boot", "maven", "gradle"],
+    "officialDocs": ["oracle.com", "dev.java"],
+    "versionPattern": "java"
+  },
+  "csharp": {
+    "label": "C#",
+    "aliases": ["c#", "csharp", "c sharp", ".net", "dotnet", "asp.net"],
+    "officialDocs": ["learn.microsoft.com"],
+    "versionPattern": null
+  },
+  "powershell": {
+    "label": "PowerShell",
+    "aliases": ["powershell", "pwsh", "foreach-object", "cmdlet"],
+    "officialDocs": ["learn.microsoft.com"],
+    "versionPattern": null
+  }
+}
