@@ -30,6 +30,7 @@ export const api = {
   criarRoadmap: (dados) => requisicao("POST", "/roadmaps", dados),
   atualizarRoadmap: (id, dados) => requisicao("PUT", `/roadmaps/${id}`, dados),
   importarRoadmaps: (dados) => requisicao("POST", "/roadmaps/import", dados),
+  gerarRoadmapIa: (dados) => requisicao("POST", "/roadmaps/gerar", dados),
   excluirRoadmap: (id) => requisicao("DELETE", `/roadmaps/${id}`),
   adicionarCompetencia: (roadmapId, dados) =>
     requisicao("POST", `/roadmaps/${roadmapId}/competencias`, dados),

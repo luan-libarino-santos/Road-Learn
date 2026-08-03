@@ -238,7 +238,8 @@ function abrirModal(titulo, campos, onSubmit, opcoes = {}) {
   form.onsubmit = async (e) => {
     e.preventDefault();
     try {
-      await onSubmit(new FormData(form), form);
+      const resultado = await onSubmit(new FormData(form), form);
+      if (resultado?.manterAberto) return;
       fecharModal();
       atualizarTela();
     } catch (erro) {
@@ -1834,7 +1835,7 @@ function mostrarModalCompetencias(roadmapId) {
   );
 }
 
-  const TEMPLATE_IMPORT_EXEMPLO = `{
+const TEMPLATE_IMPORT_EXEMPLO = `{
   "nome": "Laravel",
   "descricao": "Fundamentos do framework",
   "competencias": [
@@ -1866,28 +1867,99 @@ function mostrarModalCompetencias(roadmapId) {
 }`;
 
 export function mostrarModalImportarJson() {
+  let abaImport = "colar";
+
   abrirModal(
     "Importar via JSON",
     [
       {
         tipo: "html",
-        html: `<p class="campo-dica">Cole o JSON ou carregue um arquivo. Guia: <code>docs/GERAR_ROADMAP.md</code>. Inclua <code>competencias</code> na raiz e referencie nas tarefas (por id ou nome).</p>`,
-      },
-      {
-        tipo: "html",
-        html: `<label class="campo campo-arquivo"><span>Arquivo .json (opcional)</span><input type="file" id="import-arquivo" accept=".json,application/json"></label>`,
-      },
-      {
-        label: "JSON do roadmap",
-        name: "json",
-        tipo: "textarea",
-        placeholder: TEMPLATE_IMPORT_EXEMPLO,
-        required: true,
-        rows: 14,
-        valor: "",
+        html: `
+      <div class="modal-abas roadmap-abas" role="tablist" aria-label="Modo de importação">
+        <button type="button" class="aba-btn ativo" role="tab" aria-selected="true" data-aba-import="colar">Colar / arquivo</button>
+        <button type="button" class="aba-btn" role="tab" aria-selected="false" data-aba-import="ia">Gerar com IA</button>
+      </div>
+      <div class="modal-aba-painel" data-painel-import="colar" role="tabpanel">
+        <p class="campo-dica">Cole o JSON ou carregue um arquivo. Guia: <code>docs/GERAR_ROADMAP.md</code>. Inclua <code>competencias</code> na raiz e referencie nas tarefas (por id ou nome).</p>
+        <label class="campo campo-arquivo"><span>Arquivo .json (opcional)</span><input type="file" id="import-arquivo" accept=".json,application/json"></label>
+        <label class="campo">
+          <span>JSON do roadmap</span>
+          <textarea name="json" id="import-json" placeholder="Cole o JSON do roadmap aqui…" rows="14" required></textarea>
+        </label>
+        <p class="campo-dica" id="import-ia-info" hidden></p>
+      </div>
+      <div class="modal-aba-painel" data-painel-import="ia" role="tabpanel" hidden>
+        <p class="campo-dica">A IA gera o JSON com base no tema. Depois você revisa na aba Colar / arquivo e importa.</p>
+        <div class="campo-linha-2">
+          <label class="campo">
+            <span>Porte</span>
+            <select name="ia_porte" id="ia-porte">
+              <option value="Pequeno">Pequeno (5–10 tarefas)</option>
+              <option value="Médio" selected>Médio (11–20 tarefas)</option>
+              <option value="Grande">Grande (21+ tarefas)</option>
+            </select>
+          </label>
+          <label class="campo">
+            <span>Nível</span>
+            <select name="ia_nivel" id="ia-nivel">
+              <option value="Iniciante">Iniciante</option>
+              <option value="Intermediário" selected>Intermediário</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </label>
+        </div>
+        <label class="campo">
+          <span>Tema</span>
+          <input type="text" name="ia_tema" id="ia-tema" placeholder="Ex.: PHP, Laravel, Redes…" autocomplete="off">
+        </label>
+        <label class="campo">
+          <span>Detalhes adicionais (opcional)</span>
+          <textarea name="ia_detalhes" id="ia-detalhes" placeholder="Foco, exclusões, duração desejada, stack específica…" rows="4"></textarea>
+        </label>
+      </div>`,
       },
     ],
-    async (formData) => {
+    async (formData, form) => {
+      if (abaImport === "ia") {
+        const tema = String(formData.get("ia_tema") ?? "").trim();
+        if (!tema) throw new Error("Informe o tema do roadmap");
+
+        const confirmar = elementos.modalConfirmar();
+        const labelOriginal = confirmar?.textContent ?? "Gerar JSON";
+        if (confirmar) {
+          confirmar.disabled = true;
+          confirmar.textContent = "Gerando…";
+        }
+
+        try {
+          const resultado = await api.gerarRoadmapIa({
+            tema,
+            nivel: String(formData.get("ia_nivel") ?? "Intermediário"),
+            porte: String(formData.get("ia_porte") ?? "Médio"),
+            detalhes: String(formData.get("ia_detalhes") ?? "").trim(),
+          });
+
+          const textarea = form.querySelector("#import-json");
+          if (textarea) {
+            textarea.value = JSON.stringify(resultado.roadmap, null, 2);
+          }
+
+          const info = form.querySelector("#import-ia-info");
+          if (info) {
+            info.hidden = false;
+            info.textContent = `Gerado com ${resultado.modeloUsado}. Revise o JSON e clique em Importar.`;
+          }
+
+          form.querySelector('[data-aba-import="colar"]')?.click();
+          return { manterAberto: true };
+        } finally {
+          if (confirmar && abaImport === "ia") {
+            confirmar.disabled = false;
+            confirmar.textContent = labelOriginal;
+          }
+        }
+      }
+
       const texto = String(formData.get("json") ?? "").trim();
       if (!texto) throw new Error("Cole ou carregue um JSON");
 
@@ -1913,9 +1985,39 @@ export function mostrarModalImportarJson() {
     },
     {
       largo: true,
+      submitLabel: "Importar",
       onMount: (form) => {
+        const confirmar = elementos.modalConfirmar();
+        const textarea = form.querySelector("#import-json");
+        const inputTema = form.querySelector("#ia-tema");
         const inputArquivo = form.querySelector("#import-arquivo");
-        const textarea = form.querySelector('textarea[name="json"]');
+
+        if (textarea) {
+          textarea.placeholder = TEMPLATE_IMPORT_EXEMPLO;
+        }
+
+        const ativarAba = (id) => {
+          abaImport = id;
+          form.querySelectorAll("[data-aba-import]").forEach((btn) => {
+            const ativo = btn.dataset.abaImport === id;
+            btn.classList.toggle("ativo", ativo);
+            btn.setAttribute("aria-selected", ativo ? "true" : "false");
+          });
+          form.querySelectorAll("[data-painel-import]").forEach((painel) => {
+            painel.hidden = painel.dataset.painelImport !== id;
+          });
+          if (textarea) textarea.required = id === "colar";
+          if (inputTema) inputTema.required = id === "ia";
+          if (confirmar) {
+            confirmar.textContent = id === "ia" ? "Gerar JSON" : "Importar";
+            confirmar.disabled = false;
+          }
+        };
+
+        form.querySelectorAll("[data-aba-import]").forEach((btn) => {
+          btn.addEventListener("click", () => ativarAba(btn.dataset.abaImport || "colar"));
+        });
+
         inputArquivo?.addEventListener("change", async () => {
           const arquivo = inputArquivo.files?.[0];
           if (!arquivo || !textarea) return;
@@ -1925,6 +2027,8 @@ export function mostrarModalImportarJson() {
             mostrarErro("Não foi possível ler o arquivo");
           }
         });
+
+        ativarAba("colar");
       },
     }
   );

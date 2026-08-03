@@ -1741,6 +1741,26 @@ textarea[name="json"] {
   max-width: 680px;
 }
 
+.modal-abas {
+  margin-bottom: 16px;
+}
+
+.modal-aba-painel[hidden] {
+  display: none;
+}
+
+.campo-linha-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .campo-linha-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
 @keyframes modalEntrada {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }

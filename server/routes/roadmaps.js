@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as service from "../roadmaps-service.js";
+import { gerarRoadmapComIa } from "../ai/gerar-roadmap.js";
 
 const router = Router();
 
@@ -22,6 +23,25 @@ router.post("/import", async (req, res, next) => {
   } catch (erro) {
     if (erro.message && !erro.message.startsWith("Erro interno")) {
       return res.status(400).json({ erro: erro.message });
+    }
+    next(erro);
+  }
+});
+
+router.post("/gerar", async (req, res, next) => {
+  try {
+    const { tema, nivel, porte, detalhes } = req.body ?? {};
+    const resultado = await gerarRoadmapComIa({ tema, nivel, porte, detalhes });
+    res.json({
+      roadmap: resultado.roadmap,
+      modeloUsado: resultado.modeloUsado,
+    });
+  } catch (erro) {
+    if (erro.status === 400 || erro.status === 503 || erro.status === 502) {
+      return res.status(erro.status).json({ erro: erro.message });
+    }
+    if (erro.message && !erro.message.startsWith("Erro interno")) {
+      return res.status(502).json({ erro: erro.message });
     }
     next(erro);
   }
