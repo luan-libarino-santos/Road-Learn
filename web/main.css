@@ -1738,7 +1738,7 @@ textarea[name="json"] {
 }
 
 .modal.modal-largo {
-  max-width: 680px;
+  max-width: 760px;
 }
 
 .modal-abas {
@@ -1759,6 +1759,72 @@ textarea[name="json"] {
   .campo-linha-2 {
     grid-template-columns: 1fr;
   }
+}
+
+.ia-campo {
+  border: none;
+  margin: 0 0 14px;
+  padding: 0;
+  min-width: 0;
+}
+
+.ia-campo legend {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.ia-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ia-opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+}
+
+.ia-opcao input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ia-opcao:has(input:checked) {
+  color: var(--text);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+.ia-opcao:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--text);
+}
+
+.ia-preview-acoes {
+  margin: 0 0 12px;
+}
+
+.ia-preview-painel textarea {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  white-space: pre;
+  max-height: 40vh;
 }
 
 @keyframes modalEntrada {

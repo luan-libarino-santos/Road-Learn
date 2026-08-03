@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as service from "../roadmaps-service.js";
-import { gerarRoadmapComIa } from "../ai/gerar-roadmap.js";
+import { gerarRoadmapComIa, previewPromptGeracao } from "../ai/gerar-roadmap.js";
 
 const router = Router();
 
@@ -28,10 +28,44 @@ router.post("/import", async (req, res, next) => {
   }
 });
 
+function extrairParamsGeracao(body) {
+  const {
+    tema,
+    objetivos,
+    experiencia,
+    estilo,
+    profundidade,
+    tempo,
+    tiposAtividade,
+    restricoes,
+  } = body ?? {};
+  return {
+    tema,
+    objetivos,
+    experiencia,
+    estilo,
+    profundidade,
+    tempo,
+    tiposAtividade,
+    restricoes,
+  };
+}
+
+router.post("/gerar/preview", async (req, res, next) => {
+  try {
+    const resultado = previewPromptGeracao(extrairParamsGeracao(req.body));
+    res.json(resultado);
+  } catch (erro) {
+    if (erro.status === 400) {
+      return res.status(400).json({ erro: erro.message });
+    }
+    next(erro);
+  }
+});
+
 router.post("/gerar", async (req, res, next) => {
   try {
-    const { tema, nivel, porte, detalhes } = req.body ?? {};
-    const resultado = await gerarRoadmapComIa({ tema, nivel, porte, detalhes });
+    const resultado = await gerarRoadmapComIa(extrairParamsGeracao(req.body));
     res.json({
       roadmap: resultado.roadmap,
       modeloUsado: resultado.modeloUsado,

@@ -1,0 +1,42 @@
+1 - Sistema de criação de "Projeto Final" baseado nas competências adquiridas:
+    Utilizar os dados obtidos durante o Roadmap (competências desenvolvidas, tarefas concluídas, tecnologias utilizadas e nível de domínio) para gerar um grande projeto final que consolide o aprendizado adquirido.
+    Diferentemente dos projetos finais padrões existentes dentro dos Roadmaps, esses projetos terão uma estrutura própria, contendo objetivo, descrição, dificuldade, stack obrigatória, requisitos técnicos, requisitos funcionais, checklist de implementação e critérios de conclusão.
+    Os Projetos Finais deverão representar aplicações reais que poderiam existir como projetos de portfólio, possuindo uma estrutura compatível com um repositório Github, incluindo organização de tarefas, documentação inicial e possíveis etapas de desenvolvimento.
+    Assim como os Roadmaps, os Projetos Finais serão gerados utilizando IA, utilizando competências, tarefas, subtarefas, atributos e tecnologias estudadas como contexto para criar desafios personalizados.
+
+2 - Sistema de Habilidades Permanentes:
+    Criar um registro permanente das competências adquiridas pelo usuário independente dos Roadmaps ativos.
+    Ao concluir Roadmaps e Projetos Finais, as habilidades desenvolvidas serão adicionadas ao perfil geral do usuário.
+    Permitir visualizar o histórico de domínio de tecnologias, como evolução em Back-end, Front-end, Banco de Dados, DevOps e outras áreas.
+    Criar uma visão de longo prazo da evolução técnica do usuário.
+
+3 - Sistema de evolução de competências através de projetos:
+    Permitir que Projetos Finais também contribuam para o domínio de competências, seguindo o mesmo modelo dos Roadmaps.
+    Cada requisito ou etapa concluída de um Projeto Final poderá aumentar o domínio de determinadas skills, representando a aplicação prática do conhecimento adquirido.
+    Criar uma relação entre teoria e prática, onde o usuário não apenas aprende uma competência, mas também demonstra sua aplicação através de projetos.
+
+4 - Expansão da Ficha de Usuário como perfil de desenvolvimento:
+    Evoluir a Ficha atual para representar a trajetória completa de aprendizado do usuário.
+    Exibir atributos, XP baseado em horas reais estudadas, nível, radar de competências, histórico de evolução e distribuição de conhecimento por áreas.
+    Adicionar estatísticas diárias, semanais e mensais, mostrando evolução de tempo estudado, tarefas concluídas, competências desenvolvidas e projetos finalizados.
+    Manter a filosofia de progresso sem gamificação vazia, utilizando métricas reais de aprendizado.
+
+5 - Sistema de trilhas de carreira e objetivos profissionais:
+    Permitir que o usuário defina objetivos de desenvolvimento, como Backend Developer, Full Stack Developer, DevOps Engineer, Data Engineer, entre outros.
+    Utilizar as competências atuais, Roadmaps concluídos e Projetos Finais realizados para calcular o progresso em direção ao objetivo escolhido.
+    Gerar recomendações de próximas competências, tecnologias e projetos necessários para evoluir profissionalmente.
+
+6 - Sistema de personalização visual e identidade do usuário:
+    Permitir personalizar a interface do Road-Learn através de temas, cores principais, background, botões, componentes da árvore de tecnologia e elementos visuais.
+    Criar suporte para diferentes estilos de interface, mantendo as preferências salvas no perfil do usuário.
+    Permitir que a Ficha de Usuário tenha elementos personalizáveis como avatar e identidade visual.
+
+7 - Sistema de desafios práticos personalizados:
+    Criar pequenos desafios gerados automaticamente com base nas competências atuais do usuário.
+    Diferentemente dos Roadmaps, esses desafios seriam atividades rápidas para testar conhecimento, reforçar conceitos ou explorar novas aplicações.
+    Utilizar histórico, domínio de skills e objetivos profissionais para criar desafios adequados ao nível atual.
+
+8 - Sistema de integração com Github:
+    Permitir conectar projetos finais desenvolvidos pelo usuário aos seus respectivos repositórios.
+    Registrar informações como tecnologias utilizadas, progresso de implementação e histórico de evolução.
+    Utilizar os dados do Github para complementar a análise de competências e evolução prática do usuário.

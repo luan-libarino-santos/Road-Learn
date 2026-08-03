@@ -1866,6 +1866,70 @@ const TEMPLATE_IMPORT_EXEMPLO = `{
   ]
 }`;
 
+const IA_OBJETIVOS = [
+  "Aprendizado inicial",
+  "Aprofundamento",
+  "Revisão",
+  "Projetos práticos",
+  "Preparação profissional",
+];
+const IA_EXPERIENCIAS = ["Iniciante", "Já tenho fundamentos", "Intermediário", "Avançado"];
+const IA_ESTILOS = ["Teórico", "Prático", "Equilibrado", "Baseado em projetos", "Desafios/exercícios"];
+const IA_PROFUNDIDADES = ["Resumo", "Normal", "Completo", "Extenso"];
+const IA_TEMPOS = ["1 semana", "1 mês", "3 meses", "6 meses", "Sem prazo", "Personalizado"];
+const IA_TIPOS_ATIVIDADE = ["Conceitos", "Exercícios", "Projetos", "Pesquisas", "Leituras", "Revisões"];
+
+function renderizarOpcoesIa({ nome, label, tipo, opcoes, valor, valores = [] }) {
+  const selecionados = new Set(valores);
+  return `
+    <fieldset class="campo ia-campo">
+      <legend>${label}</legend>
+      <div class="ia-opcoes" role="group" aria-label="${label}">
+        ${opcoes
+          .map((op) => {
+            const marcado =
+              tipo === "checkbox" ? selecionados.has(op) : valor === op;
+            return `
+          <label class="ia-opcao">
+            <input type="${tipo}" name="${nome}" value="${op}" ${marcado ? "checked" : ""}>
+            <span>${op}</span>
+          </label>`;
+          })
+          .join("")}
+      </div>
+    </fieldset>`;
+}
+
+/** @returns {object} payload para /roadmaps/gerar e /gerar/preview */
+function coletarParamsGeracaoIa(formData) {
+  const tema = String(formData.get("ia_tema") ?? "").trim();
+  if (!tema) throw new Error("Informe o tema do roadmap");
+
+  const objetivos = formData.getAll("ia_objetivo").map(String);
+  if (!objetivos.length) throw new Error("Selecione ao menos um objetivo");
+
+  const tiposAtividade = formData.getAll("ia_tipo_atividade").map(String);
+  if (!tiposAtividade.length) throw new Error("Selecione ao menos um tipo de atividade");
+
+  const tempoSelecionado = String(formData.get("ia_tempo") ?? "Sem prazo");
+  let tempo = tempoSelecionado;
+  if (tempoSelecionado === "Personalizado") {
+    tempo = String(formData.get("ia_tempo_custom") ?? "").trim();
+    if (!tempo) throw new Error("Informe o tempo personalizado");
+  }
+
+  return {
+    tema,
+    objetivos,
+    experiencia: String(formData.get("ia_experiencia") ?? "Intermediário"),
+    estilo: String(formData.get("ia_estilo") ?? "Equilibrado"),
+    profundidade: String(formData.get("ia_profundidade") ?? "Normal"),
+    tempo,
+    tiposAtividade,
+    restricoes: String(formData.get("ia_restricoes") ?? "").trim(),
+  };
+}
+
 export function mostrarModalImportarJson() {
   let abaImport = "colar";
 
@@ -1889,40 +1953,74 @@ export function mostrarModalImportarJson() {
         <p class="campo-dica" id="import-ia-info" hidden></p>
       </div>
       <div class="modal-aba-painel" data-painel-import="ia" role="tabpanel" hidden>
-        <p class="campo-dica">A IA gera o JSON com base no tema. Depois você revisa na aba Colar / arquivo e importa.</p>
-        <div class="campo-linha-2">
-          <label class="campo">
-            <span>Porte</span>
-            <select name="ia_porte" id="ia-porte">
-              <option value="Pequeno">Pequeno (5–10 tarefas)</option>
-              <option value="Médio" selected>Médio (11–20 tarefas)</option>
-              <option value="Grande">Grande (21+ tarefas)</option>
-            </select>
-          </label>
-          <label class="campo">
-            <span>Nível</span>
-            <select name="ia_nivel" id="ia-nivel">
-              <option value="Iniciante">Iniciante</option>
-              <option value="Intermediário" selected>Intermediário</option>
-              <option value="Avançado">Avançado</option>
-            </select>
-          </label>
-        </div>
+        <p class="campo-dica">A IA gera o JSON com base no tema e nos parâmetros abaixo. Depois você revisa na aba Colar / arquivo e importa.</p>
         <label class="campo">
           <span>Tema</span>
           <input type="text" name="ia_tema" id="ia-tema" placeholder="Ex.: PHP, Laravel, Redes…" autocomplete="off">
         </label>
-        <label class="campo">
-          <span>Detalhes adicionais (opcional)</span>
-          <textarea name="ia_detalhes" id="ia-detalhes" placeholder="Foco, exclusões, duração desejada, stack específica…" rows="4"></textarea>
+        ${renderizarOpcoesIa({
+          nome: "ia_objetivo",
+          label: "Objetivo",
+          tipo: "checkbox",
+          opcoes: IA_OBJETIVOS,
+          valores: ["Aprendizado inicial"],
+        })}
+        ${renderizarOpcoesIa({
+          nome: "ia_experiencia",
+          label: "Experiência atual",
+          tipo: "radio",
+          opcoes: IA_EXPERIENCIAS,
+          valor: "Intermediário",
+        })}
+        ${renderizarOpcoesIa({
+          nome: "ia_estilo",
+          label: "Formato de aprendizado",
+          tipo: "radio",
+          opcoes: IA_ESTILOS,
+          valor: "Equilibrado",
+        })}
+        ${renderizarOpcoesIa({
+          nome: "ia_profundidade",
+          label: "Profundidade",
+          tipo: "radio",
+          opcoes: IA_PROFUNDIDADES,
+          valor: "Normal",
+        })}
+        ${renderizarOpcoesIa({
+          nome: "ia_tempo",
+          label: "Tempo disponível",
+          tipo: "radio",
+          opcoes: IA_TEMPOS,
+          valor: "Sem prazo",
+        })}
+        <label class="campo" id="ia-tempo-custom-campo" hidden>
+          <span>Tempo personalizado</span>
+          <input type="text" name="ia_tempo_custom" id="ia-tempo-custom" placeholder="Ex.: 2 semanas, 10h por semana…" autocomplete="off">
         </label>
+        ${renderizarOpcoesIa({
+          nome: "ia_tipo_atividade",
+          label: "Tipos de atividades",
+          tipo: "checkbox",
+          opcoes: IA_TIPOS_ATIVIDADE,
+          valores: IA_TIPOS_ATIVIDADE,
+        })}
+        <label class="campo">
+          <span>Restrições / Observações (opcional)</span>
+          <textarea name="ia_restricoes" id="ia-restricoes" placeholder="Ex.: Não utilizar frameworks; focar em backend; usar apenas ferramentas gratuitas…" rows="3"></textarea>
+        </label>
+        <div class="ia-preview-acoes">
+          <button type="button" class="btn-secundario btn-sm" id="ia-preview-prompt">Ver preview do prompt</button>
+        </div>
+        <div class="campo ia-preview-painel" id="ia-preview-painel" hidden>
+          <span>Prompt que será enviado à IA</span>
+          <textarea id="ia-preview-texto" readonly rows="12" spellcheck="false"></textarea>
+        </div>
       </div>`,
       },
     ],
     async (formData, form) => {
       if (abaImport === "ia") {
-        const tema = String(formData.get("ia_tema") ?? "").trim();
-        if (!tema) throw new Error("Informe o tema do roadmap");
+        const payload = coletarParamsGeracaoIa(formData);
 
         const confirmar = elementos.modalConfirmar();
         const labelOriginal = confirmar?.textContent ?? "Gerar JSON";
@@ -1932,12 +2030,7 @@ export function mostrarModalImportarJson() {
         }
 
         try {
-          const resultado = await api.gerarRoadmapIa({
-            tema,
-            nivel: String(formData.get("ia_nivel") ?? "Intermediário"),
-            porte: String(formData.get("ia_porte") ?? "Médio"),
-            detalhes: String(formData.get("ia_detalhes") ?? "").trim(),
-          });
+          const resultado = await api.gerarRoadmapIa(payload);
 
           const textarea = form.querySelector("#import-json");
           if (textarea) {
@@ -1991,10 +2084,47 @@ export function mostrarModalImportarJson() {
         const textarea = form.querySelector("#import-json");
         const inputTema = form.querySelector("#ia-tema");
         const inputArquivo = form.querySelector("#import-arquivo");
+        const tempoCustomCampo = form.querySelector("#ia-tempo-custom-campo");
+        const tempoCustomInput = form.querySelector("#ia-tempo-custom");
 
         if (textarea) {
           textarea.placeholder = TEMPLATE_IMPORT_EXEMPLO;
         }
+
+        const sincronizarTempoCustom = () => {
+          const personalizado =
+            form.querySelector('input[name="ia_tempo"]:checked')?.value === "Personalizado";
+          if (tempoCustomCampo) tempoCustomCampo.hidden = !personalizado;
+          if (tempoCustomInput) tempoCustomInput.required = personalizado && abaImport === "ia";
+        };
+
+        form.querySelectorAll('input[name="ia_tempo"]').forEach((input) => {
+          input.addEventListener("change", sincronizarTempoCustom);
+        });
+        sincronizarTempoCustom();
+
+        const btnPreview = form.querySelector("#ia-preview-prompt");
+        const painelPreview = form.querySelector("#ia-preview-painel");
+        const textoPreview = form.querySelector("#ia-preview-texto");
+        btnPreview?.addEventListener("click", async () => {
+          const labelOriginal = btnPreview.textContent;
+          try {
+            btnPreview.disabled = true;
+            btnPreview.textContent = "Carregando…";
+            const params = coletarParamsGeracaoIa(new FormData(form));
+            const resultado = await api.previewPromptRoadmapIa(params);
+            if (textoPreview) textoPreview.value = resultado.prompt ?? "";
+            if (painelPreview) {
+              painelPreview.hidden = false;
+              textoPreview?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+          } catch (erro) {
+            mostrarErro(erro.message);
+          } finally {
+            btnPreview.disabled = false;
+            btnPreview.textContent = labelOriginal;
+          }
+        });
 
         const ativarAba = (id) => {
           abaImport = id;
@@ -2008,6 +2138,7 @@ export function mostrarModalImportarJson() {
           });
           if (textarea) textarea.required = id === "colar";
           if (inputTema) inputTema.required = id === "ia";
+          sincronizarTempoCustom();
           if (confirmar) {
             confirmar.textContent = id === "ia" ? "Gerar JSON" : "Importar";
             confirmar.disabled = false;
