@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { networkInterfaces } from "os";
 import roadmapsRouter from "./routes/roadmaps.js";
 import sidebarRouter from "./routes/sidebar.js";
+import irRouter from "./ir/routes/ir.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = join(__dirname, "..", "web");
@@ -20,6 +21,7 @@ app.get("/api/status", (_req, res) => {
 
 app.use("/api/roadmaps", roadmapsRouter);
 app.use("/api/sidebar", sidebarRouter);
+app.use("/api/ir", irRouter);
 
 app.get("/", (_req, res) => {
   res.sendFile(join(WEB_DIR, "main.html"));

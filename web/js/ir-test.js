@@ -273,7 +273,6 @@ async function executarBusca() {
         subtarefas: parseSubtarefas($("#input-subtarefas").value),
         options: {
           providers,
-          maxResults: Number($("#input-max-results").value) || 20,
           debug: true,
           languagePreference: ["pt", "en"],
         },

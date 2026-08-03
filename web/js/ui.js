@@ -36,6 +36,7 @@ import {
 } from "./roadmaps.js";
 import { renderizarDashboard } from "./dashboard.js";
 import { renderizarGrafoDependencias } from "./grafo.js";
+import { api } from "./api.js";
 import {
   obterGrupos,
   obterAtribuicao,
@@ -54,6 +55,7 @@ let filtroTarefas = "todas";
 let filtroTag = "";
 let abaRoadmap = "tarefas";
 const tarefasExpandidas = new Set();
+const PROVIDERS_BUSCA_OCULTOS = new Set(["books", "reddit", "mock"]);
 
 const SIDEBAR_STORAGE_KEY = "sa.sidebarRecolhida";
 const SIDEBAR_GRUPO_KEY = "sa.sidebarGrupoAtivo";
@@ -97,6 +99,7 @@ const elementos = {
   modalTitulo: () => document.getElementById("modal-titulo"),
   modalForm: () => document.getElementById("modal-form"),
   modalCancelar: () => document.getElementById("modal-cancelar"),
+  modalConfirmar: () => document.querySelector('button[form="modal-form"]'),
   sidebarToggle: () => document.getElementById("sidebar-toggle"),
   sidebarSubabas: () => document.getElementById("sidebar-subabas"),
 };
@@ -196,8 +199,11 @@ function abrirModal(titulo, campos, onSubmit, opcoes = {}) {
   const form = elementos.modalForm();
   const modalBox = elementos.modalBox();
   elementos.modalTitulo().textContent = titulo;
+  const confirmar = elementos.modalConfirmar();
 
   modalBox.classList.toggle("modal-largo", Boolean(opcoes.largo));
+  confirmar.textContent = opcoes.submitLabel ?? "Salvar";
+  confirmar.disabled = Boolean(opcoes.submitDisabled);
 
   form.innerHTML = campos
     .map((campo) => {
@@ -247,6 +253,9 @@ function fecharModal() {
   elementos.modal().classList.remove("aberto");
   elementos.modalBox()?.classList.remove("modal-largo");
   elementos.modalForm().onsubmit = null;
+  const confirmar = elementos.modalConfirmar();
+  confirmar.textContent = "Salvar";
+  confirmar.disabled = false;
 }
 
 function montarHtmlRoadmapBtn(roadmap, ativo) {
@@ -750,6 +759,244 @@ function renderizarLinks(links) {
   `;
 }
 
+function normalizarUrlComparacao(valor) {
+  try {
+    const url = new URL(formatarUrl(String(valor ?? "").trim()));
+    url.hash = "";
+    url.hostname = url.hostname.toLowerCase();
+    url.pathname = url.pathname.replace(/\/+$/, "") || "/";
+    return url.toString();
+  } catch {
+    return String(valor ?? "").trim().toLowerCase().replace(/\/+$/, "");
+  }
+}
+
+function formatarNumeroCompacto(valor) {
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) return "";
+  return new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(numero);
+}
+
+function metadadosResultadoBusca(resultado) {
+  const metadados = [
+    resultado.provider || resultado.source,
+    TIPOS_LINK[resultado.type]?.label ?? resultado.type,
+    Number.isFinite(resultado.score) ? `score ${resultado.score}` : "",
+    resultado.language ? `idioma ${resultado.language}` : "",
+    resultado.stars !== undefined ? `★ ${formatarNumeroCompacto(resultado.stars)}` : "",
+    resultado.forks !== undefined ? `${formatarNumeroCompacto(resultado.forks)} forks` : "",
+    resultado.channel ? `canal ${resultado.channel}` : "",
+    resultado.viewCount !== undefined ? `${formatarNumeroCompacto(resultado.viewCount)} views` : "",
+    resultado.durationMinutes ? `${resultado.durationMinutes} min` : "",
+    resultado.votes !== undefined ? `${resultado.votes} votos` : "",
+    resultado.answerCount !== undefined ? `${resultado.answerCount} respostas` : "",
+    resultado.isAnswered ? "respondida" : "",
+  ];
+  return metadados.filter(Boolean);
+}
+
+function renderizarResultadosBusca(resultados, urlsExistentes) {
+  if (!resultados.length) {
+    return `<p class="busca-links-vazio">Nenhum recurso encontrado com os providers selecionados.</p>`;
+  }
+
+  const grupos = new Map();
+  resultados.forEach((resultado, indice) => {
+    const provider = resultado.provider || resultado.source || "outro";
+    if (!grupos.has(provider)) grupos.set(provider, []);
+    grupos.get(provider).push({ resultado, indice });
+  });
+
+  return [...grupos.entries()]
+    .map(
+      ([provider, itens]) => `
+        <section class="busca-links-grupo">
+          <h4>${escaparHtml(provider)} <span>${itens.length} resultado(s)</span></h4>
+          <div class="busca-links-lista">
+            ${itens
+              .map(({ resultado, indice }) => {
+                const jaAdicionado = urlsExistentes.has(normalizarUrlComparacao(resultado.url));
+                const metadados = metadadosResultadoBusca(resultado);
+                return `
+                  <label class="busca-link-item ${jaAdicionado ? "ja-adicionado" : ""}">
+                    <input type="checkbox" name="resultadoBusca" value="${indice}" ${jaAdicionado ? "disabled" : ""}>
+                    <span class="busca-link-conteudo">
+                      <span class="busca-link-topo">
+                        <a href="${escaparHtml(formatarUrl(resultado.url))}" target="_blank" rel="noopener noreferrer" data-nao-selecionar>
+                          ${escaparHtml(resultado.title || resultado.url)}
+                        </a>
+                        ${jaAdicionado ? `<span class="busca-link-existente">Já adicionado</span>` : ""}
+                      </span>
+                      <span class="busca-link-url">${escaparHtml(resultado.url)}</span>
+                      ${resultado.snippet ? `<span class="busca-link-trecho">${escaparHtml(resultado.snippet)}</span>` : ""}
+                      <span class="busca-link-meta">
+                        ${metadados.map((item) => `<span>${escaparHtml(item)}</span>`).join("")}
+                      </span>
+                    </span>
+                  </label>`;
+              })
+              .join("")}
+          </div>
+        </section>`
+    )
+    .join("");
+}
+
+function mostrarModalBuscarLinks(roadmapId, tarefaId) {
+  const roadmap = obterRoadmapPorId(roadmapId);
+  const tarefa = roadmap?.tarefas.find((item) => item.id === tarefaId);
+  if (!roadmap || !tarefa) return;
+
+  let resultadosBusca = [];
+  const urlsExistentes = new Set((tarefa.links ?? []).map((link) => normalizarUrlComparacao(link.url)));
+
+  abrirModal(
+    "Buscar links para a tarefa",
+    [
+      {
+        tipo: "html",
+        html: `
+          <div class="busca-links-modal">
+            <p class="busca-links-contexto">Buscando recursos para <strong>${escaparHtml(tarefa.titulo)}</strong></p>
+            <fieldset class="busca-links-providers">
+              <legend>Providers</legend>
+              <div id="busca-links-providers-lista">
+                <p class="busca-links-vazio">Carregando providers...</p>
+              </div>
+            </fieldset>
+            <button type="button" class="btn-secundario busca-links-botao" id="btn-executar-busca" disabled>Buscar recursos</button>
+            <p class="busca-links-status" id="busca-links-status" aria-live="polite"></p>
+            <div class="busca-links-resultados" id="busca-links-resultados">
+              <p class="busca-links-vazio">Selecione os providers e execute a busca.</p>
+            </div>
+          </div>`,
+      },
+    ],
+    async (_formData, form) => {
+      const indices = [...form.querySelectorAll('input[name="resultadoBusca"]:checked')].map((el) =>
+        Number(el.value)
+      );
+      if (!indices.length) throw new Error("Selecione ao menos um link para adicionar.");
+
+      const urls = new Set(urlsExistentes);
+      const novosLinks = [];
+      for (const indice of indices) {
+        const resultado = resultadosBusca[indice];
+        if (!resultado?.url) continue;
+        const urlNormalizada = normalizarUrlComparacao(resultado.url);
+        if (urls.has(urlNormalizada)) continue;
+        urls.add(urlNormalizada);
+        novosLinks.push({
+          id: gerarId(),
+          titulo: resultado.title || resultado.url,
+          url: resultado.url,
+          tipo: TIPOS_LINK[resultado.type] ? resultado.type : "outro",
+        });
+      }
+
+      if (!novosLinks.length) throw new Error("Os links selecionados já estão nesta tarefa.");
+      await atualizarTarefa(roadmapId, tarefaId, { links: [...(tarefa.links ?? []), ...novosLinks] });
+      tarefasExpandidas.add(tarefaId);
+    },
+    {
+      largo: true,
+      submitLabel: "Adicionar links",
+      submitDisabled: true,
+      onMount: async (form) => {
+        const providersLista = form.querySelector("#busca-links-providers-lista");
+        const resultadosEl = form.querySelector("#busca-links-resultados");
+        const statusEl = form.querySelector("#busca-links-status");
+        const buscarBtn = form.querySelector("#btn-executar-busca");
+        const confirmarBtn = elementos.modalConfirmar();
+
+        const atualizarConfirmacao = () => {
+          confirmarBtn.disabled = !form.querySelector('input[name="resultadoBusca"]:checked');
+        };
+
+        resultadosEl.addEventListener("change", atualizarConfirmacao);
+        resultadosEl.addEventListener("click", (evento) => {
+          if (evento.target.closest("[data-nao-selecionar]")) evento.stopPropagation();
+        });
+
+        try {
+          const { providers } = await api.listarProvidersBusca();
+          const visiveis = (providers ?? []).filter((provider) => !PROVIDERS_BUSCA_OCULTOS.has(provider.name));
+          providersLista.innerHTML = visiveis.length
+            ? visiveis
+                .map((provider) => {
+                  const indisponivel = provider.requiresKey && !provider.configured;
+                  const status = indisponivel
+                    ? `Requer ${provider.envVar}`
+                    : provider.requiresKey
+                      ? "Configurado"
+                      : "Disponível";
+                  return `
+                    <label class="busca-provider ${indisponivel ? "indisponivel" : ""}">
+                      <input type="checkbox" name="providerBusca" value="${escaparHtml(provider.name)}"
+                        ${indisponivel ? "disabled" : "checked"}>
+                      <span>
+                        <strong>${escaparHtml(provider.label)}</strong>
+                        <small>${escaparHtml(provider.description)} · ${escaparHtml(status)}</small>
+                      </span>
+                    </label>`;
+                })
+                .join("")
+            : `<p class="busca-links-vazio">Nenhum provider disponível.</p>`;
+          buscarBtn.disabled = !form.querySelector('input[name="providerBusca"]:not(:disabled)');
+        } catch (erro) {
+          providersLista.innerHTML = `<p class="busca-links-status erro">${escaparHtml(erro.message)}</p>`;
+        }
+
+        buscarBtn.addEventListener("click", async () => {
+          const providers = [...form.querySelectorAll('input[name="providerBusca"]:checked')].map(
+            (el) => el.value
+          );
+          if (!providers.length) {
+            statusEl.className = "busca-links-status erro";
+            statusEl.textContent = "Selecione ao menos um provider.";
+            return;
+          }
+
+          buscarBtn.disabled = true;
+          confirmarBtn.disabled = true;
+          statusEl.className = "busca-links-status";
+          statusEl.textContent = "Buscando recursos...";
+          resultadosEl.innerHTML = `<p class="busca-links-vazio">Consultando ${providers.length} provider(s)...</p>`;
+
+          try {
+            const resposta = await api.buscarLinks({
+              roadmapNome: roadmap.nome,
+              titulo: tarefa.titulo,
+              descricao: tarefa.descricao || "",
+              subtarefas: (tarefa.subtarefas ?? []).map((subtarefa) => ({ titulo: subtarefa.titulo })),
+              options: {
+                providers,
+                languagePreference: ["pt", "en"],
+                debug: false,
+              },
+            });
+            resultadosBusca = resposta.results ?? [];
+            resultadosEl.innerHTML = renderizarResultadosBusca(resultadosBusca, urlsExistentes);
+            const avisos = resposta.meta?.errors ?? [];
+            statusEl.className = `busca-links-status ${avisos.length ? "aviso" : ""}`;
+            statusEl.textContent = avisos.length
+              ? `${resultadosBusca.length} resultado(s). ${avisos.map((erro) => `${erro.provider}: ${erro.message}`).join(" · ")}`
+              : `${resultadosBusca.length} resultado(s) em ${resposta.meta?.durationMs ?? 0} ms.`;
+            atualizarConfirmacao();
+          } catch (erro) {
+            resultadosBusca = [];
+            resultadosEl.innerHTML = `<p class="busca-links-vazio">Não foi possível concluir a busca.</p>`;
+            statusEl.className = "busca-links-status erro";
+            statusEl.textContent = erro.message;
+          } finally {
+            buscarBtn.disabled = false;
+          }
+        });
+      },
+    }
+  );
+}
+
 function renderizarSubtarefas(roadmapId, tarefa) {
   const concluidas = tarefa.subtarefas.filter((s) => s.concluida).length;
   const total = tarefa.subtarefas.length;
@@ -910,6 +1157,7 @@ function renderizarTarefa(roadmapId, tarefa, todas, opcoes = {}) {
               : ""
           }
           <button type="button" class="btn-icone btn-expandir" data-acao="expandir" data-tarefa="${tarefa.id}" title="${expandida ? "Recolher" : "Expandir"}">${expandida ? "▲" : "▼"}</button>
+          <button type="button" class="btn-icone btn-buscar-links" data-acao="buscar-links" data-roadmap="${roadmapId}" data-tarefa="${tarefa.id}" title="Buscar links para a tarefa">⌕</button>
           <button type="button" class="btn-icone btn-editar" data-acao="editar-tarefa" data-roadmap="${roadmapId}" data-tarefa="${tarefa.id}" title="Editar tarefa">✎</button>
           <button type="button" class="btn-icone btn-excluir-tarefa" data-acao="excluir-tarefa" data-roadmap="${roadmapId}" data-tarefa="${tarefa.id}" title="Excluir tarefa">✕</button>
         </div>
@@ -1350,6 +1598,11 @@ async function handleAcao(e) {
 
   if (acao === "editar-tarefa") {
     mostrarModalEditarTarefa(el.dataset.roadmap, el.dataset.tarefa);
+    return;
+  }
+
+  if (acao === "buscar-links") {
+    mostrarModalBuscarLinks(el.dataset.roadmap, el.dataset.tarefa);
     return;
   }
 

@@ -42,6 +42,8 @@ export const api = {
     requisicao("PUT", `/roadmaps/${roadmapId}/tarefas/${tarefaId}`, dados),
   excluirTarefa: (roadmapId, tarefaId) =>
     requisicao("DELETE", `/roadmaps/${roadmapId}/tarefas/${tarefaId}`),
+  listarProvidersBusca: () => requisicao("GET", "/ir/providers"),
+  buscarLinks: (dados) => requisicao("POST", "/ir/search", dados),
   registrarTempo: (roadmapId, tarefaId, horas) =>
     requisicao("POST", `/roadmaps/${roadmapId}/tarefas/${tarefaId}/tempo`, { horas }),
   iniciarTimer: (roadmapId, tarefaId) =>

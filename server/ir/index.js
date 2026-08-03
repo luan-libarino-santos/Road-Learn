@@ -43,7 +43,6 @@ export async function searchTask(input) {
   const options = input.options ?? {};
   const providers = getProviders(options.providers);
   const languagePreference = options.languagePreference ?? IR_CONFIG.languagePreferenceDefault;
-  const maxResults = options.maxResults ?? IR_CONFIG.maxResultsDefault;
   const debug = options.debug !== false;
   const titulo = input.titulo?.trim() ?? "";
   const roadmapNome = input.roadmapNome?.trim() ?? "";
@@ -126,8 +125,7 @@ export async function searchTask(input) {
   const scored = scoreResults(normalized, context);
   const filtered = filterByMinScore(scored, IR_CONFIG.minScoreThreshold);
   const deduped = deduplicateResults(filtered);
-  const perProvider = limitPerProvider(deduped, IR_CONFIG.maxResultsPerProvider);
-  const results = perProvider.slice(0, maxResults);
+  const results = limitPerProvider(deduped, IR_CONFIG.maxResultsPerProvider);
 
   const response = {
     results,
@@ -136,7 +134,7 @@ export async function searchTask(input) {
       totalAfterScore: scored.length,
       totalAfterMinScore: filtered.length,
       totalAfterDedup: deduped.length,
-      totalAfterProviderLimit: perProvider.length,
+      totalAfterProviderLimit: results.length,
       totalReturned: results.length,
       maxPerProvider: IR_CONFIG.maxResultsPerProvider,
       minScoreThreshold: IR_CONFIG.minScoreThreshold,

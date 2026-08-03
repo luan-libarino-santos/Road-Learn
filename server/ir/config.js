@@ -1,6 +1,5 @@
 export const IR_CONFIG = {
   maxQueries: 10,
-  maxResultsDefault: 15,
   maxResultsPerProvider: 5,
   minScoreThreshold: 20,
   concurrency: 3,

@@ -43,7 +43,6 @@
  * @property {Object} [options]
  * @property {string[]} [options.providers]
  * @property {string[]} [options.languagePreference]
- * @property {number} [options.maxResults]
  * @property {boolean} [options.debug]
  */
 
