@@ -1,0 +1,679 @@
+{
+  "nome": "HTML do Zero ao Avançado",
+  "descricao": "Roadmap completo para dominar HTML moderno — da estrutura básica a semântica, formulários, multimídia, acessibilidade, SEO técnico, Canvas e SVG. Conduz a um aprendizado progressivo com teoria, prática e revisão espaçada.",
+  "competencias": [
+    { "id": "c_estrutura",      "nome": "Estrutura de Documento",       "descricao": "DOCTYPE, html, head, body, DOM" },
+    { "id": "c_texto",          "nome": "Elementos de Texto",           "descricao": "Headings, parágrafos, formatação semântica" },
+    { "id": "c_links",          "nome": "Links e Navegação",            "descricao": "Âncoras, href absoluto/relativo, navegação entre páginas" },
+    { "id": "c_imagens",        "nome": "Imagens e Mídia",              "descricao": "img, picture, srcset, formatos modernos" },
+    { "id": "c_tabelas",        "nome": "Tabelas",                      "descricao": "Tabelas de dados acessíveis com thead/tbody/tfoot" },
+    { "id": "c_formularios",    "nome": "Formulários",                  "descricao": "Inputs, labels, validação nativa HTML5" },
+    { "id": "c_semantica",      "nome": "HTML Semântico",               "descricao": "Elementos HTML5: header, main, article, section, aside" },
+    { "id": "c_acessibilidade", "nome": "Acessibilidade e ARIA",        "descricao": "WCAG, atributos ARIA, teclado, leitores de tela" },
+    { "id": "c_seo",            "nome": "SEO Técnico e Meta Tags",      "descricao": "Meta description, Open Graph, JSON-LD" },
+    { "id": "c_multimidia",     "nome": "Áudio e Vídeo",                "descricao": "Elementos audio/video nativos, track, legendas" },
+    { "id": "c_canvas_svg",     "nome": "Canvas e SVG",                 "descricao": "Gráficos 2D com Canvas API e SVG inline" },
+    { "id": "c_performance",    "nome": "Performance e Boas Práticas",  "descricao": "Lazy loading, preload, defer, Core Web Vitals" }
+  ],
+  "tarefas": [
+    {
+      "id": "t1",
+      "titulo": "Como a web funciona: HTTP, navegadores e HTML",
+      "descricao": "Compreender o ciclo completo de uma requisição web — da digitação da URL até a renderização da página. Entender o papel do HTML como linguagem de estrutura, diferenciando-o de CSS (estilo) e JavaScript (comportamento). Esta base conceitual evita confusões fundamentais durante todo o aprendizado.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Conseguir explicar com suas próprias palavras o que acontece quando você digita uma URL no navegador e qual é o papel do HTML nesse processo.",
+      "competencias": ["c_estrutura"],
+      "tags": ["fundamentos", "web", "teoria"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": [],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Como a web funciona — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Getting_started_with_the_web/How_the_Web_works", "tipo": "doc" },
+        { "titulo": "Introdução ao HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/Getting_started", "tipo": "doc" },
+        { "titulo": "HTML in 100 Seconds — Fireship", "url": "https://www.youtube.com/watch?v=ok-plXXHlWw", "tipo": "video" },
+        { "titulo": "O que é HTTP — Alura (PT-BR)", "url": "https://www.alura.com.br/artigos/o-que-e-http", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler o guia 'Como a web funciona' no MDN" },
+        { "titulo": "Assistir ao vídeo 'HTML in 100 Seconds'" },
+        { "titulo": "Anotar: qual a diferença entre HTML, CSS e JavaScript" },
+        { "titulo": "Pesquisar o que é um navegador e como ele renderiza HTML" }
+      ]
+    },
+    {
+      "id": "t2",
+      "titulo": "Estrutura básica de um documento HTML",
+      "descricao": "Aprender os elementos que compõem todo documento HTML válido: DOCTYPE, html, head e body. Entender o que vai em cada seção (metadados vs. conteúdo visível), a importância do charset UTF-8 e como o navegador constrói a árvore DOM a partir do HTML. Sem isso, nada mais faz sentido.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Criar um documento HTML do zero, de memória, com DOCTYPE, html, head (charset + title) e body, sem consultar referências.",
+      "competencias": ["c_estrutura"],
+      "tags": ["fundamentos", "documento", "DOM"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t1"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Anatomia de um documento HTML — MDN", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/Getting_started#anatomia_de_um_documento_html", "tipo": "doc" },
+        { "titulo": "Document Structure — web.dev Learn HTML", "url": "https://web.dev/learn/html/document-structure/", "tipo": "artigo" },
+        { "titulo": "Curso HTML gratuito — freeCodeCamp", "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design/#learn-html-by-building-a-cat-photo-app", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar o propósito de cada tag: !DOCTYPE, html, head, body" },
+        { "titulo": "Entender o que é charset e por que usar UTF-8" },
+        { "titulo": "Pesquisar o que é o DOM (Document Object Model)" },
+        { "titulo": "Criar um arquivo index.html do zero no editor de texto" }
+      ]
+    },
+    {
+      "id": "t3",
+      "titulo": "Criar a primeira página HTML no navegador",
+      "descricao": "Consolidar a estrutura do documento criando uma página HTML funcional no editor. Praticar a abertura no navegador, o uso do DevTools para inspecionar o DOM e a edição de conteúdo em tempo real. Este exercício transforma teoria em vivência prática desde o início e apresenta o fluxo de trabalho real do desenvolvedor.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1,
+      "criterioConclusao": "Página HTML aberta no navegador com título visível na aba, um h1 e um parágrafo; DOM inspecionado no DevTools (F12).",
+      "competencias": ["c_estrutura"],
+      "tags": ["prática", "fundamentos", "devtools"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t2"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Inspecionando o DOM com DevTools — Chrome", "url": "https://developer.chrome.com/docs/devtools/dom/", "tipo": "doc" },
+        { "titulo": "VS Code para HTML — documentação oficial", "url": "https://code.visualstudio.com/docs/languages/html", "tipo": "doc" },
+        { "titulo": "Extensão Live Server para VS Code", "url": "https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Instalar VS Code com a extensão Live Server" },
+        { "titulo": "Criar index.html com estrutura completa (DOCTYPE, html, head, body)" },
+        { "titulo": "Adicionar title na aba e um h1 visível no body" },
+        { "titulo": "Abrir no navegador com Live Server" },
+        { "titulo": "Abrir o DevTools (F12), inspecionar o DOM e editar um texto" }
+      ]
+    },
+    {
+      "id": "t4",
+      "titulo": "Tags de texto: headings, parágrafos e formatação semântica",
+      "descricao": "Dominar os elementos de conteúdo textual: headings (h1–h6) e sua hierarquia, parágrafo (p), quebra de linha (br), linha horizontal (hr), ênfases semânticas (strong, em) vs. puramente visuais (b, i), citações (blockquote, cite), código inline (code), pré-formatado (pre) e abreviações (abbr). Entender por que a escolha semântica impacta acessibilidade e SEO.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Conseguir citar a diferença semântica entre strong/b e em/i, e saber usar h1–h6 corretamente em uma página real sem repetir o h1.",
+      "competencias": ["c_texto", "c_semantica"],
+      "tags": ["fundamentos", "texto", "semântica"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t3"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Fundamentos de texto em HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/HTML_text_fundamentals", "tipo": "doc" },
+        { "titulo": "Formatação avançada de texto — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/Advanced_text_formatting", "tipo": "doc" },
+        { "titulo": "HTML Text Elements — web.dev Learn HTML", "url": "https://web.dev/learn/html/text-basics/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar h1–h6: hierarquia e regra de um h1 por página" },
+        { "titulo": "Entender a diferença semântica: strong vs. b, em vs. i" },
+        { "titulo": "Praticar blockquote, cite, abbr, code e pre" },
+        { "titulo": "Explorar sub, sup, mark, del e ins" },
+        { "titulo": "Criar exemplos de cada tag em uma página de testes" }
+      ]
+    },
+    {
+      "id": "t5",
+      "titulo": "Praticar: página de artigo com formatação completa",
+      "descricao": "Aplicar todas as tags de texto construindo uma página de artigo sobre um tema de interesse pessoal. O objetivo é fixar o uso correto de headings, ênfases, citações e código, reforçando a hierarquia semântica do documento. Validar no W3C fecha o ciclo de aprendizado desta etapa.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Página de artigo com h1, ao menos dois h2, um blockquote de fonte real, strong/em usados corretamente e um trecho de código exibido com pre+code. Válida no W3C.",
+      "competencias": ["c_texto", "c_estrutura"],
+      "tags": ["prática", "texto", "artigo"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t4"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validador HTML do W3C", "url": "https://validator.w3.org/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Escolher um tema de interesse (tecnologia, ciência, hobby)" },
+        { "titulo": "Estruturar o artigo com h1 e pelo menos dois h2" },
+        { "titulo": "Adicionar blockquote de uma fonte real com cite" },
+        { "titulo": "Incluir trecho de código com pre + code" },
+        { "titulo": "Usar strong, em, abbr e mark de forma correta" },
+        { "titulo": "Colar o HTML no validator.w3.org e corrigir erros" }
+      ]
+    },
+    {
+      "id": "t6",
+      "titulo": "Links, âncoras e navegação entre páginas",
+      "descricao": "Entender a tag <a> em profundidade: href absoluto vs. relativo, target (_blank, _self), rel (noopener, noreferrer) para segurança, âncoras internas com #id, links para e-mail (mailto:) e telefone (tel:). Aprender como criar uma estrutura de navegação entre múltiplas páginas HTML. Links são o fundamento da web — dominá-los é essencial.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Criar uma estrutura de 3 páginas interligadas com menu de navegação funcional, âncoras internas e um link externo com rel=noopener noreferrer correto.",
+      "competencias": ["c_links", "c_estrutura"],
+      "tags": ["fundamentos", "navegação", "links"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Criando hyperlinks — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/Creating_hyperlinks", "tipo": "doc" },
+        { "titulo": "Links: boas práticas — web.dev Learn HTML", "url": "https://web.dev/learn/html/links/", "tipo": "artigo" },
+        { "titulo": "A tag anchor explicada — freeCodeCamp (EN)", "url": "https://www.freecodecamp.org/news/the-a-tag-in-html/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar href absoluto vs. relativo com exemplos práticos" },
+        { "titulo": "Entender target=_blank e por que usar rel=noopener noreferrer" },
+        { "titulo": "Criar âncoras internas com id e href=#id" },
+        { "titulo": "Criar links mailto: e tel:" },
+        { "titulo": "Montar 3 páginas HTML interligadas por um menu de navegação" }
+      ]
+    },
+    {
+      "id": "t7",
+      "titulo": "Imagens: formatos, atributos e responsividade",
+      "descricao": "Dominar a tag <img>: atributos src, alt (crucial para acessibilidade e SEO), width, height, loading=lazy e decoding. Entender os formatos de imagem modernos (JPEG, PNG, WebP, AVIF, SVG) e quando usar cada um. Estudar o elemento <picture> com srcset e sizes para imagens responsivas que se adaptam ao dispositivo.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Implementar uma galeria com img (alt descritivo, loading=lazy) e ao menos um elemento picture com srcset para diferentes resoluções de tela.",
+      "competencias": ["c_imagens", "c_acessibilidade", "c_performance"],
+      "tags": ["fundamentos", "imagens", "responsivo", "performance"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Imagens em HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Multimedia_and_embedding/Images_in_HTML", "tipo": "doc" },
+        { "titulo": "Imagens responsivas — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images", "tipo": "doc" },
+        { "titulo": "Aprendendo sobre imagens — web.dev Learn", "url": "https://web.dev/learn/images/", "tipo": "artigo" },
+        { "titulo": "Squoosh — compressor de imagens online", "url": "https://squoosh.app/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar src, alt, width e height — por que sempre definir dimensões" },
+        { "titulo": "Entender o impacto do alt em acessibilidade, SEO e CLS" },
+        { "titulo": "Pesquisar diferenças entre JPEG, PNG, WebP, AVIF e SVG" },
+        { "titulo": "Implementar loading=lazy em imagens abaixo do fold" },
+        { "titulo": "Criar um exemplo com picture e srcset para telas 1x e 2x" },
+        { "titulo": "Comprimir uma imagem no Squoosh e comparar tamanhos" }
+      ]
+    },
+    {
+      "id": "t8",
+      "titulo": "Listas: ordenadas, não-ordenadas e de definição",
+      "descricao": "Estudar os três tipos de lista HTML: ul (não-ordenada), ol (ordenada com type e start) e dl (definição com dt/dd). Entender quando cada tipo é semanticamente correto, como aninhar listas e a diferença entre list-item e description-term para leitores de tela. Listas mal aplicadas poluem a semântica do documento.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "media",
+      "horasEstimadas": 1,
+      "criterioConclusao": "Criar uma página com os três tipos de lista: ul com itens aninhados, ol numerada e dl usada como glossário de termos HTML.",
+      "competencias": ["c_texto", "c_semantica"],
+      "tags": ["fundamentos", "listas", "semântica"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Listas em HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/HTML_text_fundamentals#listas", "tipo": "doc" },
+        { "titulo": "Elemento dl (description list) — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar uma lista ul com subitens aninhados (dois níveis)" },
+        { "titulo": "Criar uma lista ol com type=A e start personalizados" },
+        { "titulo": "Criar uma dl para um glossário de termos HTML" }
+      ]
+    },
+    {
+      "id": "t9",
+      "titulo": "Tabelas HTML: estrutura semântica e acessibilidade",
+      "descricao": "Aprender a criar tabelas acessíveis com table, thead, tbody, tfoot, tr, th e td. Entender os atributos scope e headers para leitores de tela, colspan e rowspan para mesclar células, e caption para descrição da tabela. Reforçar que tabelas são para dados tabulares — nunca para layout de página.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Criar uma tabela de comparação de produtos com thead, tbody, tfoot, caption, th com scope e pelo menos uma mesclagem com colspan. HTML válido.",
+      "competencias": ["c_tabelas", "c_acessibilidade", "c_semantica"],
+      "tags": ["tabelas", "semântica", "acessibilidade"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tabelas HTML básicas — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Tables/Basics", "tipo": "doc" },
+        { "titulo": "Funcionalidades avançadas e acessibilidade — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Tables/Advanced", "tipo": "doc" },
+        { "titulo": "Tabelas acessíveis — WebAIM", "url": "https://webaim.org/techniques/tables/data", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar tabela básica com table, tr, th e td" },
+        { "titulo": "Adicionar thead, tbody, tfoot e caption" },
+        { "titulo": "Usar colspan e rowspan para mesclar células" },
+        { "titulo": "Adicionar scope=col e scope=row nos cabeçalhos" },
+        { "titulo": "Validar no validator.w3.org" }
+      ]
+    },
+    {
+      "id": "t10",
+      "titulo": "Formulários: inputs, labels e estrutura",
+      "descricao": "Estudar o elemento form e todos os seus componentes: input com seus tipos (text, email, password, number, date, checkbox, radio, file, range, color, search, tel, url), label, select/option/optgroup, textarea, button e fieldset/legend. Entender a relação for/id entre label e input — fundamental para acessibilidade. Formulários são a principal forma de coleta de dados na web.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Listar de memória pelo menos 10 tipos de input diferentes e explicar por que o uso correto de label melhora acessibilidade e usabilidade.",
+      "competencias": ["c_formularios", "c_acessibilidade"],
+      "tags": ["formulários", "inputs", "acessibilidade"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Primeiros passos com formulários — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Forms/Your_first_form", "tipo": "doc" },
+        { "titulo": "Tipos de input HTML5 — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Forms/HTML5_input_types", "tipo": "doc" },
+        { "titulo": "Formulários acessíveis — WebAIM", "url": "https://webaim.org/techniques/forms/", "tipo": "artigo" },
+        { "titulo": "Learn Forms — web.dev", "url": "https://web.dev/learn/forms/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar os atributos do form: action, method, enctype, novalidate" },
+        { "titulo": "Mapear todos os tipos de input e quando usar cada um" },
+        { "titulo": "Entender a relação label[for] + input[id] para acessibilidade" },
+        { "titulo": "Estudar fieldset e legend para agrupar campos relacionados" },
+        { "titulo": "Estudar select, option, optgroup e textarea" },
+        { "titulo": "Entender os tipos de button: submit, reset, button" }
+      ]
+    },
+    {
+      "id": "t11",
+      "titulo": "Validação nativa de formulários HTML5",
+      "descricao": "Explorar os atributos de validação built-in do HTML5: required, minlength, maxlength, min, max, pattern, step, autocomplete e novalidate. Entender como o navegador exibe mensagens de erro nativamente e como as pseudo-classes CSS :valid/:invalid e :required/:optional se combinam. Isso reduz a dependência de JavaScript para validações comuns.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Criar um formulário que valide email (type=email), senha com mínimo de 8 caracteres (minlength), um campo com regex pattern e um número dentro de intervalo (min/max), tudo sem JavaScript.",
+      "competencias": ["c_formularios"],
+      "tags": ["formulários", "validação", "HTML5"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t10"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validação de formulários client-side — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Forms/Form_validation", "tipo": "doc" },
+        { "titulo": "Atributo pattern — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern", "tipo": "doc" },
+        { "titulo": "Constraint Validation API — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Testar required, minlength, maxlength, min, max e step" },
+        { "titulo": "Criar um campo com pattern usando regex simples (CEP, CPF)" },
+        { "titulo": "Observar as mensagens de erro nativas em diferentes navegadores" },
+        { "titulo": "Testar autocomplete em campos de endereço e pagamento" }
+      ]
+    },
+    {
+      "id": "t12",
+      "titulo": "Praticar: criar formulário de cadastro completo",
+      "descricao": "Construir um formulário de cadastro realista com campos essenciais: nome, email, senha com confirmação, data de nascimento, gênero (radio), interesses (checkbox), foto (file), bio (textarea) e botão de envio. Aplicar validação nativa, labels corretos, fieldsets agrupando seções e atributos de acessibilidade. Projeto que consolida tudo de formulários.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Formulário com ao menos 8 campos de tipos diferentes, todos com label associado, validação nativa funcionando, fieldsets agrupando seções e HTML válido no W3C.",
+      "competencias": ["c_formularios", "c_acessibilidade"],
+      "tags": ["prática", "formulários", "acessibilidade", "projeto"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t11"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validador HTML W3C", "url": "https://validator.w3.org/", "tipo": "outro" },
+        { "titulo": "Guia prático de formulários — web.dev", "url": "https://web.dev/learn/forms/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar seção 'Dados Pessoais' com fieldset + legend" },
+        { "titulo": "Adicionar campos text, email e password com validação" },
+        { "titulo": "Adicionar input date, radio (gênero) e checkboxes (interesses)" },
+        { "titulo": "Adicionar upload de foto (input type=file)" },
+        { "titulo": "Adicionar textarea para bio com maxlength" },
+        { "titulo": "Testar todo o formulário navegando apenas com Tab" },
+        { "titulo": "Validar o HTML no W3C e corrigir todos os erros" }
+      ]
+    },
+    {
+      "id": "t13",
+      "titulo": "HTML5 Semântico: elementos de layout e conteúdo",
+      "descricao": "Estudar os elementos semânticos HTML5 que dão significado à estrutura: header, nav, main, section, article, aside, footer, figure, figcaption, time, address e details/summary. Entender por que 'divitis' prejudica acessibilidade e SEO, e como leitores de tela usam os landmarks semânticos para permitir navegação rápida por pessoas com deficiência.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Desenhar (no papel ou em ferramenta) a estrutura semântica de uma página de blog com ao menos 7 elementos semânticos distintos e conseguir justificar cada escolha.",
+      "competencias": ["c_semantica", "c_estrutura"],
+      "tags": ["semântica", "HTML5", "layout", "acessibilidade"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t9"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Estrutura de documento e site — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/Document_and_website_structure", "tipo": "doc" },
+        { "titulo": "Semantic HTML — web.dev Learn HTML", "url": "https://web.dev/learn/html/semantic-html/", "tipo": "artigo" },
+        { "titulo": "HTML Semântico — Tableless (PT-BR)", "url": "https://tableless.com.br/html-semantico-1/", "tipo": "artigo" },
+        { "titulo": "Referência de elementos de seção — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element#content_sectioning", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar header, nav, main e footer — posição e propósito" },
+        { "titulo": "Entender section vs. article vs. div — quando usar cada um" },
+        { "titulo": "Estudar aside, figure com figcaption e o elemento time" },
+        { "titulo": "Estudar details e summary para conteúdo expansível (FAQ)" },
+        { "titulo": "Comparar lado a lado: uma página divitis vs. HTML5 semântico" }
+      ]
+    },
+    {
+      "id": "t14",
+      "titulo": "Praticar: refatorar página de divitis para HTML5 semântico",
+      "descricao": "Pegar uma página HTML criada anteriormente (ou um exemplo com divitis) e refatorá-la para usar elementos semânticos HTML5. Exercício de análise + refatoração — um dos mais eficazes para solidificar semântica. A diferença fica visível no HTML5 Outliner e no comportamento de leitores de tela.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Página refatorada com header, nav, main, ao menos um article ou section, aside e footer. Sem divs desnecessárias onde elementos semânticos cabem. HTML válido no W3C.",
+      "competencias": ["c_semantica", "c_estrutura"],
+      "tags": ["prática", "semântica", "refatoração", "HTML5"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t13"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "HTML5 Outliner — verificador de estrutura semântica", "url": "https://gsnedders.html5.org/outliner/", "tipo": "outro" },
+        { "titulo": "Validador HTML W3C", "url": "https://validator.w3.org/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Escolher uma página anterior ou um template com divitis" },
+        { "titulo": "Identificar onde cada elemento semântico se aplica" },
+        { "titulo": "Substituir divs pelos elementos semânticos corretos" },
+        { "titulo": "Usar o HTML5 Outliner para verificar a estrutura de headings" },
+        { "titulo": "Validar o HTML no W3C" }
+      ]
+    },
+    {
+      "id": "t15",
+      "titulo": "Análise: auditoria de semântica em sites reais",
+      "descricao": "Consolidar o aprendizado de semântica analisando sites reais no DevTools. Identificar boas e más práticas de HTML semântico, rodar ferramentas de acessibilidade automáticas e refletir sobre o impacto das escolhas de marcação. Análises críticas de código real fixam conceitos melhor do que a leitura passiva.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento/nota com análise de 2 sites reais: elementos semânticos usados corretamente, pelo menos 2 problemas encontrados e sugestão de como corrigiriam.",
+      "competencias": ["c_semantica", "c_acessibilidade"],
+      "tags": ["análise", "semântica", "revisão", "acessibilidade"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t14"],
+      "reviewAfterDays": 7,
+      "links": [
+        { "titulo": "WAVE — Web Accessibility Evaluation Tool", "url": "https://wave.webaim.org/", "tipo": "outro" },
+        { "titulo": "axe DevTools — extensão para acessibilidade", "url": "https://www.deque.com/axe/devtools/", "tipo": "outro" },
+        { "titulo": "Accessibility Insights for Web — extensão Microsoft", "url": "https://accessibilityinsights.io/docs/web/overview/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Escolher 2 sites reais diferentes para analisar" },
+        { "titulo": "Inspecionar o HTML: quais elementos semânticos utilizam" },
+        { "titulo": "Rodar WAVE ou axe em cada site e listar os erros" },
+        { "titulo": "Registrar: o que fariam diferente e por quê" }
+      ]
+    },
+    {
+      "id": "t16",
+      "titulo": "Áudio e vídeo nativos no HTML5",
+      "descricao": "Aprender a incorporar mídia nativa com <audio> e <video>: atributos controls, autoplay, muted, loop, preload, poster e múltiplas sources para compatibilidade entre navegadores. Estudar o elemento <track> para legendas (WebVTT) — essencial para acessibilidade de surdos. Comparar mídia nativa vs. embed de plataformas externas.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Criar página com player de vídeo (poster, múltiplos sources) e player de áudio com controls. Ao menos uma track de legenda adicionada ao vídeo.",
+      "competencias": ["c_multimidia", "c_acessibilidade"],
+      "tags": ["multimídia", "vídeo", "áudio", "HTML5"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t7"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Conteúdo de vídeo e áudio — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Multimedia_and_embedding/Video_and_audio_content", "tipo": "doc" },
+        { "titulo": "Elemento video — MDN", "url": "https://developer.mozilla.org/pt-BR/docs/Web/HTML/Element/video", "tipo": "doc" },
+        { "titulo": "Elemento track (legendas WebVTT) — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar player de vídeo com controls, poster e muted" },
+        { "titulo": "Adicionar múltiplos sources (mp4, webm) para compatibilidade" },
+        { "titulo": "Criar player de áudio com controls e preload=metadata" },
+        { "titulo": "Adicionar track kind=subtitles a um vídeo" },
+        { "titulo": "Testar embed de vídeo do YouTube com iframe" }
+      ]
+    },
+    {
+      "id": "t17",
+      "titulo": "Acessibilidade Web: WCAG, ARIA e navegação por teclado",
+      "descricao": "Estudar os fundamentos de acessibilidade aplicados ao HTML: princípios POUR das WCAG (Perceptível, Operável, Compreensível, Robusto), atributos ARIA (role, aria-label, aria-labelledby, aria-hidden, aria-expanded, aria-live), foco de teclado e tabindex. Entender como leitores de tela interpretam o HTML. Acessibilidade não é opcional — é requisito ético e em muitos países legal.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Conseguir explicar os 4 princípios POUR das WCAG, listar 5 atributos ARIA comuns com seus propósitos e navegar uma página HTML usando somente o teclado.",
+      "competencias": ["c_acessibilidade", "c_semantica"],
+      "tags": ["acessibilidade", "ARIA", "WCAG", "avançado"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t15"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Acessibilidade em HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Accessibility/HTML", "tipo": "doc" },
+        { "titulo": "Introdução a WAI-ARIA — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/Accessibility/WAI-ARIA_basics", "tipo": "doc" },
+        { "titulo": "WCAG 2.1 em português — W3C Brasil", "url": "https://www.w3c.br/traducoes/wcag/wcag21-pt-BR/", "tipo": "doc" },
+        { "titulo": "Learn Accessibility — web.dev", "url": "https://web.dev/learn/accessibility/", "tipo": "artigo" },
+        { "titulo": "WebAIM: Web Accessibility In Mind", "url": "https://webaim.org/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler introdução às WCAG 2.1 — entender os 4 princípios POUR" },
+        { "titulo": "Estudar a regra de ouro do ARIA: 'No ARIA is better than bad ARIA'" },
+        { "titulo": "Praticar: role, aria-label, aria-labelledby, aria-hidden" },
+        { "titulo": "Testar navegação por teclado (Tab, Shift+Tab, Enter, Space) na sua página" },
+        { "titulo": "Instalar NVDA (Windows) ou usar VoiceOver (Mac/iPhone) e testar uma página" }
+      ]
+    },
+    {
+      "id": "t18",
+      "titulo": "Praticar: auditoria e correção de acessibilidade",
+      "descricao": "Auditar uma página HTML com ferramentas automatizadas e manuais, identificar falhas de acessibilidade e corrigi-las. O ciclo auditoria → correção → reteste é a forma mais eficaz de internalizar as boas práticas. Acessibilidade praticada vale mais do que acessibilidade apenas lida.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Página sem erros críticos no axe/WAVE, navegação por teclado com todos os elementos interativos alcançáveis, imagens com alt descritivo e score de acessibilidade ≥ 85 no Lighthouse.",
+      "competencias": ["c_acessibilidade", "c_semantica", "c_formularios"],
+      "tags": ["prática", "acessibilidade", "auditoria", "ARIA"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t17"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "WAVE — Web Accessibility Evaluation Tool", "url": "https://wave.webaim.org/", "tipo": "outro" },
+        { "titulo": "Lighthouse (aba Accessibility) — Chrome Developers", "url": "https://developer.chrome.com/docs/lighthouse/accessibility/", "tipo": "doc" },
+        { "titulo": "axe DevTools Extension — Chrome Web Store", "url": "https://chrome.google.com/webstore/detail/axe-devtools/lhdoppojpmngadmnindnejefpokejbdd", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Rodar Lighthouse (aba Accessibility) na sua página" },
+        { "titulo": "Rodar WAVE e listar todos os erros encontrados" },
+        { "titulo": "Corrigir: imagens sem alt, inputs sem label, contraste insuficiente" },
+        { "titulo": "Adicionar aria-label em botões icônicos (sem texto visível)" },
+        { "titulo": "Garantir ordem de tabulação lógica (tabindex quando necessário)" },
+        { "titulo": "Retestar após correções e documentar a evolução do score" }
+      ]
+    },
+    {
+      "id": "t19",
+      "titulo": "Meta tags, Open Graph e SEO técnico com HTML",
+      "descricao": "Estudar as meta tags do head que afetam SEO e compartilhamento: description, viewport, robots, og: (Open Graph para redes sociais), twitter:card, canonical e JSON-LD para dados estruturados. Entender como o Google usa o HTML para indexar e ranquear páginas e o papel da hierarquia de headings no SEO de conteúdo.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Adicionar em uma página: meta description, viewport, todas as tags Open Graph essenciais (og:title, og:description, og:image, og:url) e um script JSON-LD básico. Testar com o Open Graph Debugger.",
+      "competencias": ["c_seo", "c_estrutura"],
+      "tags": ["SEO", "meta tags", "Open Graph", "avançado"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t13"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Metadados no head — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML", "tipo": "doc" },
+        { "titulo": "The Open Graph Protocol", "url": "https://ogp.me/", "tipo": "doc" },
+        { "titulo": "SEO Starter Guide — Google", "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide", "tipo": "artigo" },
+        { "titulo": "Dados estruturados JSON-LD — Google Search Central", "url": "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data", "tipo": "doc" },
+        { "titulo": "Open Graph Debugger — Meta for Developers", "url": "https://developers.facebook.com/tools/debug/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar meta charset, description (150–160 chars), viewport e robots" },
+        { "titulo": "Implementar todas as tags Open Graph essenciais" },
+        { "titulo": "Estudar twitter:card e meta tags para Twitter/X" },
+        { "titulo": "Adicionar um script JSON-LD (Organization ou Article)" },
+        { "titulo": "Testar o compartilhamento com o Open Graph Debugger do Meta" }
+      ]
+    },
+    {
+      "id": "t20",
+      "titulo": "Performance de HTML: lazy loading, preload e resource hints",
+      "descricao": "Estudar técnicas de performance que começam no HTML: loading=lazy para imagens e iframes, preload/prefetch/preconnect no head, async e defer para scripts, e como a ordem dos elementos afeta o Critical Rendering Path. Entender como o HTML afeta as Core Web Vitals (LCP, CLS, INP). Performance começa na marcação antes do CSS e JS.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Aplicar em uma página: loading=lazy nas imagens fora do viewport, preconnect para domínios externos críticos e defer em scripts não essenciais. Medir impacto com Lighthouse antes e depois.",
+      "competencias": ["c_performance", "c_imagens"],
+      "tags": ["performance", "avançado", "Core Web Vitals", "otimização"],
+      "atributos": ["Front-end"],
+      "dependsOn": ["t19"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Resource hints — web.dev Learn Performance", "url": "https://web.dev/learn/performance/resource-hints/", "tipo": "artigo" },
+        { "titulo": "Lazy loading de imagens — web.dev", "url": "https://web.dev/articles/lazy-loading", "tipo": "artigo" },
+        { "titulo": "Critical Rendering Path — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path", "tipo": "doc" },
+        { "titulo": "Script async vs defer — JavaScript.info", "url": "https://javascript.info/script-async-defer", "tipo": "artigo" },
+        { "titulo": "Core Web Vitals — web.dev", "url": "https://web.dev/articles/vitals", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar loading=lazy e identificar quando não usar (imagens above the fold)" },
+        { "titulo": "Entender preload, prefetch e preconnect com exemplos" },
+        { "titulo": "Estudar async vs. defer: qual usar para scripts analytics vs. UI" },
+        { "titulo": "Ler sobre Critical Rendering Path e o impacto do order of elements" },
+        { "titulo": "Rodar Lighthouse antes e após otimizações e comparar métricas" }
+      ]
+    },
+    {
+      "id": "t21",
+      "titulo": "Canvas HTML5: desenhando gráficos com JavaScript",
+      "descricao": "Explorar o elemento <canvas>: criar contextos 2D, desenhar formas geométricas (fillRect, arc, lineTo, bezierCurveTo), adicionar texto e imagens, e criar animações com requestAnimationFrame. Canvas é a base para jogos 2D, visualizações de dados e efeitos visuais na web — diferencia o dev front-end que quer ir além do CSS.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "baixa",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Criar uma cena canvas com ao menos 3 formas geométricas diferentes, texto renderizado e um elemento com animação (movimento ou mudança de cor) via requestAnimationFrame.",
+      "competencias": ["c_canvas_svg"],
+      "tags": ["canvas", "avançado", "JavaScript", "animação"],
+      "atributos": ["Front-end"],
+      "dependsOn": ["t14"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Canvas API — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Web/API/Canvas_API", "tipo": "doc" },
+        { "titulo": "Tutorial completo de Canvas — MDN", "url": "https://developer.mozilla.org/pt-BR/docs/Web/API/Canvas_API/Tutorial", "tipo": "doc" },
+        { "titulo": "Canvas Deep Dive — Joshondesign (EN)", "url": "https://joshondesign.com/p/books/canvasdeepdive/toc.html", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar um canvas e obter o contexto 2D com getContext('2d')" },
+        { "titulo": "Desenhar retângulos com fillRect e strokeRect" },
+        { "titulo": "Desenhar círculos e arcos com arc()" },
+        { "titulo": "Adicionar texto com fillText e strokeText" },
+        { "titulo": "Criar uma animação simples com requestAnimationFrame" },
+        { "titulo": "Carregar e desenhar uma imagem no canvas com drawImage" }
+      ]
+    },
+    {
+      "id": "t22",
+      "titulo": "SVG inline: gráficos vetoriais diretamente no HTML",
+      "descricao": "Entender o SVG (Scalable Vector Graphics) embutido no HTML: elementos básicos (rect, circle, ellipse, line, polygon, path, text), atributos fill/stroke, grupos (g), transformações (translate, rotate, scale) e como aplicar CSS e animações em SVG. SVG é preferível a imagens rasterizadas para ícones e logos — escala sem perda e é acessível.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "baixa",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Criar um SVG inline com ao menos 4 elementos diferentes, uma transformação (rotate ou translate), texto SVG e o SVG otimizado com SVGOMG.",
+      "competencias": ["c_canvas_svg", "c_imagens"],
+      "tags": ["SVG", "avançado", "vetorial", "gráficos"],
+      "atributos": ["Front-end"],
+      "dependsOn": ["t21"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "SVG — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Web/SVG", "tipo": "doc" },
+        { "titulo": "Tutorial SVG — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Web/SVG/Tutorial", "tipo": "doc" },
+        { "titulo": "SVG on the web — practical guide (EN)", "url": "https://svgontheweb.com/", "tipo": "artigo" },
+        { "titulo": "SVGOMG — otimizador de SVG online", "url": "https://svgomg.net/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar viewBox, width/height e sistema de coordenadas SVG" },
+        { "titulo": "Criar formas: rect, circle, ellipse e polygon" },
+        { "titulo": "Adicionar texto com text e tspan" },
+        { "titulo": "Aplicar transformações: translate, rotate e scale" },
+        { "titulo": "Exportar um ícone SVG e otimizá-lo com SVGOMG" },
+        { "titulo": "Comparar tamanho de arquivo: SVG vs. PNG equivalente" }
+      ]
+    },
+    {
+      "id": "t23",
+      "titulo": "Projeto final: landing page completa, semântica e acessível",
+      "descricao": "Construir do zero uma landing page realista aplicando todo o aprendizado: estrutura HTML5 semântica, formulário de contato com validação nativa, imagens otimizadas com lazy loading e alt descritivo, meta tags e Open Graph configurados, ARIA onde necessário e resource hints no head. Este projeto é o atestado de domínio do HTML moderno e serve como portfólio.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 6,
+      "criterioConclusao": "Landing page com: estrutura semântica completa (header/nav/main/section/footer), formulário funcional com validação, imagens com alt e lazy loading, Open Graph configurado, score de acessibilidade ≥ 90 no Lighthouse e HTML válido no W3C.",
+      "competencias": ["c_estrutura", "c_semantica", "c_formularios", "c_acessibilidade", "c_seo", "c_imagens", "c_performance"],
+      "tags": ["prática", "projeto", "portfólio", "avançado"],
+      "atributos": ["Front-end"],
+      "dependsOn": ["t18", "t19", "t20"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validador HTML W3C", "url": "https://validator.w3.org/", "tipo": "outro" },
+        { "titulo": "Google Lighthouse — Chrome DevTools", "url": "https://developer.chrome.com/docs/lighthouse/", "tipo": "doc" },
+        { "titulo": "PageSpeed Insights", "url": "https://pagespeed.web.dev/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Planejar seções: hero, sobre, serviços/produtos, contato, footer" },
+        { "titulo": "Escrever o HTML semântico completo (sem CSS ainda)" },
+        { "titulo": "Adicionar formulário de contato com validação nativa" },
+        { "titulo": "Configurar todas as meta tags e Open Graph no head" },
+        { "titulo": "Otimizar imagens: formatos modernos, lazy loading, alt descritivo" },
+        { "titulo": "Adicionar ARIA onde necessário" },
+        { "titulo": "Validar HTML no W3C e corrigir todos os erros" },
+        { "titulo": "Rodar Lighthouse e atingir score de acessibilidade ≥ 90" }
+      ]
+    },
+    {
+      "id": "t24",
+      "titulo": "Análise final: retrospectiva e mapa do aprendizado",
+      "descricao": "Consolidar todo o aprendizado fazendo uma retrospectiva estruturada: o que domina bem, o que ainda é frágil, quais conceitos se conectam e o que praticar a seguir (CSS, JavaScript). Esta metacognição é tão importante quanto o conteúdo — quem identifica seus gaps aprende exponencialmente mais rápido.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento de retrospectiva com: avaliação de cada competência (1–5), pelo menos 3 gaps identificados, 3 pontos de conexão com CSS/JavaScript e plano de revisão para os próximos 30 dias.",
+      "competencias": ["c_estrutura", "c_semantica", "c_formularios", "c_acessibilidade", "c_seo", "c_performance", "c_canvas_svg"],
+      "tags": ["análise", "revisão", "retrospectiva", "consolidação"],
+      "atributos": ["Front-end", "Fundamentos"],
+      "dependsOn": ["t23"],
+      "reviewAfterDays": 14,
+      "links": [
+        { "titulo": "Referência completa de elementos HTML — MDN (PT-BR)", "url": "https://developer.mozilla.org/pt-BR/docs/Web/HTML/Element", "tipo": "doc" },
+        { "titulo": "Can I use — suporte de recursos HTML por navegador", "url": "https://caniuse.com/", "tipo": "outro" },
+        { "titulo": "HTML Living Standard — WHATWG (spec oficial)", "url": "https://html.spec.whatwg.org/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Listar todas as 12 competências e avaliar confiança de 1 a 5" },
+        { "titulo": "Identificar os 3 temas mais frágeis para revisar" },
+        { "titulo": "Mapear conexões: como HTML serve de fundação para CSS e JS" },
+        { "titulo": "Planejar revisão espaçada: o que revisar em 7, 14 e 30 dias" },
+        { "titulo": "Anotar os 5 recursos favoritos para consulta futura" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+# O que o Sistema de Aprendizado faz
+
+Aplicação local para **planejar, acompanhar e organizar roadmaps de estudo**. O foco não é só “completei N tarefas”, e sim **domínio de competências**, com dependências em grafo, revisão espaçada e métricas de tempo — tudo no navegador, sem conta e sem banco externo.
+
+---
+
+## Em resumo
+
+| Capacidade | O que isso significa na prática |
+|------------|----------------------------------|
+| **Competências (skills)** | Domínio % por skill (Routing 100%, Middleware 20%…) |
+| **Ficha (atributos / XP / nível)** | Radar de áreas + XP=horas reais — progressão sem gamificação vazia |
+| **Árvore de tecnologia** | Dependências como árvore desbloqueável |
+| Roadmaps | Planos com nome, descrição, skills e tarefas |
+| Tarefas tipadas | Prática, Pesquisa ou Análise |
+| Dependências + grafo | Bloqueio até pré-requisito + visão de progressão |
+| Critério de conclusão | “Como saber que terminei” |
+| Dificuldade / prioridade | Por onde começar entre tarefas liberadas |
+| Tags | Filtrar por tema |
+| Links tipados | Vídeo, artigo, doc, repo ou outro |
+| Revisão espaçada | `reviewAfterDays` agenda revisitas |
+| Tempo real vs estimado | Manual ou mini-timer |
+| Histórico | Linha do tempo por tarefa |
+| Painel / Ficha | Atributos, XP, nível, você×você, heatmap neutro |
+| Importação JSON | Planos completos (IA-friendly) |
+
+---
+
+## 1. Competências — o progresso que importa
+
+Em vez de só contar tarefas:
+
+```
+Competências
+Routing ............ 100%
+Controllers ........ 85%
+Blade .............. 90%
+Validation ......... 70%
+Middleware ......... 20%
+```
+
+- Cada roadmap tem uma lista de **competências**.
+- Cada tarefa **desenvolve** uma ou mais skills.
+- O domínio de uma skill = peso das tarefas concluídas ÷ peso total  
+  (peso = horas estimadas, mínimo 1).
+- A sidebar e o header mostram **% domínio** junto com % de tarefas.
+- Gerencie skills no painel **Competências** ou na criação/importação JSON.
+
+Exemplo mental: a tarefa “Criar CRUD” pode somar Routing + Controllers + Blade + Validation.
+
+---
+
+## 1b. Ficha de estudo (estrutura de RPG, sem casca)
+
+- **Atributos** = áreas reais (`Back-end`, `Front-end`…) incrementadas por horas reais.
+- **Radar** mostra o perfil — estatística, não badge.
+- **XP = horas reais**; nível com barra N → N+1 (fórmula simples).
+- **Esta semana vs semana passada** — deltas neutros, sem culpa.
+- Heatmap sem punição visual; sequência só como fato discreto.
+- **Árvore de tecnologia** no roadmap (dependências).
+
+---
+
+## 2. Gerenciar roadmaps
+
+- Criar com nome, descrição e competências iniciais.
+- **Editar** nome/descrição depois.
+- Progresso na sidebar: tarefas + domínio.
+- Importar via **⤓ JSON**.
+- Abrir a **◈ Ficha**.
+- Excluir com confirmação.
+
+---
+
+## 3. Tarefas, dependências e árvore
+
+- Tipos, prazos, horas, critério, tags, **atributos**, dificuldade, prioridade.
+- `dependsOn` bloqueia até liberar pré-requisitos.
+- Seção **Árvore de tecnologia** mostra caminho percorrido vs. o que falta.
+- Filtros: Todas · Liberadas · Bloqueadas · Pendentes · Concluídas · Atrasadas · Revisão · tags.
+
+---
+
+## 4. Tempo, histórico e ficha
+
+- Timer e registro manual de horas (estimado × real).
+- Histórico por tarefa.
+- Ficha: XP/nível, radar, comparação semanal, heatmap, ritmo.
+---
+
+## 5. Importar via JSON
+
+Template Laravel completo em `docs/templates/roadmap.template.json`.  
+Prompt atualizado em `docs/GERAR_ROADMAP.md` (pede `competencias` + vínculo nas tarefas).
+
+---
+
+## 6. Onde roda
+
+- Porta 3000 · `iniciar.bat` / `npm start`
+- Dados em `data/roadmaps.json`
+- Sem login
+
+---
+
+## Ordem de evolução (visão)
+
+| # | Capacidade | Status |
+|---|------------|--------|
+| 1 | Dependências + roadmap em grafo | Feito |
+| 2 | Revisão espaçada + retenção | Feito (básico; dá para aprofundar) |
+| 3 | Competências ligadas às tarefas | Feito |
+| 4 | Sessões de estudo + métricas avançadas | Parcial (timer/painel; sessões first-class ainda não) |
+
+---
+
+## Fluxo típico
+
+```
+1. Importar roadmap com competências + dependências
+2. Olhar o domínio e o grafo — não só a lista
+3. Fazer tarefas liberadas; registrar tempo
+4. Ver skills subirem de 20% → 80%
+5. Revisar o que o filtro Revisão apontar
+```

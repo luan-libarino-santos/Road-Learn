@@ -1,0 +1,15 @@
+{
+  "name": "sistema-roadmaps",
+  "version": "1.0.0",
+  "description": "Sistema de gestão de roadmaps com Node.js e armazenamento JSON",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

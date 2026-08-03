@@ -1,0 +1,839 @@
+{
+  "nome": "PHP — Desenvolvimento Básico e Intermediário",
+  "descricao": "Roadmap abrangente para dominar PHP moderno (8.x) do zero ao nível intermediário: ambiente, sintaxe, estruturas de controle, arrays, strings, funções, POO, namespaces, Composer, manipulação de arquivos, HTTP, formulários, PDO/MySQL, sessões, segurança web e tratamento de erros. Conduz a um aprendizado progressivo com teoria, prática e revisão espaçada — culminando em um mini sistema web CRUD com autenticação.",
+  "competencias": [
+    { "id": "c_ambiente",    "nome": "Ambiente e Ferramentas",       "descricao": "Instalação PHP 8.x, servidor embutido, php.ini, extensões e editor" },
+    { "id": "c_sintaxe",     "nome": "Sintaxe e Tipos",              "descricao": "Variáveis, tipos escalares, operadores, null coalescing e strict types" },
+    { "id": "c_controle",    "nome": "Estruturas de Controle",       "descricao": "if/else, match, switch, for, foreach, while e break/continue" },
+    { "id": "c_arrays",      "nome": "Arrays e Coleções",            "descricao": "Arrays indexados, associativos, multidimensionais e funções nativas" },
+    { "id": "c_strings",     "nome": "Strings e Regex",              "descricao": "Concatenação, heredoc, funções de string, preg_match e sanitização" },
+    { "id": "c_funcoes",     "nome": "Funções e Escopo",             "descricao": "Declaração, parâmetros, return types, closures e variáveis estáticas" },
+    { "id": "c_poo",         "nome": "Programação Orientada a Objetos", "descricao": "Classes, objetos, herança, interfaces, traits, visibilidade e construtores" },
+    { "id": "c_namespaces",  "nome": "Namespaces e Autoload",        "descricao": "PSR-4, Composer, require vs autoload e organização de projetos" },
+    { "id": "c_arquivos",    "nome": "Manipulação de Arquivos",      "descricao": "file_get_contents, fopen, JSON, CSV e permissões de diretório" },
+    { "id": "c_http",        "nome": "HTTP e Superglobais",          "descricao": "Ciclo request/response, $_GET, $_POST, $_SERVER, headers e formulários" },
+    { "id": "c_pdo",         "nome": "PDO e MySQL",                  "descricao": "Conexão, prepared statements, CRUD, transações e fetch modes" },
+    { "id": "c_sessoes",     "nome": "Sessões e Cookies",            "descricao": "session_start, $_SESSION, cookies, flash messages e autenticação básica" },
+    { "id": "c_seguranca",   "nome": "Segurança Web",                "descricao": "XSS, SQL injection, CSRF, validação, htmlspecialchars e password_hash" },
+    { "id": "c_erros",       "nome": "Erros, Exceptions e Debug",    "descricao": "try/catch, Throwable, error_reporting, Xdebug e logging" }
+  ],
+  "tarefas": [
+
+    {
+      "id": "t1",
+      "titulo": "PHP na web: história, ecossistema e PHP 8.x",
+      "descricao": "Compreender o papel do PHP no desenvolvimento web server-side: como o interpretador processa scripts, a diferença entre PHP e linguagens client-side, a evolução até o PHP 8.x e onde ele é usado (WordPress, Laravel, Symfony, APIs). Esta base conceitual evita confusões sobre execução no servidor versus no navegador durante todo o aprendizado.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Conseguir explicar com suas próprias palavras o ciclo de uma requisição PHP (Apache/Nginx → interpretador → resposta HTML) e citar três novidades relevantes do PHP 8.x sem consultar material.",
+      "competencias": ["c_ambiente", "c_http"],
+      "tags": ["fundamentos", "web", "teoria"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": [],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Introdução ao PHP — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/intro-whatis.php", "tipo": "doc" },
+        { "titulo": "Novidades do PHP 8 — PHP.net", "url": "https://www.php.net/releases/8.0/pt_BR.php", "tipo": "doc" },
+        { "titulo": "Como funciona o PHP — Alura (PT-BR)", "url": "https://www.alura.com.br/artigos/php-o-que-e", "tipo": "artigo" },
+        { "titulo": "PHP in 100 Seconds — Fireship", "url": "https://www.youtube.com/watch?v=a7_WFUlff94", "tipo": "video" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler a introdução oficial do PHP.net sobre o que é PHP" },
+        { "titulo": "Pesquisar a diferença entre PHP, HTML, CSS e JavaScript no ciclo web" },
+        { "titulo": "Anotar três recursos do PHP 8.x (named arguments, match, union types)" },
+        { "titulo": "Listar três casos de uso reais onde PHP é escolhido como back-end" }
+      ]
+    },
+
+    {
+      "id": "t2",
+      "titulo": "Ambiente de desenvolvimento: instalação, php.ini e extensões",
+      "descricao": "Aprender a instalar e configurar o PHP 8.x localmente (XAMPP, Laragon, Docker ou instalação nativa), entender o php.ini, verificar extensões necessárias (pdo_mysql, mbstring, openssl) e usar o terminal com php -v e php --ini. Dominar o ambiente é pré-requisito para qualquer exercício prático.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "PHP 8.x instalado, php -v exibindo versão correta, extensões pdo_mysql e mbstring habilitadas e editor configurado com syntax highlight para PHP.",
+      "competencias": ["c_ambiente"],
+      "tags": ["fundamentos", "instalação", "ambiente"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t1"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Instalação do PHP — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/install.php", "tipo": "doc" },
+        { "titulo": "Configuração do php.ini — PHP.net", "url": "https://www.php.net/manual/pt_BR/configuration.file.php", "tipo": "doc" },
+        { "titulo": "Extensões do PHP — PHP.net", "url": "https://www.php.net/manual/pt_BR/extensions.php", "tipo": "doc" },
+        { "titulo": "Laragon — ambiente local Windows", "url": "https://laragon.org/", "tipo": "outro" }
+      ],
+      "subtarefas": [
+        { "titulo": "Instalar PHP 8.x via Laragon, XAMPP ou Docker" },
+        { "titulo": "Executar php -v e php --ini no terminal" },
+        { "titulo": "Verificar extensões com php -m (pdo_mysql, mbstring, openssl)" },
+        { "titulo": "Configurar VS Code com extensão PHP Intelephense" },
+        { "titulo": "Criar pasta de projetos dedicada ao estudo" }
+      ]
+    },
+
+    {
+      "id": "t3",
+      "titulo": "Praticar: primeiro script PHP e servidor embutido",
+      "descricao": "Consolidar a configuração do ambiente criando o clássico hello world, entendendo as tags <?php ?>, a diferença entre echo e print, e subindo o servidor embutido com php -S localhost:8000. Este exercício transforma a teoria de ambiente em vivência prática e apresenta o fluxo de trabalho real do desenvolvedor PHP.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1,
+      "criterioConclusao": "Arquivo index.php acessível no navegador via php -S, exibindo saída dinâmica com data/hora atual e sem erros no terminal.",
+      "competencias": ["c_ambiente", "c_sintaxe"],
+      "tags": ["prática", "fundamentos", "servidor"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t2"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Servidor web embutido — PHP.net", "url": "https://www.php.net/manual/pt_BR/features.commandline.webserver.php", "tipo": "doc" },
+        { "titulo": "Sintaxe básica — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.basic-syntax.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar index.php com <?php echo 'Olá, PHP!'; ?>" },
+        { "titulo": "Subir servidor com php -S localhost:8000 na pasta do projeto" },
+        { "titulo": "Acessar http://localhost:8000 no navegador" },
+        { "titulo": "Adicionar saída com date() formatada em português" },
+        { "titulo": "Testar php arquivo.php no terminal (modo CLI)" }
+      ]
+    },
+
+    {
+      "id": "t4",
+      "titulo": "Sintaxe, tipos de dados e operadores em PHP 8",
+      "descricao": "Dominar variáveis ($variavel), tipos escalares (int, float, string, bool), null, arrays básicos, operadores aritméticos, de comparação (=== vs ==), lógicos, concatenação (.), operador null coalescing (??) e nullsafe (?->). Entender declare(strict_types=1) e por que tipagem estrita previne bugs silenciosos.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Conseguir explicar a diferença entre == e ===, usar ?? e ?: corretamente, e criar variáveis de todos os tipos escalares sem consultar referências.",
+      "competencias": ["c_sintaxe"],
+      "tags": ["fundamentos", "sintaxe", "tipos"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t3"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tipos em PHP — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.types.php", "tipo": "doc" },
+        { "titulo": "Operadores — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.operators.php", "tipo": "doc" },
+        { "titulo": "Strict typing — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.types.declarations.php#language.types.declarations.strict", "tipo": "doc" },
+        { "titulo": "Null coalescing operator — PHP.net", "url": "https://www.php.net/manual/pt_BR/migration70.new-features.php#migration70.new-features.null-coalesce-op", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar tipos escalares e o valor null" },
+        { "titulo": "Praticar operadores aritméticos, de comparação e lógicos" },
+        { "titulo": "Entender === vs == com exemplos que falham com==" },
+        { "titulo": "Usar ?? e ?: em cenários reais (valor padrão, fallback)" },
+        { "titulo": "Ativar strict_types=1 e observar erros de tipo" },
+        { "titulo": "Criar arquivo de exemplos com um caso de cada operador" }
+      ]
+    },
+
+    {
+      "id": "t5",
+      "titulo": "Praticar: exercícios consolidadores de sintaxe e tipos",
+      "descricao": "Aplicar sintaxe e operadores construindo scripts CLI que calculam IMC, convertem temperaturas e formatam dados de usuário. O objetivo é fixar variáveis, tipos e operadores antes de avançar para estruturas de controle, arrays e funções — este ponto consolida a base para as trilhas paralelas.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Três scripts CLI funcionais: calculadora de IMC com validação de entrada, conversor Celsius/Fahrenheit e formatador de nome/email, todos com strict_types=1 e saída formatada.",
+      "competencias": ["c_sintaxe"],
+      "tags": ["prática", "fundamentos", "consolidação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t4"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Funções de formatação — PHP.net (number_format, sprintf)", "url": "https://www.php.net/manual/pt_BR/function.number-format.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar calculadora de IMC (peso/altura²) com validação numérica" },
+        { "titulo": "Criar conversor de temperatura com fórmulas e arredondamento" },
+        { "titulo": "Criar formatador que capitaliza nome e valida email com filter_var" },
+        { "titulo": "Usar number_format e sprintf para saída legível" },
+        { "titulo": "Executar todos os scripts via php script.php no terminal" }
+      ]
+    },
+
+    {
+      "id": "t6",
+      "titulo": "Estruturas condicionais: if, else, match e switch",
+      "descricao": "Estudar fluxo condicional em PHP: if/elseif/else, operador ternário, switch/case e a expressão match do PHP 8 (mais segura e concisa que switch). Entender quando usar cada estrutura e como condicionais compõem a lógica de validação em aplicações reais.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Reescrever um switch tradicional usando match, explicar quando match é preferível e criar validador de faixa etária com if/elseif/else sem consultar material.",
+      "competencias": ["c_controle", "c_sintaxe"],
+      "tags": ["fundamentos", "condicionais", "controle"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Estruturas de controle — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.control-structures.php", "tipo": "doc" },
+        { "titulo": "Expressão match — PHP.net", "url": "https://www.php.net/manual/pt_BR/control-structures.match.php", "tipo": "doc" },
+        { "titulo": "Switch — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/control-structures.switch.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar if, elseif, else e operador ternário" },
+        { "titulo": "Praticar switch com break e casos múltiplos" },
+        { "titulo": "Converter switch para match com retorno de valor" },
+        { "titulo": "Usar match com condições compostas e default" },
+        { "titulo": "Criar classificador de nota escolar (A–F) com match" }
+      ]
+    },
+
+    {
+      "id": "t7",
+      "titulo": "Arrays: indexados, associativos e funções nativas",
+      "descricao": "Dominar arrays em PHP — a estrutura de dados mais usada na linguagem: criação com [], arrays associativos, multidimensionais, foreach, e funções como count, array_push, array_map, array_filter, array_reduce, in_array, array_key_exists e spread operator (...). Arrays são o coração da manipulação de dados em PHP.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Manipular array de produtos com id, nome e preço usando array_map para desconto, array_filter para estoque e usort para ordenação, sem loops manuais desnecessários.",
+      "competencias": ["c_arrays"],
+      "tags": ["fundamentos", "arrays", "coleções"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Arrays — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.types.array.php", "tipo": "doc" },
+        { "titulo": "Funções de array — PHP.net", "url": "https://www.php.net/manual/pt_BR/ref.array.php", "tipo": "doc" },
+        { "titulo": "Foreach — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/control-structures.foreach.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar arrays indexados e associativos com sintaxe []" },
+        { "titulo": "Iterar com foreach (valor e chave=>valor)" },
+        { "titulo": "Praticar array_map, array_filter e array_reduce" },
+        { "titulo": "Ordenar com sort, asort, usort e ksort" },
+        { "titulo": "Usar spread operator para mesclar arrays" },
+        { "titulo": "Criar array multidimensional (lista de usuários com endereço)" }
+      ]
+    },
+
+    {
+      "id": "t8",
+      "titulo": "Funções: declaração, parâmetros, escopo e return",
+      "descricao": "Aprender a criar funções reutilizáveis: declaração function, parâmetros posicionais e nomeados (PHP 8), valores padrão, passagem por valor vs referência (&), return e early return, variáveis globais vs locais, static e include/require para modularizar código. Funções bem definidas são a base da POO e de projetos organizados.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Criar módulo com ao menos 5 funções utilitárias, usar parâmetros nomeados, return types e separar código em arquivos com require_once sem erros de redeclaração.",
+      "competencias": ["c_funcoes"],
+      "tags": ["fundamentos", "funções", "modularização"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Funções — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.functions.php", "tipo": "doc" },
+        { "titulo": "Argumentos nomeados — PHP 8", "url": "https://www.php.net/manual/pt_BR/functions.arguments.php#functions.named-arguments", "tipo": "doc" },
+        { "titulo": "Include/require — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.include.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar funções com parâmetros, default e return" },
+        { "titulo": "Usar argumentos nomeados ao chamar funções" },
+        { "titulo": "Entender escopo local, global e static" },
+        { "titulo": "Separar funções em arquivo helpers.php com require_once" },
+        { "titulo": "Praticar passagem por referência com & em um caso real" }
+      ]
+    },
+
+    {
+      "id": "t9",
+      "titulo": "Loops e iteração: for, while, do-while e foreach",
+      "descricao": "Estudar estruturas de repetição: for, while, do-while, foreach (preferido para arrays), break, continue e break com valor numérico. Entender quando escolher foreach sobre for e como loops se combinam com arrays e condicionais para processar coleções de dados.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Processar array de 20 itens com foreach aplicando filtro condicional, gerar tabela de multiplicação com for e usar break para interromper loop ao encontrar condição.",
+      "competencias": ["c_controle"],
+      "tags": ["controle", "loops", "iteração"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t6"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "For — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/control-structures.for.php", "tipo": "doc" },
+        { "titulo": "While — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/control-structures.while.php", "tipo": "doc" },
+        { "titulo": "Break e continue — PHP.net", "url": "https://www.php.net/manual/pt_BR/control-structures.break.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar tabuada com for de 1 a 10" },
+        { "titulo": "Iterar array associativo com foreach" },
+        { "titulo": "Usar while para leitura simulada até condição de parada" },
+        { "titulo": "Praticar break e continue em loop aninhado" },
+        { "titulo": "Comparar legibilidade: for vs foreach em arrays" }
+      ]
+    },
+
+    {
+      "id": "t10",
+      "titulo": "Praticar: jogo de adivinhação e validador de formulário CLI",
+      "descricao": "Consolidar condicionais e loops criando um jogo de adivinhação de números no terminal e um validador de dados (CPF simplificado, idade, email) que usa match e loops. Exercício que transforma estruturas de controle abstratas em lógica de aplicação concreta.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Jogo funcional com tentativas limitadas e dicas (maior/menor), validador com ao menos 4 regras usando condicionais e mensagens de erro claras por campo.",
+      "competencias": ["c_controle", "c_sintaxe"],
+      "tags": ["prática", "condicionais", "loops"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t9"],
+      "reviewAfterDays": 0,
+      "links": [],
+      "subtarefas": [
+        { "titulo": "Criar jogo: número aleatório (rand), loop de tentativas, dicas" },
+        { "titulo": "Limitar tentativas a 7 e exibir mensagem de vitória/derrota" },
+        { "titulo": "Criar validador de idade (0–150) e email com filter_var" },
+        { "titulo": "Usar match para mensagens de erro por tipo de falha" },
+        { "titulo": "Testar edge cases: string vazia, zero, valores negativos" }
+      ]
+    },
+
+    {
+      "id": "t11",
+      "titulo": "Manipulação de strings, encoding e expressões regulares",
+      "descricao": "Dominar funções de string: strlen, substr, str_replace, strpos, trim, explode, implode, mb_strlen (UTF-8), heredoc/nowdoc, sprintf e preg_match/preg_replace para regex. Strings mal tratadas causam bugs de encoding, XSS e validação falha — dominar este tópico é essencial para formulários e APIs.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Extrair dados de texto com regex (email, CEP), normalizar string UTF-8 com mb_* e formatar template com sprintf/heredoc sem problemas de encoding.",
+      "competencias": ["c_strings", "c_arrays"],
+      "tags": ["strings", "regex", "encoding"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t7"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Funções de string — PHP.net", "url": "https://www.php.net/manual/pt_BR/ref.strings.php", "tipo": "doc" },
+        { "titulo": "Expressões regulares (PCRE) — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.pcre.php", "tipo": "doc" },
+        { "titulo": "Multibyte String — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.mbstring.php", "tipo": "doc" },
+        { "titulo": "Heredoc syntax — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.types.string.php#language.types.string.syntax.heredoc", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Praticar explode/implode para CSV simples" },
+        { "titulo": "Usar trim, strtoupper, ucwords para normalização" },
+        { "titulo": "Validar email e CEP com preg_match" },
+        { "titulo": "Trabalhar com mb_strlen e mb_substr em texto acentuado" },
+        { "titulo": "Criar template de email com heredoc e interpolação" }
+      ]
+    },
+
+    {
+      "id": "t12",
+      "titulo": "Praticar: processador de listas e relatório de vendas",
+      "descricao": "Aplicar arrays e strings construindo um processador de lista de vendas: importar dados de array, calcular totais, aplicar descontos, filtrar por categoria e gerar relatório textual formatado. Consolida manipulação de coleções antes da trilha de arquivos.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Script que processa array de 10+ vendas, calcula total/subtotal/desconto, filtra por categoria, ordena por valor e exibe relatório tabular formatado no terminal.",
+      "competencias": ["c_arrays", "c_strings"],
+      "tags": ["prática", "arrays", "relatório"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t11"],
+      "reviewAfterDays": 0,
+      "links": [],
+      "subtarefas": [
+        { "titulo": "Definir array de vendas (produto, categoria, quantidade, preço)" },
+        { "titulo": "Calcular total por item e total geral com array_reduce" },
+        { "titulo": "Filtrar vendas acima de valor mínimo com array_filter" },
+        { "titulo": "Ordenar por valor decrescente com usort" },
+        { "titulo": "Formatar saída com str_pad e sprintf em colunas alinhadas" },
+        { "titulo": "Agrupar totais por categoria com loop e array associativo" }
+      ]
+    },
+
+    {
+      "id": "t13",
+      "titulo": "Type hints, union types, closures e funções anônimas",
+      "descricao": "Aprofundar funções com tipagem moderna do PHP 8: type hints em parâmetros e retorno, union types (int|string), nullable types (?string), closures (function() use ($var)), arrow functions (fn), e callable. Código tipado é mais seguro, autodocumentado e prepara para POO e frameworks.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Criar função com union type, closure que captura variável externa com use, arrow function em array_map e explicar diferença entre closure e arrow function.",
+      "competencias": ["c_funcoes", "c_sintaxe"],
+      "tags": ["funções", "tipagem", "closures"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Declarações de tipo — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.types.declarations.php", "tipo": "doc" },
+        { "titulo": "Union types — PHP 8", "url": "https://www.php.net/manual/pt_BR/language.types.declarations.php#language.types.declarations.union", "tipo": "doc" },
+        { "titulo": "Closures — PHP.net", "url": "https://www.php.net/manual/pt_BR/functions.anonymous.php", "tipo": "doc" },
+        { "titulo": "Arrow functions — PHP 7.4+", "url": "https://www.php.net/manual/pt_BR/functions.arrow.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Adicionar type hints a funções existentes do módulo helpers" },
+        { "titulo": "Usar union types e nullable em parâmetros" },
+        { "titulo": "Criar closure com use para contador ou acumulador" },
+        { "titulo": "Refatorar callback de array_map para arrow function" },
+        { "titulo": "Testar erros de tipo com strict_types=1 ativado" }
+      ]
+    },
+
+    {
+      "id": "t14",
+      "titulo": "Praticar: biblioteca de utilitários tipada e testável",
+      "descricao": "Construir uma biblioteca de funções utilitárias (formatação de moeda, slugify, validação de CPF/CNPJ simplificada, geração de UUID simples) com type hints completos, organizada em namespace-ready files. Consolida funções modernas antes de entrar em POO.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Arquivo src/helpers.php com ao menos 6 funções tipadas, documentadas com PHPDoc, invocáveis via index.php de teste sem warnings com error_reporting(E_ALL).",
+      "competencias": ["c_funcoes", "c_strings"],
+      "tags": ["prática", "funções", "utilitários"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t13"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "PHPDoc — documentação de referência", "url": "https://docs.phpdoc.org/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar formatMoney(float $valor): string com number_format" },
+        { "titulo": "Criar slugify(string $texto): string com regex e mb_strtolower" },
+        { "titulo": "Criar isValidEmail(string $email): bool com filter_var" },
+        { "titulo": "Adicionar PHPDoc (@param, @return) em cada função" },
+        { "titulo": "Criar index.php de teste que exibe resultados de cada função" },
+        { "titulo": "Ativar error_reporting(E_ALL) e corrigir warnings" }
+      ]
+    },
+
+    {
+      "id": "t15",
+      "titulo": "HTTP, superglobais e processamento de requisições",
+      "descricao": "Entender o ciclo HTTP no PHP: $_GET, $_POST, $_REQUEST, $_SERVER, $_FILES, $_COOKIE, métodos GET/POST, headers com header() e http_response_code(), e a diferença entre incluir PHP em HTML vs gerar HTML via echo. Superglobais são a ponte entre o navegador e a lógica server-side.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Explicar fluxo de um formulário POST, listar 5 chaves úteis de $_SERVER e criar script que responde diferente para GET vs POST na mesma URL.",
+      "competencias": ["c_http"],
+      "tags": ["HTTP", "superglobais", "web"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t10"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Variáveis pré-definidas — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.variables.predefined.php", "tipo": "doc" },
+        { "titulo": "Tratamento de requisições — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.variables.external.php", "tipo": "doc" },
+        { "titulo": "Função header() — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.header.php", "tipo": "doc" },
+        { "titulo": "HTTP Methods — MDN", "url": "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Methods", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar $_GET para query strings (?nome=valor)" },
+        { "titulo": "Estudar $_POST para dados de formulário" },
+        { "titulo": "Explorar $_SERVER (REQUEST_METHOD, HTTP_HOST, REQUEST_URI)" },
+        { "titulo": "Usar filter_input() como alternativa segura às superglobais" },
+        { "titulo": "Praticar header() para redirect e Content-Type" }
+      ]
+    },
+
+    {
+      "id": "t16",
+      "titulo": "Praticar: formulário HTML processado em PHP",
+      "descricao": "Construir página com formulário HTML (cadastro simples) processada pelo mesmo arquivo PHP: exibir formulário via GET, validar e processar via POST, repopular campos com valores anteriores e exibir mensagens de erro/sucesso. Projeto que consolida HTTP e validação antes do banco de dados.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Formulário com nome, email e mensagem: validação server-side, repopulação de campos após erro, mensagem de sucesso após envio válido e escape de saída com htmlspecialchars.",
+      "competencias": ["c_http", "c_strings", "c_controle"],
+      "tags": ["prática", "formulários", "HTTP"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t15"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Handling file uploads — PHP.net", "url": "https://www.php.net/manual/pt_BR/features.file-upload.php", "tipo": "doc" },
+        { "titulo": "htmlspecialchars — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.htmlspecialchars.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar form.html ou index.php com form method=POST" },
+        { "titulo": "Validar campos: required, email, tamanho mínimo" },
+        { "titulo": "Repopular inputs com valores de $_POST após erro" },
+        { "titulo": "Escapar toda saída dinâmica com htmlspecialchars" },
+        { "titulo": "Separar lógica (topo) de apresentação (HTML abaixo)" },
+        { "titulo": "Testar envio vazio, email inválido e dados válidos" }
+      ]
+    },
+
+    {
+      "id": "t17",
+      "titulo": "POO: classes, objetos, propriedades e métodos",
+      "descricao": "Introduzir Programação Orientada a Objetos: class, new, propriedades ($this->), métodos, construtor __construct, visibilidade (public, private, protected), getters/setters e readonly properties (PHP 8.1+). POO organiza código complexo e é base de todo framework PHP moderno.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Criar classe Usuario com propriedades privadas, construtor, getters e método toArray(), instanciar e manipular objetos sem acessar propriedades privadas diretamente.",
+      "competencias": ["c_poo"],
+      "tags": ["POO", "classes", "objetos"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t14"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Classes e objetos — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.oop5.php", "tipo": "doc" },
+        { "titulo": "Propriedades — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.properties.php", "tipo": "doc" },
+        { "titulo": "Construtor — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.decon.php", "tipo": "doc" },
+        { "titulo": "Visibilidade — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.visibility.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar classe simples com propriedades e métodos public" },
+        { "titulo": "Refatorar para private + getters/setters" },
+        { "titulo": "Implementar __construct com parâmetros obrigatórios" },
+        { "titulo": "Usar $this-> para acessar membros da instância" },
+        { "titulo": "Criar método estático como factory (Usuario::fromArray())" }
+      ]
+    },
+
+    {
+      "id": "t18",
+      "titulo": "Herança, classes abstratas, interfaces e traits",
+      "descricao": "Aprofundar POO com extends, override de métodos, classes abstratas (abstract), interfaces (implements), traits para composição horizontal e late static binding. Entender quando usar interface vs classe abstrata vs trait — decisões que aparecem em todo projeto PHP intermediário.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Criar hierarquia com classe abstrata Animal, classes concretas Cachorro/Gato, interface Notificavel e trait Timestampable aplicado em duas classes distintas.",
+      "competencias": ["c_poo"],
+      "tags": ["POO", "herança", "interfaces", "traits"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t17"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Herança — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.oop5.inheritance.php", "tipo": "doc" },
+        { "titulo": "Classes abstratas — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.abstract.php", "tipo": "doc" },
+        { "titulo": "Interfaces — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.interfaces.php", "tipo": "doc" },
+        { "titulo": "Traits — PHP.net", "url": "https://www.php.net/manual/pt_BR/language.oop5.traits.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar classe abstrata com método abstrato e concreto" },
+        { "titulo": "Estender com override de método (parent::)" },
+        { "titulo": "Definir interface e implementar em duas classes" },
+        { "titulo": "Criar trait reutilizável e usar em classes sem relação de herança" },
+        { "titulo": "Desenhar diagrama simples da hierarquia criada" }
+      ]
+    },
+
+    {
+      "id": "t19",
+      "titulo": "Namespaces, Composer, PSR-4 e autoload",
+      "descricao": "Organizar projetos PHP profissionais com namespaces (App\\Models\\User), Composer para gerenciamento de dependências, autoload PSR-4 e estrutura src/. Substituir cadeias de require_once por autoload e entender vendor/ e composer.json — pré-requisito para qualquer framework ou projeto colaborativo.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Projeto com composer init, autoload PSR-4 configurado, classes em namespace App\\ acessíveis via require vendor/autoload.php sem require manual de cada arquivo.",
+      "competencias": ["c_namespaces", "c_poo"],
+      "tags": ["namespaces", "Composer", "autoload", "PSR-4"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t18"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Namespaces — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.namespaces.php", "tipo": "doc" },
+        { "titulo": "Composer — documentação oficial", "url": "https://getcomposer.org/doc/", "tipo": "doc" },
+        { "titulo": "PSR-4 Autoloading — PHP-FIG", "url": "https://www.php-fig.org/psr/psr-4/", "tipo": "doc" },
+        { "titulo": "Composer em 10 minutos — documentação", "url": "https://getcomposer.org/doc/00-intro.md", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Instalar Composer globalmente" },
+        { "titulo": "Executar composer init em projeto de estudo" },
+        { "titulo": "Configurar autoload PSR-4 (App\\ → src/)" },
+        { "titulo": "Mover classes POO para src/ com namespace App\\" },
+        { "titulo": "Instalar pacote externo (ex.: vlucas/phpdotenv) via composer require" }
+      ]
+    },
+
+    {
+      "id": "t20",
+      "titulo": "Manipulação de arquivos, JSON e CSV",
+      "descricao": "Aprender leitura e escrita de arquivos: file_get_contents, file_put_contents, fopen/fread/fwrite/fclose, file_exists, is_dir, mkdir, json_encode/json_decode e fgetcsv/fputcsv. Persistência em arquivo é comum em scripts, configs, logs e integrações antes ou além de banco de dados.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Ler e gravar JSON, exportar array para CSV e append em arquivo de log com timestamp, tratando erros quando arquivo não existe.",
+      "competencias": ["c_arquivos", "c_arrays"],
+      "tags": ["arquivos", "JSON", "CSV"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t12"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Manipulação de arquivos — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.filesystem.php", "tipo": "doc" },
+        { "titulo": "JSON — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.json.php", "tipo": "doc" },
+        { "titulo": "fgetcsv — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.fgetcsv.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler e escrever arquivo texto com file_get/put_contents" },
+        { "titulo": "Serializar array para JSON e desserializar com json_decode" },
+        { "titulo": "Exportar array de vendas para CSV com fputcsv" },
+        { "titulo": "Implementar append em log.txt com date('Y-m-d H:i:s')" },
+        { "titulo": "Verificar file_exists e tratar arquivo inexistente" }
+      ]
+    },
+
+    {
+      "id": "t21",
+      "titulo": "Praticar: sistema de logs e persistência JSON",
+      "descricao": "Construir mini sistema de persistência: classe Logger que grava em arquivo, classe Repository que salva/carrega entidades em JSON, e script CLI que demonstra CRUD em arquivo. Consolida manipulação de arquivos com POO procedural e prepara conceitos para PDO.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Classes Logger e JsonUserRepository funcionais: criar, listar, buscar por id e deletar usuários persistidos em data/users.json, com log de operações em data/app.log.",
+      "competencias": ["c_arquivos", "c_poo"],
+      "tags": ["prática", "arquivos", "persistência"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t20"],
+      "reviewAfterDays": 0,
+      "links": [],
+      "subtarefas": [
+        { "titulo": "Criar classe Logger com métodos info(), error() e append" },
+        { "titulo": "Criar JsonUserRepository com save, findAll, findById, delete" },
+        { "titulo": "Garantir diretório data/ com mkdir se não existir" },
+        { "titulo": "Criar script CLI que adiciona, lista e remove usuários" },
+        { "titulo": "Registrar cada operação no log com timestamp" }
+      ]
+    },
+
+    {
+      "id": "t22",
+      "titulo": "PDO e MySQL: conexão, prepared statements e CRUD",
+      "descricao": "Conectar ao MySQL com PDO: DSN, opções de erro (ERRMODE_EXCEPTION), prepared statements com bindParam/bindValue, fetch modes (FETCH_ASSOC, FETCH_OBJ), insert/update/delete seguros e transações básicas. PDO com prepared statements é a forma correta de acessar banco em PHP — nunca concatenar SQL.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Conexão PDO funcional, CRUD completo em tabela users com prepared statements, fetch associativo e transação que insere dois registros ou reverte em caso de erro.",
+      "competencias": ["c_pdo"],
+      "tags": ["PDO", "MySQL", "banco de dados"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t16", "t19"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "PDO — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/book.pdo.php", "tipo": "doc" },
+        { "titulo": "Prepared statements — PHP.net", "url": "https://www.php.net/manual/pt_BR/pdo.prepared-statements.php", "tipo": "doc" },
+        { "titulo": "Transações — PHP.net", "url": "https://www.php.net/manual/pt_BR/pdo.transactions.php", "tipo": "doc" },
+        { "titulo": "MySQL 8 — Documentação oficial", "url": "https://dev.mysql.com/doc/refman/8.0/en/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar banco e tabela users (id, nome, email, created_at)" },
+        { "titulo": "Conectar com PDO e setAttribute ERRMODE_EXCEPTION" },
+        { "titulo": "Implementar INSERT e SELECT com prepared statements" },
+        { "titulo": "Implementar UPDATE e DELETE com placeholders" },
+        { "titulo": "Testar transação: beginTransaction, commit e rollBack" }
+      ]
+    },
+
+    {
+      "id": "t23",
+      "titulo": "Praticar: CRUD web completo com PDO",
+      "descricao": "Construir aplicação web CRUD (Create, Read, Update, Delete) de produtos ou tarefas usando PDO, com listagem, formulário de criação/edição, exclusão com confirmação e mensagens flash. Integra HTTP, POO, namespaces e banco de dados em projeto intermediário realista.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 4,
+      "criterioConclusao": "CRUD web funcional: listar, criar, editar e excluir registros no MySQL via PDO, com escape de saída, validação server-side e estrutura de pastas organizada (src/, public/, config/).",
+      "competencias": ["c_pdo", "c_http", "c_poo"],
+      "tags": ["prática", "CRUD", "PDO", "web"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t22"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Repository pattern intro — PHP.net PDO examples", "url": "https://www.php.net/manual/pt_BR/pdo.examples.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar ProductRepository ou TaskRepository com métodos CRUD" },
+        { "titulo": "Implementar listagem (index.php) com tabela HTML" },
+        { "titulo": "Criar formulário de criação e edição (create.php, edit.php)" },
+        { "titulo": "Implementar delete com confirmação via GET ou POST" },
+        { "titulo": "Validar campos e exibir erros no formulário" },
+        { "titulo": "Organizar conexão PDO em arquivo config/database.php" }
+      ]
+    },
+
+    {
+      "id": "t24",
+      "titulo": "Sessões, cookies e autenticação básica",
+      "descricao": "Implementar estado entre requisições com session_start(), $_SESSION, session_regenerate_id(), cookies com setcookie() e fluxo login/logout básico. Entender diferença entre sessão (server-side) e cookie (client-side), e por que session_regenerate_id() após login previne session fixation.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Fluxo login/logout funcional: credenciais verificadas, sessão criada com regenerate_id, página protegida redireciona se não autenticado, logout destrói sessão.",
+      "competencias": ["c_sessoes", "c_http"],
+      "tags": ["sessões", "cookies", "autenticação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t23"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Sessões — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/book.session.php", "tipo": "doc" },
+        { "titulo": "Cookies — PHP.net", "url": "https://www.php.net/manual/pt_BR/features.cookies.php", "tipo": "doc" },
+        { "titulo": "session_regenerate_id — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.session-regenerate-id.php", "tipo": "doc" },
+        { "titulo": "password_hash — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.password-hash.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Configurar session_start() no início dos scripts" },
+        { "titulo": "Armazenar user_id e nome em $_SESSION após login" },
+        { "titulo": "Criar função isLoggedIn() e proteger páginas" },
+        { "titulo": "Implementar logout com session_destroy()" },
+        { "titulo": "Usar password_hash e password_verify para senhas" },
+        { "titulo": "Chamar session_regenerate_id(true) após login bem-sucedido" }
+      ]
+    },
+
+    {
+      "id": "t25",
+      "titulo": "Segurança web: XSS, SQL injection, CSRF e validação",
+      "descricao": "Estudar vulnerabilidades comuns em PHP e suas defesas: XSS (htmlspecialchars, ENT_QUOTES), SQL injection (prepared statements — reforço), CSRF (token em formulário), validação e sanitização (filter_var, filter_input), upload seguro e princípio do menor privilégio. Segurança não é opcional — é requisito de qualquer aplicação web.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Listar 5 vulnerabilidades OWASP Top 10 relevantes para PHP, implementar token CSRF em formulário e demonstrar escape correto contra XSS em saída dinâmica.",
+      "competencias": ["c_seguranca", "c_http", "c_pdo"],
+      "tags": ["segurança", "XSS", "CSRF", "validação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t24"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Segurança — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/security.php", "tipo": "doc" },
+        { "titulo": "OWASP Top 10", "url": "https://owasp.org/www-project-top-ten/", "tipo": "doc" },
+        { "titulo": "Filter functions — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.filter.php", "tipo": "doc" },
+        { "titulo": "PHP: The Right Way — Security", "url": "https://phptherightway.com/#security", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Revisar todo output dinâmico: aplicar htmlspecialchars" },
+        { "titulo": "Confirmar que 100% das queries usam prepared statements" },
+        { "titulo": "Implementar token CSRF: gerar, armazenar em sessão, validar no POST" },
+        { "titulo": "Validar inputs com filter_var e whitelist de valores permitidos" },
+        { "titulo": "Estudar upload seguro: verificar mime, renomear arquivo, limitar tamanho" }
+      ]
+    },
+
+    {
+      "id": "t26",
+      "titulo": "Tratamento de erros, exceptions e debugging",
+      "descricao": "Dominar tratamento de erros moderno: try/catch/finally, Throwable, Exception vs Error, error_reporting e display_errors em dev vs prod, set_error_handler, logging com error_log() e introdução ao Xdebug para breakpoints. Código que falha silenciosamente em produção é pesadelo de manutenção.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Refatorar CRUD para usar try/catch em operações PDO, logar erros em arquivo sem expor detalhes ao usuário e configurar Xdebug ou debug com var_dump estruturado.",
+      "competencias": ["c_erros"],
+      "tags": ["erros", "exceptions", "debug", "logging"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t25"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Exceptions — PHP.net (PT-BR)", "url": "https://www.php.net/manual/pt_BR/language.exceptions.php", "tipo": "doc" },
+        { "titulo": "Error handling — PHP.net", "url": "https://www.php.net/manual/pt_BR/book.errorfunc.php", "tipo": "doc" },
+        { "titulo": "Xdebug — documentação oficial", "url": "https://xdebug.org/docs/", "tipo": "doc" },
+        { "titulo": "PHP: The Right Way — Errors", "url": "https://phptherightway.com/#errors_and_exceptions", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Envolver operações PDO em try/catch(PDOException)" },
+        { "titulo": "Criar página de erro amigável sem stack trace em produção" },
+        { "titulo": "Configurar error_log para gravar em data/error.log" },
+        { "titulo": "Criar exception customizada (ex.: ValidationException)" },
+        { "titulo": "Instalar/configurar Xdebug ou usar ray()/symfony dump" }
+      ]
+    },
+
+    {
+      "id": "t27",
+      "titulo": "Análise: procedural vs POO e código legado vs moderno",
+      "descricao": "Consolidar visão arquitetural comparando scripts procedurais, includes encadeados e abordagem POO com namespaces/Composer. Analisar trechos de código PHP legado (mysql_*, short tags, global state) versus PHP 8 moderno. Análises críticas fixam decisões de design melhor do que leitura passiva.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Documento comparando abordagem procedural vs POO no mesmo problema, com ao menos 3 problemas de código legado identificados e proposta de refatoração moderna.",
+      "competencias": ["c_poo", "c_namespaces", "c_arquivos"],
+      "tags": ["análise", "refatoração", "revisão", "arquitetura"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t21", "t19"],
+      "reviewAfterDays": 7,
+      "links": [
+        { "titulo": "PHP: The Right Way", "url": "https://phptherightway.com/", "tipo": "artigo" },
+        { "titulo": "Migrating from mysql_* — PHP.net", "url": "https://www.php.net/manual/pt_BR/function.mysql-connect.php", "tipo": "doc" },
+        { "titulo": "PHP Standards Recommendations — PHP-FIG", "url": "https://www.php-fig.org/psr/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Reescrever script procedural como classes com responsabilidade única" },
+        { "titulo": "Identificar 3 code smells em código PHP legado (exemplos online)" },
+        { "titulo": "Comparar require encadeado vs autoload PSR-4" },
+        { "titulo": "Documentar quando procedural ainda é aceitável (scripts CLI simples)" },
+        { "titulo": "Listar PSRs relevantes: PSR-4, PSR-12, PSR-7 (intro)" }
+      ]
+    },
+
+    {
+      "id": "t28",
+      "titulo": "Projeto final: mini sistema web CRUD com autenticação",
+      "descricao": "Construir do zero um mini sistema web completo — gerenciador de tarefas ou catálogo de produtos — aplicando todo o aprendizado: POO com namespaces, Composer, PDO/MySQL, CRUD, login/logout com sessões, password_hash, proteção CSRF/XSS, tratamento de erros e estrutura de pastas profissional. Projeto portfolio-ready que atesta domínio do PHP intermediário.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 8,
+      "criterioConclusao": "Sistema funcional com: login/logout, CRUD protegido por autenticação, PDO com prepared statements, token CSRF em formulários, escape XSS, tratamento de erros com log e estrutura src/public/config com Composer autoload.",
+      "competencias": ["c_poo", "c_pdo", "c_sessoes", "c_seguranca", "c_http", "c_erros", "c_namespaces"],
+      "tags": ["prática", "projeto", "portfólio", "CRUD"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t23", "t25", "t26"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "PHP: The Right Way — complete guide", "url": "https://phptherightway.com/", "tipo": "artigo" },
+        { "titulo": "OWASP PHP Security Cheat Sheet", "url": "https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Planejar entidades: User e Task/Product com relacionamento" },
+        { "titulo": "Configurar projeto com Composer, PSR-4 e estrutura src/public" },
+        { "titulo": "Implementar registro e login com password_hash" },
+        { "titulo": "Proteger rotas: redirecionar não autenticados para login" },
+        { "titulo": "Implementar CRUD completo com PDO e Repository" },
+        { "titulo": "Adicionar token CSRF em todos os formulários POST" },
+        { "titulo": "Escapar toda saída e validar todos os inputs" },
+        { "titulo": "Implementar try/catch global e log de erros" },
+        { "titulo": "Testar fluxos: registro, login, CRUD, logout e acesso negado" }
+      ]
+    },
+
+    {
+      "id": "t29",
+      "titulo": "Análise final: retrospectiva e plano de continuidade",
+      "descricao": "Consolidar todo o aprendizado com retrospectiva estruturada: avaliar competências adquiridas, identificar gaps, mapear conexões com frameworks (Laravel, Symfony, CodeIgniter) e planejar próximos passos (APIs REST, testes com PHPUnit, padrões de design). Metacognição acelera a transição do PHP intermediário para avançado.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento de retrospectiva com: avaliação de cada competência (1–5), 3 gaps identificados, comparação breve Laravel vs CodeIgniter vs Symfony e plano de estudo para os próximos 60 dias.",
+      "competencias": ["c_ambiente", "c_sintaxe", "c_controle", "c_arrays", "c_funcoes", "c_poo", "c_pdo", "c_seguranca", "c_sessoes", "c_erros"],
+      "tags": ["análise", "revisão", "retrospectiva", "consolidação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t28"],
+      "reviewAfterDays": 14,
+      "links": [
+        { "titulo": "PHP.net Manual completo (PT-BR)", "url": "https://www.php.net/manual/pt_BR/", "tipo": "doc" },
+        { "titulo": "Laravel — documentação", "url": "https://laravel.com/docs", "tipo": "doc" },
+        { "titulo": "PHPUnit — getting started", "url": "https://phpunit.de/getting-started/phpunit-10.html", "tipo": "doc" },
+        { "titulo": "PHP: The Right Way", "url": "https://phptherightway.com/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Avaliar confiança (1–5) em cada uma das 14 competências" },
+        { "titulo": "Identificar os 3 temas mais frágeis para revisar" },
+        { "titulo": "Pesquisar qual framework combina com seu perfil e objetivo" },
+        { "titulo": "Planejar revisão espaçada: tópicos para 7, 14 e 30 dias" },
+        { "titulo": "Anotar 5 recursos favoritos para consulta futura" },
+        { "titulo": "Definir próximo projeto: API REST ou app com framework" }
+      ]
+    }
+
+  ]
+}

@@ -1,0 +1,503 @@
+{
+  "nome": "Legislação Tributária Brasileira para Desenvolvedores de ERP",
+  "descricao": "Roadmap de porte médio para desenvolvedores que precisam implementar e manter módulos fiscais em ERPs: sistema tributário nacional, impostos sobre consumo vigentes, documentos fiscais eletrônicos, classificação e motor de cálculo, SPED, e a Reforma Tributária do Consumo (EC 132/2023, LC 214/2025 — IBS, CBS, IS). Progressão teoria → prática → análise, com ramificações paralelas e projeto integrador que simula operação dual (legado + reforma).",
+  "competencias": [
+    { "id": "c_sistema_tributario", "nome": "Sistema Tributário Nacional", "descricao": "Competências federativas, espécies tributárias e visão sistêmica para modelagem de ERP" },
+    { "id": "c_impostos_consumo", "nome": "Impostos sobre Consumo (Legado)", "descricao": "ICMS, ISS, IPI, PIS e COFINS — incidência, não cumulatividade e créditos" },
+    { "id": "c_documentos_fiscais", "nome": "Documentos Fiscais Eletrônicos", "descricao": "NF-e, NFC-e, CT-e, eventos, XML, assinatura e integração com SEFAZ" },
+    { "id": "c_classificacao_fiscal", "nome": "Classificação Fiscal", "descricao": "NCM, CFOP, CST/CSOSN, CEST, cClassTrib e tabelas auxiliares versionadas" },
+    { "id": "c_motor_calculo", "nome": "Motor de Cálculo Tributário", "descricao": "Regras de tributação, ST, DIFAL, retenções e apuração de débitos/créditos" },
+    { "id": "c_reforma_tributaria", "nome": "Reforma Tributária do Consumo", "descricao": "IBS, CBS, IS, transição dual, split payment, cashback e impacto em NF-e" },
+    { "id": "c_sped_obrigacoes", "nome": "SPED e Obrigações Acessórias", "descricao": "EFD ICMS/IPI, EFD-Contribuições, ECD e calendário de entregas" },
+    { "id": "c_arquitetura_fiscal", "nome": "Arquitetura Fiscal no ERP", "descricao": "Camadas de domínio fiscal, parametrização, multi-empresa e extensibilidade" },
+    { "id": "c_compliance_fiscal", "nome": "Compliance e Versionamento Fiscal", "descricao": "Auditoria, rastreabilidade, feature flags e gestão de mudanças legislativas" }
+  ],
+  "tarefas": [
+    {
+      "id": "t1",
+      "titulo": "Sistema tributário brasileiro: visão para desenvolvedores de ERP",
+      "descricao": "Compreender a estrutura federativa de tributação no Brasil — União, estados, DF e municípios —, as espécies tributárias (impostos, taxas, contribuições) e por que ERPs precisam de camadas fiscais parametrizáveis e versionadas. Sem esse mapa mental, cada regra parece um patch isolado e a dívida técnica explode a cada mudança legal.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Diagrama escrito explicando competências tributárias, principais tributos sobre consumo e onde cada um impacta um ERP (cadastro, movimento, documento, apuração).",
+      "competencias": ["c_sistema_tributario", "c_arquitetura_fiscal"],
+      "tags": ["fundamentos", "sistema-tributario", "erp"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": [],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Código Tributário Nacional — Planalto", "url": "https://www.planalto.gov.br/ccivil_03/leis/l5172.htm", "tipo": "doc" },
+        { "titulo": "Receita Federal — Portal do Contribuinte", "url": "https://www.gov.br/receitafederal/pt-br", "tipo": "doc" },
+        { "titulo": "Sistema Tributário Nacional — IBGE Educa", "url": "https://educa.ibge.gov.br/jovens/conheca-o-brasil/populacao/18317-sistema-tributario-nacional.html", "tipo": "artigo" },
+        { "titulo": "Emenda Constitucional nº 132/2023 — Planalto", "url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler a estrutura básica do CTN (fato gerador, base, alíquota, sujeito passivo)" },
+        { "titulo": "Mapear competências: federal, estadual/DF e municipal" },
+        { "titulo": "Listar tributos sobre consumo vigentes e futuros (pós-reforma)" },
+        { "titulo": "Desenhar módulos ERP afetados: cadastro, operação, documento, apuração, SPED" },
+        { "titulo": "Anotar por que parametrização e versionamento são críticos" }
+      ]
+    },
+    {
+      "id": "t2",
+      "titulo": "Impostos sobre consumo vigentes: ICMS, ISS, IPI, PIS e COFINS",
+      "descricao": "Estudar incidência, base de cálculo, não cumulatividade e créditos dos principais tributos que um ERP precisa calcular hoje. Entender diferenças entre mercadorias (ICMS/IPI) e serviços (ISS), e entre regimes cumulativo e não cumulativo de PIS/COFINS evita erros estruturais no motor fiscal.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Tabela comparativa com: tributo, ente federativo, fato gerador típico, base, crédito permitido e documento fiscal associado — cobrindo os cinco tributos.",
+      "competencias": ["c_impostos_consumo"],
+      "tags": ["fundamentos", "icms", "pis-cofins", "consumo"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t1"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "CONFAZ — Portal ICMS", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms", "tipo": "doc" },
+        { "titulo": "Receita Federal — PIS/PASEP e COFINS", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/tributos/pis-pasep-e-cofins", "tipo": "doc" },
+        { "titulo": "IPI — Receita Federal", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/tributos/ipi", "tipo": "doc" },
+        { "titulo": "ISS — LC 116/2003 — Planalto", "url": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar ICMS: operações interestaduais, alíquotas internas/interestaduais e crédito" },
+        { "titulo": "Estudar ISS: local da prestação, lista LC 116 e retenção na fonte" },
+        { "titulo": "Estudar IPI: incidência industrial e integração com NF-e" },
+        { "titulo": "Comparar PIS/COFINS cumulativo vs. não cumulativo" },
+        { "titulo": "Identificar pontos de parametrização obrigatória no ERP para cada tributo" }
+      ]
+    },
+    {
+      "id": "t3",
+      "titulo": "Praticar: modelar entidades tributárias básicas no ERP",
+      "descricao": "Traduzir o conhecimento teórico em um modelo de dados mínimo para ERP: empresa, filial, regime tributário, produto/serviço, operação fiscal e item de imposto. A modelagem correta desde o início permite evoluir para reforma tributária sem reescrever o núcleo fiscal.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Diagrama ER ou DDL com entidades fiscais básicas, relacionamentos e campos essenciais para suportar ICMS, PIS/COFINS e ISS em operações de venda.",
+      "competencias": ["c_arquitetura_fiscal", "c_impostos_consumo"],
+      "tags": ["prática", "modelagem", "erp"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t2"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Domain-Driven Design — referência conceitual (EN)", "url": "https://martinfowler.com/bliki/DomainDrivenDesign.html", "tipo": "artigo" },
+        { "titulo": "Receita Federal — Cadastro de contribuintes", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/cnpj", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Definir entidades: Empresa, Filial, RegimeTributario, Produto, OperacaoFiscal" },
+        { "titulo": "Modelar ItemImposto com tipo, base, alíquota, valor e indicador de crédito" },
+        { "titulo": "Incluir campos de UF, município e CNAE para regras locais" },
+        { "titulo": "Documentar cardinalidades e exemplos de INSERT para venda interestadual" },
+        { "titulo": "Validar modelo com ao menos 2 cenários: venda interna e prestação de serviço" }
+      ]
+    },
+    {
+      "id": "t4",
+      "titulo": "Documentos fiscais eletrônicos: NF-e, NFC-e, CT-e e eventos",
+      "descricao": "Entender o ecossistema de documentos fiscais eletrônicos que o ERP emite ou recebe: layout XML, assinatura digital, autorização SEFAZ, contingência e eventos (cancelamento, carta de correção). Desenvolvedores fiscais passam mais tempo integrando documentos do que calculando alíquotas — dominar esse fluxo é essencial.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Fluxograma do ciclo de vida de uma NF-e (geração → assinatura → transmissão → autorização → armazenamento) com estados e responsabilidades de cada camada do ERP.",
+      "competencias": ["c_documentos_fiscais"],
+      "tags": ["nfe", "documentos-fiscais", "sefaz"],
+      "atributos": ["Back-end", "Integração"],
+      "dependsOn": ["t3"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Portal Nacional da NF-e", "url": "https://www.nfe.fazenda.gov.br/portal/", "tipo": "doc" },
+        { "titulo": "Manual de Orientação do Contribuinte — NF-e", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=tW+YMyk/50s=", "tipo": "doc" },
+        { "titulo": "Portal CT-e — SVRS", "url": "https://dfe-portal.svrs.rs.gov.br/Cte", "tipo": "doc" },
+        { "titulo": "Receita Federal — Certificado Digital", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/senhas-e-procuracoes/servicos/certificados-digitais", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Diferenciar NF-e, NFC-e e CT-e (escopo e obrigatoriedade)" },
+        { "titulo": "Estudar estrutura XML: ide, emit, dest, det/imposto, total" },
+        { "titulo": "Mapear status: em digitação, transmitida, autorizada, cancelada, denegada" },
+        { "titulo": "Listar eventos principais: cancelamento, CC-e, manifestação do destinatário" },
+        { "titulo": "Anotar requisitos de armazenamento e auditoria do XML por 5 anos" }
+      ]
+    },
+    {
+      "id": "t5",
+      "titulo": "Praticar: pipeline de emissão fiscal simulada (sem SEFAZ real)",
+      "descricao": "Implementar um fluxo simplificado de emissão fiscal no ERP: montar payload/XML a partir da operação, calcular totais de impostos, simular autorização e persistir documento com hash e status. Consolidar cadastro + cálculo + documento forma a base sobre a qual as trilhas especializadas se ramificam.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 4,
+      "criterioConclusao": "Serviço ou script que recebe operação de venda, gera estrutura de documento fiscal (JSON ou XML simplificado), persiste com status e permite consulta posterior.",
+      "competencias": ["c_documentos_fiscais", "c_arquitetura_fiscal", "c_impostos_consumo"],
+      "tags": ["prática", "nfe", "pipeline", "consolidação"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t4"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Schemas XSD NF-e 4.00", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=BMPFMBoln3w=", "tipo": "doc" },
+        { "titulo": "Portal Nacional da NF-e — Downloads", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9cyb0=", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar serviço DocumentoFiscalService com método emitir(operacao)" },
+        { "titulo": "Montar cabeçalho (emitente, destinatário, natureza da operação)" },
+        { "titulo": "Popular itens com impostos calculados da operação" },
+        { "titulo": "Simular retorno de autorização com chave de acesso fictícia" },
+        { "titulo": "Persistir documento e expor endpoint ou CLI de consulta" }
+      ]
+    },
+    {
+      "id": "t6",
+      "titulo": "Reforma Tributária: EC 132/2023 e o novo arcabouço constitucional",
+      "descricao": "Estudar a Emenda Constitucional nº 132/2023 que reformula tributos sobre consumo, cria IBS, CBS e Imposto Seletivo, e estabelece cronograma de transição. Desenvolvedores de ERP precisam entender o marco constitucional para planejar convivência de sistemas legado e novo por uma década.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Linha do tempo da transição (2026–2033) com marcos principais e lista de tributos que serão extintos vs. criados, explicada em linguagem de impacto em software.",
+      "competencias": ["c_reforma_tributaria", "c_sistema_tributario"],
+      "tags": ["reforma-tributaria", "ec-132", "ibs", "cbs"],
+      "atributos": ["Fundamentos", "Back-end"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "EC nº 132/2023 — texto integral (Planalto)", "url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm", "tipo": "doc" },
+        { "titulo": "Câmara dos Deputados — Reforma Tributária", "url": "https://www.camara.leg.br/tema/reforma-tributaria", "tipo": "doc" },
+        { "titulo": "Senado Federal — Acompanhamento da Reforma", "url": "https://www12.senado.leg.br/noticias/temas/reforma-tributaria", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler dispositivos que criam IBS (art. 156-A) e CBS (art. 195, §17)" },
+        { "titulo": "Identificar Imposto Seletivo e sua função extrafiscal" },
+        { "titulo": "Mapear ADCT — cronograma de transição e alíquotas-teste" },
+        { "titulo": "Listar tributos extintos: ICMS, ISS, PIS, COFINS, IPI (prazos)" },
+        { "titulo": "Traduzir marcos legais em milestones de desenvolvimento ERP" }
+      ]
+    },
+    {
+      "id": "t7",
+      "titulo": "LC 214/2025: IBS, CBS, IS — regras operacionais e IVA dual",
+      "descricao": "Aprofundar a Lei Complementar nº 214/2025 que regulamenta IBS, CBS e IS: fato gerador, base de cálculo, alíquotas de referência, não cumulatividade, Comitê Gestor do IBS e regimes diferenciados. É a lei que define como o motor fiscal do futuro deve se comportar — leitura obrigatória para quem projeta arquitetura hoje.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Documento técnico comparando IBS vs. CBS vs. IS: competência, administração, base, crédito, responsável pelo recolhimento e campos necessários no ERP.",
+      "competencias": ["c_reforma_tributaria"],
+      "tags": ["reforma-tributaria", "lc-214", "iva-dual"],
+      "atributos": ["Fundamentos", "Back-end"],
+      "dependsOn": ["t6"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "LC nº 214/2025 — Planalto", "url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/lcp/lcp214.htm", "tipo": "doc" },
+        { "titulo": "Receita Federal — Reforma Tributária do Consumo", "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/reforma-tributaria-do-consumo", "tipo": "doc" },
+        { "titulo": "CONFAZ — Reforma Tributária", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms/reforma-tributaria", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar definição de operação tributável e base de cálculo (arts. 12–14)" },
+        { "titulo": "Compreender split de IBS (estadual/municipal) e CBS (federal)" },
+        { "titulo": "Mapear créditos, ajustes e devoluções (cashback)" },
+        { "titulo": "Identificar regimes específicos (saúde, educação, combustíveis etc.)" },
+        { "titulo": "Anotar impacto em cadastro de produto, operação e apuração" }
+      ]
+    },
+    {
+      "id": "t8",
+      "titulo": "Praticar: modelar período dual e novos tributos (IBS/CBS/IS) no ERP",
+      "descricao": "Estender o modelo de dados para suportar convivência legado + reforma: flags de período, tabelas de alíquota IBS/CBS, créditos unificados e campos de Imposto Seletivo. A transição dual exige que o ERP calcule tributos antigos e novos simultaneamente durante anos — arquitetura mal planejada gera caos na apuração.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 4,
+      "criterioConclusao": "Extensão do modelo com entidades AliquotaIbsCbs, PeriodoTransicao, CreditoUnificado e exemplo de operação calculando ICMS + IBS/CBS proporcional conforme regra de transição simulada.",
+      "competencias": ["c_reforma_tributaria", "c_arquitetura_fiscal", "c_motor_calculo"],
+      "tags": ["prática", "reforma-tributaria", "modelagem"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t7"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "LC 214/2025 — Disposições transitórias", "url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/lcp/lcp214.htm", "tipo": "doc" },
+        { "titulo": "Receita Federal — CBS (orientações)", "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/reforma-tributaria-do-consumo", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar tabela PeriodoTransicao com percentuais legado/novo por ano" },
+        { "titulo": "Modelar AliquotaIbsCbs com competência (UF, município, federal)" },
+        { "titulo": "Estender ItemImposto para tipos IBS, CBS e IS" },
+        { "titulo": "Implementar cálculo dual simplificado para 2029 (50% teste)" },
+        { "titulo": "Documentar estratégia de feature flag reforma_tributaria_ativa" }
+      ]
+    },
+    {
+      "id": "t9",
+      "titulo": "Split payment, cashback e cClassTrib na NF-e pós-reforma",
+      "descricao": "Estudar mecanismos novos introduzidos pela reforma que alteram fluxo financeiro e layout fiscal: retenção na liquidação (split payment), devolução parcial ao consumidor (cashback) e classificação tributária unificada (cClassTrib) que substituirá combinações CST/CFOP em muitos cenários. São pontos onde ERP, financeiro e fiscal se cruzam intensamente.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Especificação de requisitos de software descrevendo integração split payment com módulo financeiro e campos cClassTrib necessários no item da NF-e.",
+      "competencias": ["c_reforma_tributaria", "c_documentos_fiscais", "c_classificacao_fiscal"],
+      "tags": ["reforma-tributaria", "split-payment", "cclasstrib"],
+      "atributos": ["Back-end", "Integração"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Portal NF-e — Notas técnicas", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9cyb0=", "tipo": "doc" },
+        { "titulo": "LC 214/2025 — Split payment e cashback", "url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/lcp/lcp214.htm", "tipo": "doc" },
+        { "titulo": "CONFAZ — cClassTrib (acompanhamento)", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms/reforma-tributaria", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Entender split payment: retenção automática na liquidação" },
+        { "titulo": "Mapear fluxo cashback para famílias de baixa renda" },
+        { "titulo": "Estudar cClassTrib e relação com NCM/serviço" },
+        { "titulo": "Identificar eventos NF-e previstos para IBS/CBS" },
+        { "titulo": "Listar adaptações necessárias no módulo financeiro/contas a pagar" }
+      ]
+    },
+    {
+      "id": "t10",
+      "titulo": "Análise: impacto da Reforma Tributária no ERP — gap analysis",
+      "descricao": "Consolidar o aprendizado da trilha de reforma comparando o ERP atual (simulado) com requisitos da LC 214/2025 e notas técnicas NF-e. Produzir um gap analysis priorizado ajuda equipes a estimar esforço real de migração e evitar surpresas próximo aos marcos de transição.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Documento de gap analysis com pelo menos 10 itens classificados (cadastro, cálculo, documento, financeiro, SPED), prioridade (P1–P3) e estimativa de esforço.",
+      "competencias": ["c_reforma_tributaria", "c_compliance_fiscal", "c_arquitetura_fiscal"],
+      "tags": ["análise", "reforma-tributaria", "gap-analysis"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t9"],
+      "reviewAfterDays": 7,
+      "links": [
+        { "titulo": "EC 132/2023 — ADCT transição", "url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm", "tipo": "doc" },
+        { "titulo": "Receita Federal — Reforma Tributária", "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/reforma-tributaria-do-consumo", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Revisar modelo dual implementado vs. requisitos LC 214" },
+        { "titulo": "Listar gaps em cadastro (cClassTrib, regimes especiais)" },
+        { "titulo": "Listar gaps em documento fiscal (campos IBS/CBS/IS)" },
+        { "titulo": "Listar gaps em financeiro (split payment, cashback)" },
+        { "titulo": "Priorizar itens P1 para 2026–2027 e estimar sprints" }
+      ]
+    },
+    {
+      "id": "t11",
+      "titulo": "Classificação fiscal: NCM, CFOP, CST/CSOSN, CEST e tabelas auxiliares",
+      "descricao": "Dominar as tabelas de classificação que determinam como cada operação será tributada: NCM para mercadorias, CFOP para natureza da operação, CST/CSOSN para ICMS e PIS/COFINS, CEST para ST. ERPs dependem de importadores de tabela versionados — entender cada código evita cálculos errados silenciosos.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Guia de referência explicando quando usar cada código, com 5 exemplos reais de combinações NCM+CFOP+CST e impacto no cálculo.",
+      "competencias": ["c_classificacao_fiscal"],
+      "tags": ["ncm", "cfop", "cst", "classificação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tabela NCM — Receita Federal", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/aduana-e-comercio-exterior/classificacao-fiscal-de-mercadorias/ncm", "tipo": "doc" },
+        { "titulo": "CONFAZ — Tabela CFOP", "url": "https://www.confaz.fazenda.gov.br/legislacao/ajustes/2011/ajustes_07_11", "tipo": "doc" },
+        { "titulo": "Portal NF-e — Tabelas de domínio", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9cyb0=", "tipo": "doc" },
+        { "titulo": "CEST — CONFAZ", "url": "https://www.confaz.fazenda.gov.br/legislacao/cest", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar estrutura NCM (8 dígitos) e exceções TIPI" },
+        { "titulo": "Mapear CFOPs de entrada vs. saída e intra vs. interestadual" },
+        { "titulo": "Diferenciar CST ICMS, CSOSN Simples e CST PIS/COFINS" },
+        { "titulo": "Entender CEST e relação com substituição tributária" },
+        { "titulo": "Propor estratégia de importação/versionamento de tabelas no ERP" }
+      ]
+    },
+    {
+      "id": "t12",
+      "titulo": "Praticar: motor de cálculo tributário para ICMS, PIS e COFINS",
+      "descricao": "Implementar um motor de cálculo parametrizável que, dado produto, operação e UF, retorna bases, alíquotas e valores de ICMS, PIS e COFINS. Separar regras de cálculo da persistência permite testar cenários fiscalmente críticos e prepara extensão para IBS/CBS.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 5,
+      "criterioConclusao": "Motor de cálculo com testes automatizados cobrindo: venda interna, interestadual, isento, substituto e Simples Nacional — todos passando.",
+      "competencias": ["c_motor_calculo", "c_classificacao_fiscal", "c_impostos_consumo"],
+      "tags": ["prática", "motor-calculo", "icms"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t11"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "CONFAZ — Convênios ICMS", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms", "tipo": "doc" },
+        { "titulo": "Receita Federal — PIS/COFINS não cumulativo", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/tributos/pis-pasep-e-cofins", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Definir interface CalculadoraImposto com método calcular(contexto)" },
+        { "titulo": "Implementar cálculo ICMS: base, alíquota, redução e crédito" },
+        { "titulo": "Implementar PIS/COFINS cumulativo e não cumulativo" },
+        { "titulo": "Criar tabela de regras parametrizável por UF e NCM" },
+        { "titulo": "Escrever testes unitários para 5 cenários distintos" }
+      ]
+    },
+    {
+      "id": "t13",
+      "titulo": "Substituição tributária, DIFAL, retenções e regimes especiais",
+      "descricao": "Aprofundar regras que mais geram chamados de suporte fiscal em ERPs: ICMS-ST com MVA, DIFAL em operações interestaduais para consumidor final, retenções de ISS/INSS/IRRF e regimes especiais (Simples, monofásico, ZFM). Dominar essas exceções separa um motor fiscal confiável de um protótipo frágil.",
+      "tipo": "pesquisa",
+      "dificuldade": "dificil",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Matriz de decisão: dado cenário (UF origem/destino, perfil destinatário, produto ST), qual regra aplicar — com referência legal.",
+      "competencias": ["c_motor_calculo", "c_impostos_consumo"],
+      "tags": ["st", "difal", "retenções", "regimes"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t12"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "CONFAZ — Substituição Tributária", "url": "https://www.confaz.fazenda.gov.br/legislacao/substituicao-tributaria", "tipo": "doc" },
+        { "titulo": "EC 87/2015 — DIFAL (Planalto)", "url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc087.htm", "tipo": "doc" },
+        { "titulo": "Simples Nacional — Portal do Empreendedor", "url": "https://www8.receita.fazenda.gov.br/simplesnacional/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Estudar ICMS-ST: MVA ajustada, pauta e responsabilidade" },
+        { "titulo": "Compreender DIFAL e FCP em B2C interestadual" },
+        { "titulo": "Mapear retenções na fonte (ISS, IRRF, CSLL, PIS/COFINS)" },
+        { "titulo": "Estudar monofásico de combustíveis e bebidas" },
+        { "titulo": "Documentar impacto de cada regra no motor de cálculo" }
+      ]
+    },
+    {
+      "id": "t14",
+      "titulo": "Análise: auditoria de cálculos fiscais e casos de borda",
+      "descricao": "Executar auditoria sistemática do motor de cálculo contra casos reais e planilhas de referência. Identificar divergências, classificar por gravidade e propor correções. Essa prática espelha rotinas de QA fiscal que empresas de ERP executam antes de cada release legislativo.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Relatório de auditoria com pelo menos 8 cenários testados, divergências documentadas e plano de correção para bugs encontrados.",
+      "competencias": ["c_motor_calculo", "c_compliance_fiscal"],
+      "tags": ["análise", "auditoria", "qa-fiscal"],
+      "atributos": ["Back-end", "Qualidade"],
+      "dependsOn": ["t13"],
+      "reviewAfterDays": 7,
+      "links": [
+        { "titulo": "CONFAZ — Perguntas frequentes ICMS", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms", "tipo": "doc" },
+        { "titulo": "Receita Federal — Soluções de Consulta", "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/legislacao/documentos-e-orientacao/consultas-solucoes", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Montar planilha ou dataset com 8+ cenários reais" },
+        { "titulo": "Executar motor e comparar resultados centavo a centavo" },
+        { "titulo": "Classificar divergências: regra ausente, parametrização, arredondamento" },
+        { "titulo": "Priorizar correções por impacto financeiro e frequência" },
+        { "titulo": "Propor testes de regressão para evitar reincidência" }
+      ]
+    },
+    {
+      "id": "t15",
+      "titulo": "SPED e obrigações acessórias: EFD, EFD-Contribuições e ECD",
+      "descricao": "Estudar o Sistema Público de Escrituração Digital e as principais obrigações que ERPs alimentam: EFD ICMS/IPI (SPED Fiscal), EFD-Contribuições (PIS/COFINS) e ECD (contábil). Entender blocos, registros e calendário de entrega é tão importante quanto calcular impostos — multas por arquivo inválido são frequentes.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Mapa dos blocos principais de EFD ICMS/IPI e EFD-Contribuições, indicando origem dos dados no ERP e periodicidade de entrega.",
+      "competencias": ["c_sped_obrigacoes"],
+      "tags": ["sped", "efd", "obrigações-acessórias"],
+      "atributos": ["Back-end", "Integração"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "SPED — Receita Federal", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped", "tipo": "doc" },
+        { "titulo": "EFD ICMS/IPI — Guia Prático", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped/sped-fiscal", "tipo": "doc" },
+        { "titulo": "EFD-Contribuições — Guia Prático", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped/sped-contribuicoes", "tipo": "doc" },
+        { "titulo": "ECD — Escrituração Contábil Digital", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped/ecd", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Diferenciar SPED Fiscal, Contribuições, ECD e ECF" },
+        { "titulo": "Estudar blocos C (documentos) e E (apuração ICMS) do EFD" },
+        { "titulo": "Mapear blocos M (apuração) da EFD-Contribuições" },
+        { "titulo": "Consultar calendário de entrega por regime e porte" },
+        { "titulo": "Anotar validações PVA e erros comuns de integração ERP" }
+      ]
+    },
+    {
+      "id": "t16",
+      "titulo": "Praticar: gerar arquivo SPED simplificado a partir do ERP",
+      "descricao": "Implementar exportador que lê documentos fiscais e apurações do ERP simulado e gera arquivo texto no layout EFD ICMS/IPI (blocos 0, C e E simplificados). Praticar geração SPED conecta módulo fiscal ao cumprimento legal e expõe lacunas de rastreabilidade nos dados.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "media",
+      "horasEstimadas": 4,
+      "criterioConclusao": "Arquivo .txt gerado com registros 0000, 0150, C100, C170 e E110 coerentes com operações do ERP simulado, passando validação estrutural básica.",
+      "competencias": ["c_sped_obrigacoes", "c_arquitetura_fiscal"],
+      "tags": ["prática", "sped", "exportação"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t15"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "EFD ICMS/IPI — Layout e guia (Receita Federal)", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped/sped-fiscal", "tipo": "doc" },
+        { "titulo": "Programa Validador e Assinador — SPED", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped/sped-fiscal/programa-validador-e-assinador", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Implementar SpedFiscalExporter com bloco 0 (abertura)" },
+        { "titulo": "Gerar registros C100/C170 a partir de NF-e simuladas" },
+        { "titulo": "Calcular e exportar E110 (apuração ICMS)" },
+        { "titulo": "Formatar pipe-delimited conforme layout oficial" },
+        { "titulo": "Validar estrutura com PVA ou checker manual de registros" }
+      ]
+    },
+    {
+      "id": "t17",
+      "titulo": "Projeto final: módulo fiscal ERP com legado, reforma e SPED",
+      "descricao": "Integrar todas as trilhas em um módulo fiscal coeso: cadastro parametrizado, motor de cálculo legado + dual IBS/CBS, emissão simulada de documento, exportação SPED e logs de auditoria. Simula o que equipes reais entregam antes de ir para homologação SEFAZ — consolida arquitetura, cálculo, reforma e compliance.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 8,
+      "criterioConclusao": "Módulo funcional processando venda completa (cadastro → cálculo legado+dual → documento → SPED) com log de auditoria, feature flags de reforma e README de arquitetura.",
+      "competencias": ["c_arquitetura_fiscal", "c_motor_calculo", "c_reforma_tributaria", "c_documentos_fiscais", "c_sped_obrigacoes", "c_compliance_fiscal"],
+      "tags": ["projeto", "prática", "integração", "erp"],
+      "atributos": ["Back-end", "Banco de Dados", "Integração"],
+      "dependsOn": ["t10", "t14", "t16"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Portal NF-e — Homologação", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9cyb0=", "tipo": "doc" },
+        { "titulo": "Receita Federal — SPED", "url": "https://www.gov.br/receitafederal/pt-br/assuntos/sped", "tipo": "doc" },
+        { "titulo": "LC 214/2025 — referência integrada", "url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/lcp/lcp214.htm", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Integrar cadastro, motor legado e motor dual em fluxo único" },
+        { "titulo": "Emitir documento fiscal simulado com impostos legado + IBS/CBS" },
+        { "titulo": "Exportar SPED do período com documentos gerados" },
+        { "titulo": "Implementar log de auditoria (quem, quando, regra aplicada)" },
+        { "titulo": "Configurar feature flags: reforma_ativa, periodo_transicao" },
+        { "titulo": "Escrever README com diagrama de módulos e pontos de extensão" },
+        { "titulo": "Demonstrar cenário completo via CLI, API ou teste e2e" }
+      ]
+    },
+    {
+      "id": "t18",
+      "titulo": "Análise final: retrospectiva e plano de evolução fiscal",
+      "descricao": "Fechar o roadmap avaliando competências adquiridas, gaps remanescentes e próximos passos — especialmente acompanhamento legislativo da reforma, homologação SEFAZ real e obrigações estaduais específicas. Metacognição fiscal evita que o conhecimento expire silenciosamente a cada Nota Técnica publicada.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento de retrospectiva com avaliação 1–5 de cada competência, 3 gaps prioritários, fontes de monitoramento legislativo e plano de revisão para 30 dias.",
+      "competencias": ["c_sistema_tributario", "c_impostos_consumo", "c_reforma_tributaria", "c_motor_calculo", "c_sped_obrigacoes", "c_compliance_fiscal"],
+      "tags": ["análise", "retrospectiva", "revisão"],
+      "atributos": ["Fundamentos", "Back-end"],
+      "dependsOn": ["t17"],
+      "reviewAfterDays": 14,
+      "links": [
+        { "titulo": "CONFAZ — Legislação atualizada", "url": "https://www.confaz.fazenda.gov.br/legislacao/portal-icms", "tipo": "doc" },
+        { "titulo": "Receita Federal — Reforma Tributária do Consumo", "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/reforma-tributaria-do-consumo", "tipo": "doc" },
+        { "titulo": "Portal NF-e — Notas técnicas", "url": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=/NJarYc9cyb0=", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Avaliar confiança (1–5) nas 9 competências do roadmap" },
+        { "titulo": "Identificar 3 gaps mais críticos para produção real" },
+        { "titulo": "Listar fontes de monitoramento: CONFAZ, RF, NF-e, CGIBS" },
+        { "titulo": "Planejar revisão em 7, 14 e 30 dias (especialmente reforma)" },
+        { "titulo": "Definir próximo marco: homologação SEFAZ ou LC complementar" }
+      ]
+    }
+  ]
+}

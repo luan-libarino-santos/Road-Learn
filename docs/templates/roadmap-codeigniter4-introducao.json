@@ -1,0 +1,684 @@
+{
+  "nome": "CodeIgniter 4 — Introdução ao Desenvolvimento",
+  "descricao": "Roadmap prático de introdução ao desenvolvimento web com CodeIgniter 4 e MySQL: instalação, MVC, rotas, controllers, views, models, migrations, validação, autenticação, filtros, segurança e API REST básica. Conduz a um aprendizado progressivo com teoria, prática e revisão espaçada — culminando em um sistema CRUD completo com login.",
+  "competencias": [
+    { "id": "c_ambiente",       "nome": "Ambiente e Instalação",        "descricao": "Composer, Spark CLI, .env e configuração local" },
+    { "id": "c_mvc",            "nome": "Arquitetura MVC",              "descricao": "Fluxo request/response, separação de responsabilidades no CI4" },
+    { "id": "c_routing",        "nome": "Rotas e URLs",                 "descricao": "Routes.php, grupos, placeholders, rotas nomeadas e RESTful" },
+    { "id": "c_controllers",    "nome": "Controllers",                  "descricao": "Controllers, métodos, responses, redirect e flash data" },
+    { "id": "c_views",          "nome": "Views e Templates",            "descricao": "Views, layouts, sections, escapamento e helpers de view" },
+    { "id": "c_models",         "nome": "Models e Query Builder",       "descricao": "Model class, find/insert/update/delete, Query Builder" },
+    { "id": "c_mysql",          "nome": "MySQL, Migrations e Seeds",    "descricao": "Conexão MySQL, migrations, seeders e versionamento de schema" },
+    { "id": "c_validacao",      "nome": "Validação de Formulários",     "descricao": "Validation library, rules, mensagens customizadas e old input" },
+    { "id": "c_autenticacao",   "nome": "Autenticação e Sessões",       "descricao": "Session service, login/logout, proteção de rotas" },
+    { "id": "c_filtros",        "nome": "Filters (Middleware)",         "descricao": "Before/after filters, auth filter, CSRF filter" },
+    { "id": "c_seguranca",      "nome": "Segurança Web",                "descricao": "CSRF, XSS, SQL injection, escapamento e boas práticas" },
+    { "id": "c_api",            "nome": "API REST Básica",              "descricao": "Resource routes, JSON responses, status codes e CORS intro" }
+  ],
+  "tarefas": [
+
+    {
+      "id": "t1",
+      "titulo": "PHP moderno, MVC e o papel do CodeIgniter 4",
+      "descricao": "Compreender o que é um framework PHP, por que o CodeIgniter 4 existe e como a arquitetura MVC organiza rotas, controllers, models e views. Entender os requisitos de PHP 8.1+, Composer e o ciclo HTTP request/response evita confusões fundamentais durante todo o aprendizado — e saber quando CI4 é a escolha certa versus outros frameworks acelera decisões de projeto.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Conseguir explicar o fluxo MVC no CI4, os requisitos mínimos (PHP, Composer, extensões) e a diferença entre framework e PHP puro, sem consultar material.",
+      "competencias": ["c_mvc", "c_ambiente"],
+      "tags": ["fundamentos", "teoria", "mvc"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": [],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "CodeIgniter 4 — User Guide (oficial)", "url": "https://codeigniter.com/user_guide/index.html", "tipo": "doc" },
+        { "titulo": "Introdução ao MVC — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/concepts/mvc.html", "tipo": "doc" },
+        { "titulo": "Requisitos de servidor — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/intro/requirements.html", "tipo": "doc" },
+        { "titulo": "O que é um framework PHP — Alura (PT-BR)", "url": "https://www.alura.com.br/artigos/php-frameworks", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler a introdução oficial do CodeIgniter 4" },
+        { "titulo": "Anotar requisitos: versão PHP, extensões e Composer" },
+        { "titulo": "Desenhar o fluxo: URL → Router → Controller → Model → View → Response" },
+        { "titulo": "Comparar brevemente CI4 com Laravel/Symfony (quando usar cada um)" }
+      ]
+    },
+
+    {
+      "id": "t2",
+      "titulo": "Instalação: Composer, Spark CLI e estrutura inicial",
+      "descricao": "Aprender a instalar o CodeIgniter 4 via Composer, conhecer o Spark CLI (serve, migrate, make:*), entender a estrutura de pastas (app, public, writable, tests) e por que o document root deve apontar para public/. Dominar a instalação é pré-requisito para qualquer exercício prático no framework.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Projeto CI4 instalado localmente, servidor rodando com php spark serve e lista de comandos Spark explorada com sucesso.",
+      "competencias": ["c_ambiente"],
+      "tags": ["fundamentos", "instalação", "spark"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t1"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Instalação — CodeIgniter 4 User Guide", "url": "https://codeigniter.com/user_guide/installation/index.html", "tipo": "doc" },
+        { "titulo": "Spark CLI — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/cli/spark_commands.html", "tipo": "doc" },
+        { "titulo": "Estrutura de diretórios — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/concepts/autoloader.html", "tipo": "doc" },
+        { "titulo": "Composer — documentação oficial", "url": "https://getcomposer.org/doc/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Instalar Composer (se ainda não tiver)" },
+        { "titulo": "Criar projeto: composer create-project codeigniter4/appstarter meu-ci4" },
+        { "titulo": "Subir o servidor com php spark serve e acessar a welcome page" },
+        { "titulo": "Explorar php spark list e anotar 5 comandos úteis" },
+        { "titulo": "Mapear pastas app/, public/, writable/ e seu propósito" }
+      ]
+    },
+
+    {
+      "id": "t3",
+      "titulo": "Praticar: configurar .env e conectar ao MySQL",
+      "descricao": "Configurar o arquivo .env para ambiente de desenvolvimento: baseURL, CI_ENVIRONMENT, credenciais do MySQL e timezone. Testar a conexão com o banco usando o Database Config e o Spark. Ter MySQL funcionando desde cedo evita retrabalho quando migrations e models entrarem em cena.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Arquivo .env configurado, banco MySQL criado, conexão testada sem erro (via spark db:table ou script simples de teste).",
+      "competencias": ["c_ambiente", "c_mysql"],
+      "tags": ["prática", "mysql", "configuração"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t2"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Configuração — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/general/configuration.html", "tipo": "doc" },
+        { "titulo": "Conectando ao banco — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/database/connecting.html", "tipo": "doc" },
+        { "titulo": "MySQL 8 — Documentação oficial", "url": "https://dev.mysql.com/doc/refman/8.0/en/", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Copiar env para .env e definir CI_ENVIRONMENT = development" },
+        { "titulo": "Configurar database.default.* com host, database, username e password" },
+        { "titulo": "Criar banco MySQL dedicado ao projeto (ex.: ci4_estudo)" },
+        { "titulo": "Testar conexão com php spark db:table ou tinker equivalente" },
+        { "titulo": "Definir app.baseURL e timezone corretos no .env" }
+      ]
+    },
+
+    {
+      "id": "t4",
+      "titulo": "Fluxo MVC: Controllers, Views e primeira requisição",
+      "descricao": "Estudar como o CodeIgniter 4 recebe uma requisição HTTP, resolve a rota, instancia o controller e retorna uma view ou response. Entender namespaces PSR-4, autoload e a convenção de nomes (Controllers em app/Controllers, Views em app/Views). Sem dominar esse fluxo, rotas e models parecem magia.",
+      "tipo": "pesquisa",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Explicar o caminho completo de uma requisição GET até a renderização de uma view e criar mentalmente (ou no papel) o diagrama Controller → View com dados passados.",
+      "competencias": ["c_mvc", "c_controllers", "c_views"],
+      "tags": ["fundamentos", "mvc", "controllers"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t3"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Controllers — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/controllers.html", "tipo": "doc" },
+        { "titulo": "Views — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/outgoing/views.html", "tipo": "doc" },
+        { "titulo": "URI Routing — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/routing.html", "tipo": "doc" },
+        { "titulo": "Request Lifecycle — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/concepts/factories.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Ler sobre Controllers: extends BaseController, métodos públicos" },
+        { "titulo": "Entender return view('nome', $data) e escapamento automático" },
+        { "titulo": "Inspecionar app/Config/Routes.php e a rota default" },
+        { "titulo": "Estudar como passar dados do controller para a view via array" },
+        { "titulo": "Verificar index.php em public/ como front controller" }
+      ]
+    },
+
+    {
+      "id": "t5",
+      "titulo": "Praticar: primeira página completa (rota + controller + view)",
+      "descricao": "Consolidar a base MVC criando uma página funcional do zero: rota customizada, controller com método index e view que exibe dados dinâmicos. Este exercício transforma a teoria do fluxo request/response em vivência prática e serve como gancho para as trilhas paralelas de rotas, views e banco de dados.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Rota /sobre acessível no navegador, renderizando view com título e lista de itens passados pelo controller, sem erros no log em writable/logs/.",
+      "competencias": ["c_mvc", "c_routing", "c_controllers", "c_views"],
+      "tags": ["prática", "fundamentos", "mvc"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t4"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tutorial oficial — CodeIgniter 4 News", "url": "https://codeigniter.com/user_guide/tutorial/index.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar controller Sobre com método index()" },
+        { "titulo": "Registrar rota GET sobre no Routes.php" },
+        { "titulo": "Criar view sobre.php com dados dinâmicos (título + array)" },
+        { "titulo": "Acessar http://localhost:8080/sobre e verificar renderização" },
+        { "titulo": "Consultar writable/logs/ se algo falhar e corrigir" }
+      ]
+    },
+
+    {
+      "id": "t6",
+      "titulo": "Rotas avançadas: grupos, placeholders e rotas nomeadas",
+      "descricao": "Aprofundar o sistema de rotas do CI4: placeholders (:num, :segment, :any), route groups com prefixo e namespace, rotas nomeadas (as), HTTP verbs (get/post/put/delete) e auto-routing vs defined routes. Rotas bem definidas são a espinha dorsal de qualquer aplicação — CRUD e APIs dependem disso.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Criar grupo de rotas /admin com prefixo, rota com placeholder :num e rota nomeada; gerar URL com url_to() ou site_url() corretamente.",
+      "competencias": ["c_routing"],
+      "tags": ["rotas", "fundamentos", "avançado"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Routing — CodeIgniter 4 (completo)", "url": "https://codeigniter.com/user_guide/incoming/routing.html", "tipo": "doc" },
+        { "titulo": "Auto Routing — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/auto_routing_improved.html", "tipo": "doc" },
+        { "titulo": "URL Helper — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/helpers/url_helper.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar route group com prefix admin e namespace Admin\\" },
+        { "titulo": "Definir rota produtos/(:num) capturando id" },
+        { "titulo": "Nomear uma rota com as e gerar link com url_to()" },
+        { "titulo": "Comparar auto-routing ligado vs desligado (prós e contras)" },
+        { "titulo": "Mapear verbos HTTP: get, post, put, delete, match" }
+      ]
+    },
+
+    {
+      "id": "t7",
+      "titulo": "Views: layouts, sections e escapamento seguro",
+      "descricao": "Dominar a composição de views no CI4: view layouts com extend/section/endSection, partials reutilizáveis, escapamento com esc() para prevenir XSS e helpers de view (form, url, html). Templates bem estruturados evitam duplicação de HTML e são base para formulários e dashboards.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Layout master com header/footer funcionando via sections, ao menos uma partial incluída e output escapado com esc() em dados dinâmicos.",
+      "competencias": ["c_views", "c_seguranca"],
+      "tags": ["views", "templates", "layouts"],
+      "atributos": ["Back-end", "Front-end"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "View Parser e Layouts — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/outgoing/view_parser.html", "tipo": "doc" },
+        { "titulo": "Views — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/outgoing/views.html", "tipo": "doc" },
+        { "titulo": "Escaping Data — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/general/security.html", "tipo": "doc" },
+        { "titulo": "Form Helper — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/helpers/form_helper.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar layout default.php com yield sections (content, title)" },
+        { "titulo": "Refatorar view anterior para extend('layouts/default')" },
+        { "titulo": "Criar partial navbar.php e incluir no layout" },
+        { "titulo": "Usar esc($variavel) em todo output dinâmico de usuário" },
+        { "titulo": "Explorar helper form_open() para preparar formulários" }
+      ]
+    },
+
+    {
+      "id": "t8",
+      "titulo": "MySQL no CI4: Database config, Query Builder intro",
+      "descricao": "Estudar a camada de banco do CodeIgniter 4: Database Config, obter conexão, Query Builder básico (table, select, where, get, insert, update, delete) e diferença entre Query Builder e SQL raw. Entender prepared statements e por que nunca concatenar input do usuário em SQL.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Executar SELECT, INSERT, UPDATE e DELETE via Query Builder em tabela MySQL de teste, com WHERE parametrizado, sem SQL injection.",
+      "competencias": ["c_mysql", "c_models"],
+      "tags": ["mysql", "query-builder", "banco de dados"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t5"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Query Builder — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/database/query_builder.html", "tipo": "doc" },
+        { "titulo": "Connecting to Database — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/database/connecting.html", "tipo": "doc" },
+        { "titulo": "Queries — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/database/queries.html", "tipo": "doc" },
+        { "titulo": "MySQL Tutorial — getting started", "url": "https://www.mysqltutorial.org/getting-started-with-mysql/", "tipo": "artigo" }
+      ],
+      "subtarefas": [
+        { "titulo": "Obter instância: $db = \\Config\\Database::connect()" },
+        { "titulo": "SELECT com ->table()->where()->get()->getResult()" },
+        { "titulo": "INSERT e UPDATE com arrays associativos" },
+        { "titulo": "DELETE com where — conferir affected rows" },
+        { "titulo": "Ler sobre bind parameters e por que evitam SQL injection" }
+      ]
+    },
+
+    {
+      "id": "t9",
+      "titulo": "Praticar: rotas RESTful para um recurso",
+      "descricao": "Aplicar rotas avançadas mapeando um recurso completo (ex.: posts ou produtos) com verbos HTTP corretos: index, show, create, store, edit, update, destroy. Exercício que fixa convenções REST e prepara o terreno para CRUD com banco e filtros de autenticação.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Controller recurso com 7 métodos mapeados via rotas explícitas ou resource route; cada rota responde com texto ou view identificando a ação.",
+      "competencias": ["c_routing", "c_controllers"],
+      "tags": ["prática", "rotas", "rest"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t6"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Resource Routing — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/routing.html#resource-routing", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar controller Posts (ou Produtos) com métodos REST" },
+        { "titulo": "Registrar $routes->resource('posts') ou rotas manuais equivalentes" },
+        { "titulo": "Testar GET /posts, GET /posts/1, GET /posts/new no navegador" },
+        { "titulo": "Testar POST /posts e PUT/DELETE com ferramenta HTTP (Postman/Insomnia)" },
+        { "titulo": "Documentar mapa rota → método → ação em nota pessoal" }
+      ]
+    },
+
+    {
+      "id": "t10",
+      "titulo": "Praticar: layout master com navegação entre páginas",
+      "descricao": "Consolidar views criando um mini-site de 3 páginas (home, sobre, contato) compartilhando layout master, navbar com links ativos e footer. Reforça sections, partials e helpers de URL — padrão real de qualquer aplicação CI4.",
+      "tipo": "pratica",
+      "dificuldade": "facil",
+      "prioridade": "media",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Três páginas renderizadas com mesmo layout, navbar funcional usando url_to()/site_url(), highlight da página atual e HTML sem duplicação de header/footer.",
+      "competencias": ["c_views", "c_controllers"],
+      "tags": ["prática", "views", "layouts"],
+      "atributos": ["Back-end", "Front-end"],
+      "dependsOn": ["t7"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "View Cells — CodeIgniter 4 (opcional)", "url": "https://codeigniter.com/user_guide/outgoing/view_cells.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar controllers Home, Sobre, Contato" },
+        { "titulo": "Implementar layout default com navbar e footer" },
+        { "titulo": "Passar variável activePage para destacar link atual" },
+        { "titulo": "Garantir esc() em todo conteúdo dinâmico" },
+        { "titulo": "Navegar entre as 3 páginas sem quebrar layout" }
+      ]
+    },
+
+    {
+      "id": "t11",
+      "titulo": "Formulários HTML: method POST, old input e flash messages",
+      "descricao": "Estudar como o CI4 recebe dados de formulários: $this->request->getPost(), old() para repopular campos após erro, redirect com flash data (withInput, with) e helper form. Formulários são a ponte entre views e controllers — dominar old input evita UX frustrante em cadastros.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Formulário POST que, ao falhar validação simulada, redireciona de volta com campos preenchidos via old() e mensagem flash visível na view.",
+      "competencias": ["c_controllers", "c_views"],
+      "tags": ["formulários", "flash", "controllers"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t7"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Incoming Request — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/incomingrequest.html", "tipo": "doc" },
+        { "titulo": "Redirecting — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/general/common_functions.html", "tipo": "doc" },
+        { "titulo": "Session — Flashdata — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/libraries/sessions.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar form GET (filtro) e form POST (cadastro) side by side" },
+        { "titulo": "Usar form_open(), form_input() e form_label()" },
+        { "titulo": "Implementar redirect()->back()->withInput()->with('errors', ...)" },
+        { "titulo": "Exibir old('campo') e session()->getFlashdata('errors') na view" },
+        { "titulo": "Diferenciar getPost(), getGet() e getVar()" }
+      ]
+    },
+
+    {
+      "id": "t12",
+      "titulo": "Praticar: primeira migration e seed no MySQL",
+      "descricao": "Versionar o schema MySQL com migrations e popular dados iniciais com seeders. Criar tabela via php spark make:migration, executar migrate e seed. Migrations são essenciais em equipe e deploy — nunca alterar produção manualmente sem versionamento.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Migration criada e executada criando tabela no MySQL; seeder inserindo ao menos 3 registros; php spark migrate:rollback testado com sucesso.",
+      "competencias": ["c_mysql"],
+      "tags": ["prática", "migrations", "seeds"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Database Migrations — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/dbmgmt/migration.html", "tipo": "doc" },
+        { "titulo": "Database Seeding — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/dbmgmt/seeds.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "php spark make:migration CreateCategoriasTable" },
+        { "titulo": "Definir colunas: id, nome, created_at com Forge" },
+        { "titulo": "php spark migrate e verificar tabela no MySQL" },
+        { "titulo": "php spark make:seeder CategoriaSeeder com 3 registros" },
+        { "titulo": "Testar migrate:rollback e migrate novamente" }
+      ]
+    },
+
+    {
+      "id": "t13",
+      "titulo": "Models: CRUD, allowedFields, timestamps e callbacks",
+      "descricao": "Estudar a classe Model do CI4: $table, $allowedFields, $useTimestamps, métodos find/findAll/insert/update/delete, validação integrada e callbacks (beforeInsert, afterUpdate). Models encapsulam acesso ao banco e são a camada correta para regras de persistência.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Model funcional com allowedFields, timestamps automáticos e ao menos um callback beforeInsert registrando log ou normalizando dado.",
+      "competencias": ["c_models", "c_mysql"],
+      "tags": ["models", "crud", "banco de dados"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t8"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Using CodeIgniter's Model — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/models/model.html", "tipo": "doc" },
+        { "titulo": "Model Class Reference — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/models/model.html#model-class-reference", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "php spark make:model CategoriaModel" },
+        { "titulo": "Configurar $table, $allowedFields, $useTimestamps" },
+        { "titulo": "Praticar find(), findAll(), insert(), update(), delete()" },
+        { "titulo": "Implementar callback beforeInsert para trim no nome" },
+        { "titulo": "Entender returnType 'array' vs 'object'" }
+      ]
+    },
+
+    {
+      "id": "t14",
+      "titulo": "Validação: rules, mensagens customizadas e validation service",
+      "descricao": "Dominar a Validation library do CI4: definir rules inline ou em config, mensagens customizadas em Validation.php, validar arrays de input e exibir erros na view. Validação server-side é obrigatória — nunca confiar apenas em HTML5 ou JavaScript.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Formulário com regras required|min_length|valid_email|is_unique funcionando; erros exibidos por campo na view; mensagens customizadas em português.",
+      "competencias": ["c_validacao"],
+      "tags": ["validação", "formulários", "segurança"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t11"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validation — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/libraries/validation.html", "tipo": "doc" },
+        { "titulo": "Validation Rules — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/libraries/validation.html#available-rules", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Definir rules no controller ou $this->validate()" },
+        { "titulo": "Customizar mensagens em app/Config/Validation.php" },
+        { "titulo": "Exibir $validation->getErrors() e erro por campo na view" },
+        { "titulo": "Usar is_unique[tabela.campo] para email único" },
+        { "titulo": "Combinar redirect()->withInput() após falha de validação" }
+      ]
+    },
+
+    {
+      "id": "t15",
+      "titulo": "Praticar: CRUD completo com Model (sem autenticação)",
+      "descricao": "Construir CRUD funcional de um recurso (ex.: categorias ou tarefas) usando Model, views de listagem/formulário e rotas REST mapeadas. Consolida models, migrations e controllers antes de adicionar validação e login — ciclo completo de persistência.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 4,
+      "criterioConclusao": "CRUD funcional: listar, criar, editar e excluir registros no MySQL via interface web, com confirmação antes de delete e feedback flash após cada ação.",
+      "competencias": ["c_models", "c_controllers", "c_views", "c_routing"],
+      "tags": ["prática", "crud", "projeto"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t13"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tutorial News — CodeIgniter 4 (referência CRUD)", "url": "https://codeigniter.com/user_guide/tutorial/index.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Migration + Model para o recurso escolhido" },
+        { "titulo": "View index listando registros com links edit/delete" },
+        { "titulo": "Views create e edit com formulário compartilhado (partial)" },
+        { "titulo": "Controller store/update/destroy com redirect e flash message" },
+        { "titulo": "Página de confirmação ou modal antes de excluir" }
+      ]
+    },
+
+    {
+      "id": "t16",
+      "titulo": "Praticar: relacionamentos MySQL (FK) e joins no Model",
+      "descricao": "Modelar relacionamento entre duas tabelas MySQL (ex.: posts + categorias) com foreign key, migration de FK e consulta join via Model ou Query Builder. Relacionamentos são o coração de aplicações reais — dominar joins no CI4 evita N+1 queries e dados inconsistentes.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "Duas tabelas relacionadas por FK, migration com constraint, listagem exibindo nome da categoria junto ao post via join ou método no Model.",
+      "competencias": ["c_mysql", "c_models"],
+      "tags": ["prática", "relacionamentos", "joins"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t12", "t13"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Working with Databases — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/database/examples.html", "tipo": "doc" },
+        { "titulo": "MySQL FOREIGN KEY — referência", "url": "https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Migration posts com categoria_id FK referenciando categorias" },
+        { "titulo": "Select com join exibindo posts.categoria_nome" },
+        { "titulo": "Formulário create com select de categorias" },
+        { "titulo": "Testar ON DELETE RESTRICT ou CASCADE conforme regra de negócio" },
+        { "titulo": "Opcional: método getPostsWithCategory() no Model" }
+      ]
+    },
+
+    {
+      "id": "t17",
+      "titulo": "Praticar: CRUD com validação integrada",
+      "descricao": "Integrar validação ao CRUD existente: rules no store/update, repopulação com old input, mensagens por campo e regras is_unique excluindo o registro atual no edit. Convergência das trilhas de formulários e models — padrão de produção para qualquer cadastro.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 3,
+      "criterioConclusao": "CRUD com validação em create e update: campos obrigatórios, email válido ou regra customizada, erros visíveis na view e nenhum insert de dados inválidos no MySQL.",
+      "competencias": ["c_validacao", "c_models", "c_controllers", "c_views"],
+      "tags": ["prática", "validação", "crud"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t14", "t15"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Validation — Saving Validation Rules in Models", "url": "https://codeigniter.com/user_guide/models/model.html#validation-rules", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Adicionar $validationRules no Model ou controller" },
+        { "titulo": "Validar store e update com regras distintas se necessário" },
+        { "titulo": "is_unique com parâmetro de exclusão no edit {id}" },
+        { "titulo": "Exibir erros ao lado de cada campo do formulário" },
+        { "titulo": "Testar submissão inválida e válida; verificar MySQL" }
+      ]
+    },
+
+    {
+      "id": "t18",
+      "titulo": "Filters: before/after, auth filter e CSRF",
+      "descricao": "Estudar o sistema de Filters do CI4 (equivalente a middleware): registrar em Filters.php, filters globais vs por rota, AuthFilter customizado e CSRF filter nativo. Filters centralizam lógica transversal — autenticação, CORS e rate limiting começam aqui.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2.5,
+      "criterioConclusao": "Filter customizado bloqueando rota /admin para usuários não logados; CSRF habilitado em formulários POST com token hidden funcionando.",
+      "competencias": ["c_filtros", "c_seguranca"],
+      "tags": ["filters", "middleware", "csrf"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t9"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Filters — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/filters.html", "tipo": "doc" },
+        { "titulo": "Security — CSRF — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/libraries/security.html", "tipo": "doc" },
+        { "titulo": "Creating Filter Classes — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/filters.html#creating-filter-classes", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "php spark make:filter AuthFilter" },
+        { "titulo": "Registrar filter em Config/Filters.php (aliases + routes)" },
+        { "titulo": "Implementar before() redirecionando guest para /login" },
+        { "titulo": "Habilitar csrf filter global ou por rota POST" },
+        { "titulo": "Adicionar csrf_field() nos formulários" }
+      ]
+    },
+
+    {
+      "id": "t19",
+      "titulo": "Autenticação: sessões, login, logout e registro simples",
+      "descricao": "Implementar autenticação com Session service: registro de usuário (hash de senha com password_hash), login verificando credenciais, logout limpando sessão e proteção de rotas via filter. Autenticação é requisito de quase todo sistema — entender sessões no CI4 é fundamental antes do projeto final.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 4,
+      "criterioConclusao": "Usuário consegue registrar-se, fazer login e logout; rotas protegidas redirecionam guest; senha armazenada com password_hash no MySQL, nunca em texto plano.",
+      "competencias": ["c_autenticacao", "c_filtros", "c_seguranca"],
+      "tags": ["prática", "autenticação", "sessões"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t17", "t18"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Session Library — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/libraries/sessions.html", "tipo": "doc" },
+        { "titulo": "Shield (auth oficial CI4) — overview", "url": "https://codeigniter.com/user_guide/shield/index.html", "tipo": "doc" },
+        { "titulo": "password_hash — PHP manual", "url": "https://www.php.net/manual/en/function.password-hash.php", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Migration users: id, email, password, created_at" },
+        { "titulo": "UserModel com allowedFields e hash no beforeInsert" },
+        { "titulo": "AuthController: register, login, logout" },
+        { "titulo": "Armazenar user_id e email na session após login" },
+        { "titulo": "Aplicar AuthFilter nas rotas do CRUD" }
+      ]
+    },
+
+    {
+      "id": "t20",
+      "titulo": "Segurança web no CI4: XSS, SQL injection e boas práticas",
+      "descricao": "Consolidar segurança: escapamento em views, CSRF já aplicado, validação de input, Query Builder vs SQL raw, configuração de Security e Content Security Policy intro. Desenvolvedores iniciantes são alvo fácil de vulnerabilidades — esta tarefa fecha lacunas antes de expor a app.",
+      "tipo": "pesquisa",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 2,
+      "criterioConclusao": "Checklist de segurança preenchido para o CRUD: CSRF ativo, esc() em outputs, senhas hasheadas, queries parametrizadas e nenhum $_GET/$_POST direto sem validação.",
+      "competencias": ["c_seguranca"],
+      "tags": ["segurança", "xss", "csrf"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t19"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Security — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/general/security.html", "tipo": "doc" },
+        { "titulo": "OWASP Top 10 — introdução", "url": "https://owasp.org/www-project-top-ten/", "tipo": "artigo" },
+        { "titulo": "Content Security Policy — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/outgoing/csp.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Auditar views: todo echo de usuário passa por esc()" },
+        { "titulo": "Verificar que nenhuma query concatena input diretamente" },
+        { "titulo": "Revisar Filters.php: csrf, honeypot (opcional)" },
+        { "titulo": "Ler OWASP Top 3 riscos relevantes para PHP" },
+        { "titulo": "Documentar checklist de segurança do projeto" }
+      ]
+    },
+
+    {
+      "id": "t21",
+      "titulo": "API REST básica: JSON responses e resource routes",
+      "descricao": "Expor endpoints JSON a partir do CI4: ResponseTrait, setJSON(), códigos HTTP corretos (200, 201, 404, 422), format negotiation e intro a CORS. APIs complementam interfaces web — mesmo CRUD pode servir browser e mobile.",
+      "tipo": "pratica",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 3,
+      "criterioConclusao": "API REST para o recurso do CRUD retornando JSON; GET lista e show, POST cria, PUT atualiza, DELETE remove; testado com Postman/Insomnia com status codes corretos.",
+      "competencias": ["c_api", "c_controllers", "c_routing"],
+      "tags": ["api", "rest", "json"],
+      "atributos": ["Back-end"],
+      "dependsOn": ["t18", "t17"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "API Responses — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/outgoing/api_responses.html", "tipo": "doc" },
+        { "titulo": "RESTful Resource Handling — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/incoming/restful.html", "tipo": "doc" },
+        { "titulo": "HTTP Status Codes — MDN", "url": "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Criar Api\\PostsController usando ResponseTrait" },
+        { "titulo": "Retornar failNotFound(), failValidationErrors() onde couber" },
+        { "titulo": "Registrar rotas API com prefix api/v1" },
+        { "titulo": "Testar CRUD completo via Postman" },
+        { "titulo": "Opcional: header CORS básico para localhost" }
+      ]
+    },
+
+    {
+      "id": "t22",
+      "titulo": "Análise: revisão de arquitetura MVC e camadas do projeto",
+      "descricao": "Consolidar aprendizado analisando o CRUD construído: separação controller/model/view, rotas organizadas, filters aplicados, migrations versionadas. Retrospectiva técnica identifica acoplamentos e melhorias antes do projeto final — metacognição acelera maturidade como dev.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "media",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento com diagrama MVC do projeto, 3 pontos fortes, 3 melhorias sugeridas (ex.: service layer, repository) e avaliação de cada competência de 1 a 5.",
+      "competencias": ["c_mvc", "c_models", "c_routing", "c_validacao"],
+      "tags": ["análise", "revisão", "arquitetura"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t16"],
+      "reviewAfterDays": 7,
+      "links": [
+        { "titulo": "Best Practices — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/concepts/autoloader.html", "tipo": "doc" },
+        { "titulo": "Project Structure — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/concepts/autoloader.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Desenhar fluxo de uma requisição POST /recurso no seu projeto" },
+        { "titulo": "Identificar lógica que deveria sair do controller" },
+        { "titulo": "Avaliar organização de rotas e namespaces" },
+        { "titulo": "Listar 3 refatorações possíveis sem over-engineering" },
+        { "titulo": "Avaliar confiança 1–5 nas competências estudadas até aqui" }
+      ]
+    },
+
+    {
+      "id": "t23",
+      "titulo": "Projeto final: sistema de tarefas com login e API",
+      "descricao": "Construir do zero um sistema de gerenciamento de tarefas (to-do) com CodeIgniter 4 e MySQL: autenticação, CRUD de tarefas por usuário, validação, filters, migrations, layout responsivo simples e endpoints API JSON. Projeto integrador que consolida MVC, banco, segurança e API — portfólio back-end com CI4.",
+      "tipo": "pratica",
+      "dificuldade": "dificil",
+      "prioridade": "alta",
+      "horasEstimadas": 8,
+      "criterioConclusao": "App funcional: registro/login, CRUD de tarefas (título, descrição, status, prazo) visível só ao dono, CSRF ativo, migrations versionadas, API /api/v1/tasks retornando JSON autenticada ou com token simples, deploy local documentado.",
+      "competencias": ["c_mvc", "c_models", "c_mysql", "c_validacao", "c_autenticacao", "c_filtros", "c_seguranca", "c_api"],
+      "tags": ["prática", "projeto", "portfólio", "avançado"],
+      "atributos": ["Back-end", "Banco de Dados"],
+      "dependsOn": ["t19", "t20", "t21"],
+      "reviewAfterDays": 0,
+      "links": [
+        { "titulo": "Tutorial News — referência estrutural", "url": "https://codeigniter.com/user_guide/tutorial/index.html", "tipo": "doc" },
+        { "titulo": "Deployment — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/installation/deployment.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Planejar entidades: users, tasks (user_id FK, status enum)" },
+        { "titulo": "Migrations, models e seed de usuário demo" },
+        { "titulo": "Auth completo + AuthFilter em rotas de tarefas" },
+        { "titulo": "CRUD tarefas com validação e views com layout" },
+        { "titulo": "Listar apenas tarefas do usuário logado (where user_id)" },
+        { "titulo": "API REST /api/v1/tasks com JSON e status HTTP corretos" },
+        { "titulo": "Checklist segurança: CSRF, esc(), password_hash" },
+        { "titulo": "README com instruções de instalação e php spark serve" }
+      ]
+    },
+
+    {
+      "id": "t24",
+      "titulo": "Análise final: retrospectiva e próximos passos",
+      "descricao": "Consolidar todo o aprendizado com retrospectiva estruturada: competências dominadas, gaps remanescentes, conexões com PHP avançado, Shield, testes e deploy em produção. Metacognição define o ritmo de evolução — quem mapeia gaps revisa de forma direcionada.",
+      "tipo": "analise",
+      "dificuldade": "medio",
+      "prioridade": "alta",
+      "horasEstimadas": 1.5,
+      "criterioConclusao": "Documento de retrospectiva com avaliação 1–5 de cada competência, 3 gaps prioritários, plano de revisão 30 dias e lista de 5 tópicos avançados para estudar (Shield, PHPUnit, Queues, etc.).",
+      "competencias": ["c_mvc", "c_models", "c_mysql", "c_validacao", "c_autenticacao", "c_filtros", "c_seguranca", "c_api"],
+      "tags": ["análise", "revisão", "retrospectiva", "consolidação"],
+      "atributos": ["Back-end", "Fundamentos"],
+      "dependsOn": ["t23"],
+      "reviewAfterDays": 14,
+      "links": [
+        { "titulo": "CodeIgniter 4 User Guide — índice completo", "url": "https://codeigniter.com/user_guide/index.html", "tipo": "doc" },
+        { "titulo": "CodeIgniter Shield — autenticação oficial", "url": "https://codeigniter.com/user_guide/shield/index.html", "tipo": "doc" },
+        { "titulo": "Testing — CodeIgniter 4", "url": "https://codeigniter.com/user_guide/testing/index.html", "tipo": "doc" }
+      ],
+      "subtarefas": [
+        { "titulo": "Avaliar confiança 1–5 em cada uma das 12 competências" },
+        { "titulo": "Identificar 3 gaps mais críticos para revisar" },
+        { "titulo": "Listar 5 tópicos avançados: Shield, PHPUnit, Events, Caching, Deploy" },
+        { "titulo": "Planejar revisão espaçada em 7, 14 e 30 dias" },
+        { "titulo": "Anotar recursos favoritos para consulta futura" }
+      ]
+    }
+
+  ]
+}
