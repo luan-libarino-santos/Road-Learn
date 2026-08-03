@@ -1,0 +1,62 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - "**"
+
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Node.js CI
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22]
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Exibir versões
+        run: |
+          node --version
+          npm --version
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar Lint (se existir)
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "Nenhum script 'lint' encontrado. Pulando..."
+          fi
+
+      - name: Executar Testes (se existirem)
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "Nenhum script 'test' encontrado. Pulando..."
+          fi
+
+      - name: Executar Build (se existir)
+        run: |
+          if npm run | grep -q "build"; then
+            npm run build
+          else
+            echo "Nenhum script 'build' encontrado. Pulando..."
+          fi
