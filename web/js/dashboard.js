@@ -18,105 +18,112 @@ function formatarDelta(valor, sufixo = "") {
   return `${sinal}${valor}${sufixo}`;
 }
 
-function renderizarRadar(atributos) {
-  const stats =
-    atributos.length >= 3
-      ? atributos.slice(0, 8)
-      : atributos.length
-        ? atributos
-        : [
-            { nome: "Back-end", horas: 0 },
-            { nome: "Front-end", horas: 0 },
-            { nome: "Banco de Dados", horas: 0 },
-            { nome: "DevOps", horas: 0 },
-            { nome: "Fundamentos", horas: 0 },
-          ];
+function formatarDeltaXp(delta) {
+  const n = Number(delta) || 0;
+  const sinal = n > 0 ? "+" : "";
+  return `${sinal}${n}`;
+}
 
-  while (stats.length < 3) {
-    stats.push({ nome: `Área ${stats.length + 1}`, horas: 0 });
-  }
-
-  const size = 280;
-  const cx = size / 2;
-  const cy = size / 2;
-  const raio = 95;
-  const n = stats.length;
-  const maxH = Math.max(1, ...stats.map((s) => s.horas));
-
-  const ponto = (i, escala) => {
-    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / n;
-    return {
-      x: cx + Math.cos(ang) * raio * escala,
-      y: cy + Math.sin(ang) * raio * escala,
-    };
-  };
-
-  const niveis = [0.25, 0.5, 0.75, 1]
-    .map((esc) => {
-      const pts = stats.map((_, i) => {
-        const p = ponto(i, esc);
-        return `${p.x},${p.y}`;
-      });
-      return `<polygon class="radar-grade" points="${pts.join(" ")}"></polygon>`;
-    })
-    .join("");
-
-  const eixos = stats
-    .map((_, i) => {
-      const p = ponto(i, 1);
-      return `<line class="radar-eixo" x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}"></line>`;
-    })
-    .join("");
-
-  const dadosPts = stats.map((s, i) => {
-    const p = ponto(i, s.horas / maxH);
-    return `${p.x},${p.y}`;
-  });
-
-  const labels = stats
-    .map((s, i) => {
-      const p = ponto(i, 1.22);
-      return `<text class="radar-label" x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="middle">${escaparHtml(s.nome)}</text>
-        <text class="radar-valor" x="${p.x}" y="${p.y + 12}" text-anchor="middle">${formatarHoras(s.horas)}</text>`;
-    })
-    .join("");
-
+function renderizarBadge(badge) {
+  if (!badge?.forma) return "";
   return `
-    <div class="ficha-radar-wrap">
-      <svg class="radar-svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="Atributos de estudo">
-        ${niveis}
-        ${eixos}
-        <polygon class="radar-area" points="${dadosPts.join(" ")}"></polygon>
-        <polygon class="radar-linha" points="${dadosPts.join(" ")}" fill="none"></polygon>
-        ${stats
-          .map((s, i) => {
-            const p = ponto(i, s.horas / maxH);
-            return `<circle class="radar-ponto" cx="${p.x}" cy="${p.y}" r="3.5"></circle>`;
-          })
-          .join("")}
-        ${labels}
-      </svg>
-      ${
-        atributos.length
-          ? ""
-          : `<p class="painel-nota">Sem horas em atributos ainda. Marque áreas nas tarefas (ex.: Back-end) e registre tempo — o radar preenche sozinho.</p>`
-      }
-    </div>
+    <span class="ficha-badge ficha-badge-${escaparHtml(badge.forma)}" title="${escaparHtml(badge.rotulo || "")}" aria-label="Badge ${escaparHtml(badge.rotulo || "")}">
+      <span class="ficha-badge-forma" aria-hidden="true"></span>
+    </span>
   `;
 }
 
-function renderizarNivel(nivel) {
+function renderizarNivel(nivel, badge) {
+  if (!nivel) {
+    return `<div class="ficha-nivel"><p class="painel-nota">Sem XP ainda — conclua tarefas para subir de nível.</p></div>`;
+  }
   return `
     <div class="ficha-nivel">
       <div class="ficha-nivel-topo">
-        <span class="ficha-nivel-num">Nível ${nivel.nivel}</span>
+        <div class="ficha-nivel-titulo">
+          <span class="ficha-nivel-num">Nível ${nivel.nivel}</span>
+          ${renderizarBadge(badge)}
+        </div>
         <span class="ficha-nivel-xp">${nivel.xpNoNivel} / ${nivel.xpParaProximo} XP → N${nivel.nivel + 1}</span>
       </div>
       <div class="ficha-nivel-barra">
         <span style="width:${nivel.progresso}%"></span>
       </div>
-      <p class="painel-nota">XP = horas reais estudadas (total ${nivel.xp}h). Sem prêmio decorativo — só esforço acumulado.</p>
+      <p class="painel-nota">XP por tarefas, subtarefas e bônus de roadmap completo. Total: ${nivel.xp} XP.</p>
     </div>
+  `;
+}
+
+function renderizarLogXp(logXp) {
+  const itens = logXp ?? [];
+  if (!itens.length) {
+    return `<p class="painel-nota">Nenhuma origem de XP ainda.</p>`;
+  }
+  return `
+    <ul class="lista-log-xp">
+      ${itens
+        .map((item) => {
+          const classe = item.delta >= 0 ? "log-xp-positivo" : "log-xp-negativo";
+          const data = item.em
+            ? new Date(item.em).toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "";
+          return `
+            <li class="${classe}">
+              <strong>${formatarDeltaXp(item.delta)}</strong>
+              <span class="log-xp-rotulo">${escaparHtml(item.rotulo || item.origem)}</span>
+              <span class="log-xp-data">${escaparHtml(data)}</span>
+            </li>`;
+        })
+        .join("")}
+    </ul>
+  `;
+}
+
+function renderizarListaHabilidades(habilidades, titulo, subtitulo) {
+  const lista = [...(habilidades ?? [])].sort(
+    (a, b) => b.nivel - a.nivel || a.nome.localeCompare(b.nome, "pt-BR")
+  );
+  const topIds = new Set(lista.slice(0, 3).filter((h) => h.nivel > 0).map((h) => h.id));
+
+  return `
+    <section class="painel-secao">
+      <h2>${escaparHtml(titulo)}</h2>
+      <p class="painel-subtitulo">${escaparHtml(subtitulo)}</p>
+      ${
+        lista.length
+          ? `<ul class="lista-habilidades">
+              ${lista
+                .map((hab) => {
+                  const destaque = topIds.has(hab.id);
+                  const passo = hab.passoTier || (hab.tipo === "base" ? 50 : 15);
+                  const progresso = hab.noTopo
+                    ? 100
+                    : Math.round(((hab.progressoNoTier || 0) / passo) * 100);
+                  return `
+                    <li class="habilidade-item ${destaque ? "habilidade-destaque" : ""}">
+                      <div class="habilidade-topo">
+                        <div class="habilidade-nome-wrap">
+                          ${destaque ? `<span class="habilidade-top-tag">Top 3</span>` : ""}
+                          <span class="habilidade-nome">${escaparHtml(hab.nome)}</span>
+                          <span class="habilidade-tier tier-${escaparHtml(String(hab.indiceTier ?? 0))}">${escaparHtml(hab.tier || "Comum")}</span>
+                        </div>
+                        <strong class="habilidade-nivel">Nv. ${hab.nivel}</strong>
+                      </div>
+                      <div class="habilidade-barra" title="${hab.progressoNoTier ?? 0}/${passo} até o próximo tier">
+                        <span style="width:${progresso}%"></span>
+                      </div>
+                    </li>`;
+                })
+                .join("")}
+            </ul>`
+          : `<p class="painel-nota">Nenhuma habilidade registrada ainda. Conclua tarefas com atributos ou competências.</p>`
+      }
+    </section>
   `;
 }
 
@@ -214,23 +221,25 @@ function renderizarBarrasSemana(semanas) {
   `;
 }
 
-export function renderizarDashboard(container, roadmaps) {
+export function renderizarDashboard(container, roadmaps, perfil = null) {
   const a = calcularAnalyticsGlobais(roadmaps);
   const totalTipo = Object.values(a.porTipo).reduce((s, n) => s + n, 0) || 1;
+  const nivel = perfil?.nivel ?? null;
+  const badge = perfil?.badge ?? null;
 
   container.innerHTML = `
     <header class="roadmap-header">
       <div class="roadmap-header-info">
         <h1>Ficha de estudo</h1>
-        <p class="roadmap-descricao">Progressão agregada: atributos, XP e ritmo — estatística pura, sem emblemas.</p>
+        <p class="roadmap-descricao">Habilidades permanentes, XP e ritmo — progresso real, sem gamificação vazia.</p>
       </div>
     </header>
 
     <section class="ficha-topo">
-      ${renderizarNivel(a.nivel)}
+      ${renderizarNivel(nivel, badge)}
       <div class="metricas metricas-painel metricas-ficha">
         <div class="metrica-card">
-          <span class="metrica-valor">${formatarHoras(a.xp)}</span>
+          <span class="metrica-valor">${nivel?.xp ?? 0}</span>
           <span class="metrica-label">XP total</span>
         </div>
         <div class="metrica-card">
@@ -249,25 +258,22 @@ export function renderizarDashboard(container, roadmaps) {
     </section>
 
     <section class="painel-secao">
-      <h2>Atributos</h2>
-      <p class="painel-subtitulo">Horas reais por área de estudo — o radar reflete esforço acumulado.</p>
-      ${renderizarRadar(a.atributos)}
-      ${
-        a.atributos.length
-          ? `<ul class="lista-atributos-ficha">
-              ${a.atributos
-                .map(
-                  (at) => `
-                <li>
-                  <span>${escaparHtml(at.nome)}</span>
-                  <strong>${formatarHoras(at.horas)}</strong>
-                </li>`
-                )
-                .join("")}
-            </ul>`
-          : ""
-      }
+      <h2>Últimas origens de XP</h2>
+      <p class="painel-subtitulo">As 20 concessões e estornos mais recentes.</p>
+      ${renderizarLogXp(perfil?.logXp)}
     </section>
+
+    ${renderizarListaHabilidades(
+      perfil?.habilidadesBase,
+      "Habilidades Base",
+      "Áreas de estudo (atributos das tarefas). Tier a cada 50 níveis."
+    )}
+
+    ${renderizarListaHabilidades(
+      perfil?.habilidadesEspeciais,
+      "Habilidades Especiais",
+      "Competências desenvolvidas. Tier a cada 15 níveis."
+    )}
 
     <section class="painel-secao">
       <h2>Você × você</h2>

@@ -71,4 +71,6 @@ export const api = {
   atribuirRoadmapSidebar: (roadmapId, dados) => requisicao("PUT", `/sidebar/atribuicoes/${roadmapId}`, dados),
   reordenarRoadmapsSidebar: (grupoId, ids) =>
     requisicao("PUT", "/sidebar/reordenar", { grupoId: grupoId || null, ids }),
+  obterPerfil: () => requisicao("GET", "/profile"),
+  reconstruirPerfil: () => requisicao("POST", "/profile/rebuild"),
 };

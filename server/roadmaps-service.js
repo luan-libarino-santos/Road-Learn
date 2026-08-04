@@ -1,5 +1,12 @@
 import { lerRoadmaps, salvarRoadmaps } from "./db.js";
 import { removerRoadmapDasAtribuicoes } from "./sidebar-service.js";
+import {
+  aoConcluirTarefa,
+  aoReabrirTarefa,
+  aoConcluirSubtarefa,
+  aoReabrirSubtarefa,
+  limparBonusRoadmapExcluido,
+} from "./profile-service.js";
 
 export const TIPOS_TAREFA = {
   pratica: { label: "Prática", cor: "#7b2cbf", fundo: "#ede0f7" },
@@ -573,6 +580,7 @@ export async function excluirRoadmap(id) {
   const roadmaps = (await lerRoadmaps()).filter((r) => r.id !== id);
   await persistir(roadmaps);
   await removerRoadmapDasAtribuicoes(id);
+  await limparBonusRoadmapExcluido(id);
 }
 
 export async function adicionarTarefa(roadmapId, tarefa) {
@@ -681,8 +689,11 @@ export async function atualizarTarefa(roadmapId, tarefaId, dados) {
     atualizada.links = (dados.links ?? []).map(normalizarLink);
   }
 
+  const mudouConclusao =
+    dados.concluida !== undefined && Boolean(dados.concluida) !== atual.concluida;
+
   // Histórico automático
-  if (dados.concluida !== undefined && Boolean(dados.concluida) !== atual.concluida) {
+  if (mudouConclusao) {
     if (dados.concluida) {
       atualizada.concluidaEm = agoraIso();
       adicionarHistorico(atualizada, "concluida", "");
@@ -721,6 +732,15 @@ export async function atualizarTarefa(roadmapId, tarefaId, dados) {
 
   roadmap.tarefas[index] = atualizada;
   await persistir(roadmaps);
+
+  if (mudouConclusao) {
+    if (atualizada.concluida) {
+      await aoConcluirTarefa(roadmap, atualizada);
+    } else {
+      await aoReabrirTarefa(roadmap, atualizada);
+    }
+  }
+
   return atualizada;
 }
 
@@ -867,7 +887,12 @@ export async function atualizarSubtarefa(roadmapId, tarefaId, subtarefaId, dados
   const index = (tarefa.subtarefas ?? []).findIndex((s) => s.id === subtarefaId);
   if (index === -1) return null;
 
-  tarefa.subtarefas[index] = { ...tarefa.subtarefas[index], ...dados };
+  const subAntes = tarefa.subtarefas[index];
+  const tarefaEstavaConcluida = Boolean(tarefa.concluida);
+  const subEstavaConcluida = Boolean(subAntes.concluida);
+
+  tarefa.subtarefas[index] = { ...subAntes, ...dados };
+  const subtarefa = tarefa.subtarefas[index];
 
   if (dados.concluida !== undefined) {
     const todasConcluidas =
@@ -888,7 +913,22 @@ export async function atualizarSubtarefa(roadmapId, tarefaId, subtarefaId, dados
   }
 
   await persistir(roadmaps);
-  return tarefa.subtarefas[index];
+
+  const mudouSub =
+    dados.concluida !== undefined && Boolean(dados.concluida) !== subEstavaConcluida;
+  if (mudouSub) {
+    if (dados.concluida) {
+      await aoConcluirSubtarefa(roadmap, tarefa, subtarefa, {
+        tarefaAcabouDeConcluir: !tarefaEstavaConcluida && Boolean(tarefa.concluida),
+      });
+    } else {
+      await aoReabrirSubtarefa(roadmap, tarefa, subtarefa, {
+        tarefaAcabouDeReabrir: tarefaEstavaConcluida && !tarefa.concluida,
+      });
+    }
+  }
+
+  return subtarefa;
 }
 
 export async function excluirSubtarefa(roadmapId, tarefaId, subtarefaId) {

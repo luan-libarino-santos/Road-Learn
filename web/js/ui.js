@@ -37,6 +37,7 @@ import {
 import { renderizarDashboard } from "./dashboard.js";
 import { renderizarGrafoDependencias } from "./grafo.js";
 import { api } from "./api.js";
+import { carregarPerfil, invalidarPerfil } from "./profile.js";
 import {
   obterGrupos,
   obterAtribuicao,
@@ -133,7 +134,8 @@ function inicialRoadmap(nome) {
 async function executarAcao(acao) {
   try {
     await acao();
-    atualizarTela();
+    invalidarPerfil();
+    await atualizarTela();
   } catch (erro) {
     mostrarErro(erro.message);
   }
@@ -399,12 +401,12 @@ export function renderizarSidebar() {
 
   const liPainel = document.createElement("li");
   liPainel.innerHTML = `
-    <button class="roadmap-btn painel-btn ${vistaPainel ? "ativo" : ""}" data-acao-nav="painel" title="Ficha — atributos, XP e nível">
+    <button class="roadmap-btn painel-btn ${vistaPainel ? "ativo" : ""}" data-acao-nav="painel" title="Ficha — habilidades, XP e nível">
       <span class="roadmap-btn-nome">
         <span class="roadmap-btn-inicial" aria-hidden="true">F</span>
         <span class="roadmap-btn-nome-texto">Ficha</span>
       </span>
-      <span class="roadmap-btn-meta">Atributos · XP · nível</span>
+      <span class="roadmap-btn-meta">Skills · XP · nível</span>
     </button>`;
   lista.appendChild(liPainel);
   liPainel.querySelector("button").addEventListener("click", () => {
@@ -1403,7 +1405,7 @@ function mostrarModalEditarTarefa(roadmapId, tarefaId) {
       { label: "Prazo", name: "prazo", tipo: "date", valor: tarefa.prazo },
       { label: "Horas estimadas", name: "horasEstimadas", tipo: "number", valor: tarefa.horasEstimadas, min: 0, step: 0.5 },
       { label: "Tags (separadas por vírgula)", name: "tags", tipo: "text", valor: (tarefa.tags ?? []).join(", "), placeholder: "fundamentos, revisão..." },
-      { label: "Atributos da ficha (áreas de estudo)", name: "atributos", tipo: "text", valor: (tarefa.atributos ?? []).join(", "), placeholder: "Back-end, Banco de Dados, Front-end..." },
+      { label: "Habilidades Base (áreas)", name: "atributos", tipo: "text", valor: (tarefa.atributos ?? []).join(", "), placeholder: "Back-end, Banco de Dados, Front-end..." },
       { label: "Revisão após N dias (0 = off)", name: "reviewAfterDays", tipo: "number", valor: tarefa.reviewAfterDays || 0, min: 0, step: 1 },
       { label: "Critério de conclusão", name: "criterioConclusao", tipo: "textarea", valor: tarefa.criterioConclusao || "", placeholder: "Como saber que terminei isso de verdade?", rows: 2 },
       { label: "Observações", name: "observacoes", tipo: "textarea", valor: tarefa.observacoes, placeholder: "Notas, lembretes, contexto...", rows: 3 },
@@ -2165,10 +2167,16 @@ export function mostrarModalImportarJson() {
   );
 }
 
-function atualizarTela() {
+async function atualizarTela() {
   renderizarSidebar();
   if (vistaPainel) {
-    renderizarDashboard(elementos.conteudo(), obterRoadmaps());
+    try {
+      const perfil = await carregarPerfil({ forcar: true });
+      renderizarDashboard(elementos.conteudo(), obterRoadmaps(), perfil);
+    } catch (erro) {
+      renderizarDashboard(elementos.conteudo(), obterRoadmaps(), null);
+      mostrarErro(erro.message);
+    }
     return;
   }
   if (roadmapAtivoId && obterRoadmapPorId(roadmapAtivoId)) {

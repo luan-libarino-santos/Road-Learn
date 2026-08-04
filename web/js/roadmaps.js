@@ -322,8 +322,8 @@ function diaChave(isoOuDate) {
 }
 
 /**
- * XP = horas reais acumuladas.
- * Cada nível exige um pouco mais: 5h, 8h, 11h… (base 5 + 3 por nível).
+ * Curva legada (horas → nível). O nível da Ficha agora vem do perfil (XP por tarefas).
+ * Mantida para compatibilidade se algum cálculo local ainda referenciar.
  */
 export function calcularNivelXp(xpBruto) {
   const xp = Math.max(0, Number(xpBruto) || 0);
@@ -501,8 +501,7 @@ export function calcularAnalyticsGlobais(roadmaps) {
     }
   }
 
-  const xp = Math.round(horasReais * 100) / 100;
-  const nivel = calcularNivelXp(xp);
+  const horasReaisArred = Math.round(horasReais * 100) / 100;
 
   return {
     totalRoadmaps: roadmaps?.length ?? 0,
@@ -510,9 +509,7 @@ export function calcularAnalyticsGlobais(roadmaps) {
     totalConcluidas: concluidas.length,
     porTipo,
     horasEstimadas,
-    horasReais: xp,
-    xp,
-    nivel,
+    horasReais: horasReaisArred,
     atributos,
     diasEmSequencia,
     streak: diasEmSequencia,
