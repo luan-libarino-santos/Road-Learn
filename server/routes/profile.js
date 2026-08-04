@@ -21,4 +21,24 @@ router.post("/rebuild", async (_req, res, next) => {
   }
 });
 
+router.patch("/identidade", async (req, res, next) => {
+  try {
+    const perfil = await service.atualizarIdentidade(req.body);
+    res.json(perfil);
+  } catch (erro) {
+    if (erro.status) return res.status(erro.status).json({ erro: erro.message });
+    next(erro);
+  }
+});
+
+router.patch("/tema", async (req, res, next) => {
+  try {
+    const perfil = await service.atualizarTema(req.body);
+    res.json(perfil);
+  } catch (erro) {
+    if (erro.status) return res.status(erro.status).json({ erro: erro.message });
+    next(erro);
+  }
+});
+
 export default router;

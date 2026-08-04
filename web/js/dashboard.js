@@ -1,4 +1,5 @@
 import { calcularAnalyticsGlobais, TIPOS_TAREFA } from "./roadmaps.js";
+import { aplicarStagger, marcarEntrada } from "./motion.js";
 
 function escaparHtml(texto) {
   const div = document.createElement("div");
@@ -100,7 +101,7 @@ function renderizarListaHabilidades(habilidades, titulo, subtitulo) {
               ${lista
                 .map((hab) => {
                   const destaque = topIds.has(hab.id);
-                  const passo = hab.passoTier || (hab.tipo === "base" ? 50 : 15);
+                  const passo = hab.passoTier || (hab.tipo === "base" ? 25 : 10);
                   const progresso = hab.noTopo
                     ? 100
                     : Math.round(((hab.progressoNoTier || 0) / passo) * 100);
@@ -266,13 +267,13 @@ export function renderizarDashboard(container, roadmaps, perfil = null) {
     ${renderizarListaHabilidades(
       perfil?.habilidadesBase,
       "Habilidades Base",
-      "Áreas de estudo (atributos das tarefas). Tier a cada 50 níveis."
+      "Áreas de estudo (atributos das tarefas). Tier a cada 25 níveis."
     )}
 
     ${renderizarListaHabilidades(
       perfil?.habilidadesEspeciais,
       "Habilidades Especiais",
-      "Competências desenvolvidas. Tier a cada 15 níveis."
+      "Competências desenvolvidas. Tier a cada 10 níveis."
     )}
 
     <section class="painel-secao">
@@ -328,4 +329,7 @@ export function renderizarDashboard(container, roadmaps, perfil = null) {
       </p>
     </section>
   `;
+
+  marcarEntrada(container);
+  aplicarStagger(container);
 }

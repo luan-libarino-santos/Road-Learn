@@ -94,7 +94,7 @@ export function renderizarGrafoDependencias(tarefas) {
       <svg class="grafo-svg" viewBox="0 0 ${width} ${Math.max(height, 80)}" role="img" aria-label="Grafo de dependências">
         <defs>
           <marker id="seta-grafo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#5a5a64"></path>
+            <path d="M0,0 L6,3 L0,6 Z" fill="var(--grafo-arrow)"></path>
           </marker>
         </defs>
         ${edges
@@ -118,14 +118,14 @@ export function renderizarGrafoDependencias(tarefas) {
               .filter(Boolean)
               .join(" ");
 
-            let fill = "#1c1c1f";
+            let fill = "var(--grafo-fill)";
             let stroke = tipo.cor;
             if (t.concluida) {
-              fill = "rgba(122, 158, 126, 0.2)";
-              stroke = "#7a9e7e";
+              fill = "var(--grafo-done-fill)";
+              stroke = "var(--grafo-done)";
             } else if (bloqueada) {
-              fill = "#161618";
-              stroke = "#3a3a42";
+              fill = "var(--grafo-fill-blocked)";
+              stroke = "var(--grafo-stroke-blocked)";
             }
 
             return `

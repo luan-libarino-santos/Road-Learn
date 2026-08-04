@@ -23,6 +23,7 @@ Aplicação local para **planejar, acompanhar e organizar roadmaps de estudo**. 
 | Histórico | Linha do tempo por tarefa |
 | Painel / Ficha | Atributos, XP, nível, você×você, heatmap neutro |
 | Importação JSON | Planos completos (IA-friendly) |
+| **Projeto Final** | Capstone por roadmap (≥80% tarefas): 3 tópicos IA → 1 escolhido → projeto com checklist, docs e boas práticas |
 
 ---
 
@@ -95,10 +96,23 @@ O prompt atualizado em `docs/GERAR_ROADMAP.md` inclui `competencias` e o víncul
 
 ---
 
+## 5b. Projeto Final (capstone por roadmap)
+
+Com **≥ 80% das tarefas** do roadmap concluídas, o usuário pode gerar **um** Projeto Final (substitui se regenerar):
+
+1. **Fase 1 (mesmo modal):** a IA sugere **3 tópicos** distintos de portfólio (contexto enxuto: títulos das tarefas, competências, domínio).
+2. O usuário escolhe **1** tópico.
+3. **Fase 2 (mesmo modal):** a IA gera o projeto completo — objetivo, stack, requisitos, checklist, etapas, README, `.gitignore`, estrutura de pastas e boas práticas.
+
+Dados em `data/projetos-finais.json`. Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_FINAL.md` e `docs/INSTRUCOES_IA_PROJETO_FINAL.md`.  
+A conclusão do Projeto Final **não** altera o domínio permanente das competências (previsto para evolução futura).
+
+---
+
 ## 6. Onde roda
 
 - Porta 3000 · `iniciar.bat` / `npm start`
-- Dados em `data/roadmaps.json`
+- Dados em `data/roadmaps.json` e `data/projetos-finais.json`
 - Sem login
 
 ---

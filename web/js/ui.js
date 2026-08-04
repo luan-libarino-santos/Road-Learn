@@ -38,6 +38,8 @@ import { renderizarDashboard } from "./dashboard.js";
 import { renderizarGrafoDependencias } from "./grafo.js";
 import { api } from "./api.js";
 import { carregarPerfil, invalidarPerfil } from "./profile.js";
+import { renderizarAparencia } from "./aparencia.js";
+import { marcarEntrada, aplicarStagger } from "./motion.js";
 import {
   obterGrupos,
   obterAtribuicao,
@@ -49,9 +51,18 @@ import {
   atribuirRoadmapSidebar,
   reordenarRoadmapsSidebar,
 } from "./sidebar-meta.js";
+import {
+  PROGRESSO_MINIMO_PROJETO_FINAL,
+  carregarProjetoFinal,
+  obterProjetoEmCache,
+  invalidarCacheProjeto,
+  renderizarPainelProjetoFinal,
+  abrirModalGerarProjetoFinal,
+} from "./projetos-finais.js";
 
 let roadmapAtivoId = null;
 let vistaPainel = false;
+let vistaAparencia = false;
 let filtroTarefas = "todas";
 let filtroTag = "";
 let abaRoadmap = "tarefas";
@@ -411,6 +422,24 @@ export function renderizarSidebar() {
   lista.appendChild(liPainel);
   liPainel.querySelector("button").addEventListener("click", () => {
     vistaPainel = true;
+    vistaAparencia = false;
+    roadmapAtivoId = null;
+    atualizarTela();
+  });
+
+  const liAparencia = document.createElement("li");
+  liAparencia.innerHTML = `
+    <button class="roadmap-btn aparencia-btn ${vistaAparencia ? "ativo" : ""}" data-acao-nav="aparencia" title="Personalização — identidade e tema">
+      <span class="roadmap-btn-nome">
+        <span class="roadmap-btn-inicial" aria-hidden="true">P</span>
+        <span class="roadmap-btn-nome-texto">Personalização</span>
+      </span>
+      <span class="roadmap-btn-meta">Identidade · tema</span>
+    </button>`;
+  lista.appendChild(liAparencia);
+  liAparencia.querySelector("button").addEventListener("click", () => {
+    vistaAparencia = true;
+    vistaPainel = false;
     roadmapAtivoId = null;
     atualizarTela();
   });
@@ -436,7 +465,7 @@ export function renderizarSidebar() {
   roadmapsVisiveis.forEach((roadmap, posicao) => {
     const li = document.createElement("li");
     li.className = "sidebar-roadmap-item";
-    const ativo = !vistaPainel && roadmap.id === roadmapAtivoId;
+    const ativo = !vistaPainel && !vistaAparencia && roadmap.id === roadmapAtivoId;
     li.innerHTML = `
       <div class="sidebar-roadmap-ordem">
         <button type="button" class="btn-icone btn-mover-sidebar" data-acao-sidebar="roadmap-cima" data-roadmap="${roadmap.id}" title="Mover para cima" ${posicao === 0 ? "disabled" : ""}>↑</button>
@@ -501,10 +530,13 @@ function renderizarMetricas(metricas, classeExtra = "") {
 function renderizarAbasRoadmap(roadmap) {
   const nComp = (roadmap.competencias ?? []).length;
   const nTarefas = (roadmap.tarefas ?? []).length;
+  const projetoCache = obterProjetoEmCache(roadmap.id);
+  const temProjeto = Boolean(projetoCache);
   const abas = [
     { id: "competencias", label: "Competências", contagem: nComp },
     { id: "arvore", label: "Árvore", contagem: nTarefas },
     { id: "tarefas", label: "Tarefas", contagem: nTarefas },
+    { id: "projeto", label: "Projeto", contagem: temProjeto ? 1 : 0 },
   ];
 
   return `
@@ -537,6 +569,16 @@ function renderizarPainelAba(roadmap, metricas, dominioGeral, contagens, tags, t
         </section>
       </div>
     `;
+  }
+
+  if (abaRoadmap === "projeto") {
+    const emCache = obterProjetoEmCache(roadmap.id);
+    return renderizarPainelProjetoFinal({
+      roadmap,
+      progressoTarefas: metricas.progresso,
+      projeto: emCache === undefined ? null : emCache,
+      carregando: emCache === undefined,
+    });
   }
 
   return `
@@ -1473,12 +1515,19 @@ export function renderizarRoadmap(roadmapId) {
   const dominioGeral = calcularDominioGeral(roadmap);
   const contagens = contarPorFiltro(roadmap.tarefas);
   const tags = listarTags(roadmap.tarefas);
+  const projetoCache = obterProjetoEmCache(roadmap.id);
+  const temProjeto = Boolean(projetoCache);
+  const elegivelPf = metricas.progresso >= PROGRESSO_MINIMO_PROJETO_FINAL;
 
   const podeReordenar = filtroTarefas === "todas" && !filtroTag;
   const tarefasOrdenadas = ordenarTarefasPorOrdem(
     filtrarTarefas(roadmap.tarefas, filtroTarefas, filtroTag)
   );
   const tarefasCompletas = ordenarTarefasPorOrdem(roadmap.tarefas);
+
+  const botaoPf = temProjeto
+    ? `<button class="btn-secundario btn-sm" data-acao="gerar-projeto-final" data-id="${roadmap.id}" data-regenerar="1" ${elegivelPf ? "" : "disabled"} title="${elegivelPf ? "Substitui o Projeto Final atual" : `${metricas.progresso}% — precisa de ${PROGRESSO_MINIMO_PROJETO_FINAL}%`}">Regenerar Projeto</button>`
+    : `<button class="btn-secundario btn-sm" data-acao="gerar-projeto-final" data-id="${roadmap.id}" ${elegivelPf ? "" : "disabled"} title="${elegivelPf ? "Gerar Projeto Final com IA" : `${metricas.progresso}% — precisa de ${PROGRESSO_MINIMO_PROJETO_FINAL}%`}">Gerar Projeto Final</button>`;
 
   elementos.conteudo().innerHTML = `
     <header class="roadmap-header">
@@ -1487,6 +1536,7 @@ export function renderizarRoadmap(roadmapId) {
         ${roadmap.descricao ? `<p class="roadmap-descricao">${escaparHtml(roadmap.descricao)}</p>` : ""}
       </div>
       <div class="roadmap-header-acoes">
+        ${botaoPf}
         <button class="btn-secundario btn-sm" data-acao="editar-roadmap" data-id="${roadmap.id}">Editar</button>
         <button class="btn-perigo btn-sm" data-acao="excluir-roadmap" data-id="${roadmap.id}">Excluir</button>
       </div>
@@ -1566,6 +1616,58 @@ async function handleAcao(e) {
   if (acao === "trocar-aba") {
     abaRoadmap = el.dataset.aba || "tarefas";
     atualizarTela();
+    return;
+  }
+
+  if (acao === "gerar-projeto-final") {
+    const roadmapId = el.dataset.roadmap || el.dataset.id || roadmapAtivoId;
+    if (!roadmapId) return;
+    abrirModalGerarProjetoFinal({
+      roadmapId,
+      regenerar: el.dataset.regenerar === "1",
+      abrirModal,
+      fecharModal,
+      atualizarTela,
+      mostrarErro,
+      elementos,
+    });
+    return;
+  }
+
+  if (acao === "pf-toggle-item") {
+    await executarAcao(async () => {
+      const atualizado = await api.toggleItemProjetoFinal(el.dataset.projeto, {
+        colecao: el.dataset.colecao,
+        itemId: el.dataset.item,
+        etapaId: el.dataset.etapa || undefined,
+        concluido: el.checked,
+      });
+      invalidarCacheProjeto(atualizado.roadmapId);
+      await carregarProjetoFinal(atualizado.roadmapId, { forcar: true });
+      abaRoadmap = "projeto";
+    });
+    return;
+  }
+
+  if (acao === "pf-marcar-concluido") {
+    await executarAcao(async () => {
+      const concluido = el.dataset.concluido === "1";
+      const atualizado = await api.atualizarProjetoFinal(el.dataset.projeto, { concluido });
+      invalidarCacheProjeto(atualizado.roadmapId);
+      await carregarProjetoFinal(atualizado.roadmapId, { forcar: true });
+      abaRoadmap = "projeto";
+    });
+    return;
+  }
+
+  if (acao === "pf-excluir") {
+    if (!confirm("Excluir o Projeto Final deste roadmap?")) return;
+    await executarAcao(async () => {
+      await api.excluirProjetoFinal(el.dataset.projeto);
+      invalidarCacheProjeto(el.dataset.roadmap);
+      await carregarProjetoFinal(el.dataset.roadmap, { forcar: true });
+      abaRoadmap = "projeto";
+    });
     return;
   }
 
@@ -1681,6 +1783,7 @@ async function handleAcao(e) {
     if (confirm(`Excluir o roadmap "${obterRoadmapPorId(el.dataset.id)?.nome}"? Esta ação não pode ser desfeita.`)) {
       await executarAcao(async () => {
         await excluirRoadmap(el.dataset.id);
+        invalidarCacheProjeto(el.dataset.id);
         roadmapAtivoId = null;
         filtroTarefas = "todas";
         filtroTag = "";
@@ -1694,6 +1797,7 @@ async function handleAcao(e) {
 export function selecionarRoadmap(id) {
   roadmapAtivoId = id;
   vistaPainel = false;
+  vistaAparencia = false;
   filtroTarefas = "todas";
   filtroTag = "";
   abaRoadmap = "tarefas";
@@ -1726,6 +1830,7 @@ export function mostrarModalNovoRoadmap() {
         await atualizarRoadmap(roadmap.id, { competencias: comps });
       }
       vistaPainel = false;
+      vistaAparencia = false;
       roadmapAtivoId = roadmap.id;
       filtroTarefas = "todas";
       filtroTag = "";
@@ -2068,6 +2173,7 @@ export function mostrarModalImportarJson() {
       const resultado = await importarRoadmaps(payload);
       const primeiro = resultado.roadmaps?.[0];
       vistaPainel = false;
+      vistaAparencia = false;
       if (primeiro) {
         roadmapAtivoId = primeiro.id;
         filtroTarefas = "todas";
@@ -2179,8 +2285,29 @@ async function atualizarTela() {
     }
     return;
   }
+  if (vistaAparencia) {
+    try {
+      const perfil = await carregarPerfil({ forcar: true });
+      renderizarAparencia(elementos.conteudo(), perfil);
+    } catch (erro) {
+      renderizarAparencia(elementos.conteudo(), null);
+      mostrarErro(erro.message);
+    }
+    return;
+  }
   if (roadmapAtivoId && obterRoadmapPorId(roadmapAtivoId)) {
+    if (obterProjetoEmCache(roadmapAtivoId) === undefined) {
+      try {
+        await carregarProjetoFinal(roadmapAtivoId);
+      } catch (erro) {
+        invalidarCacheProjeto(roadmapAtivoId);
+        mostrarErro(erro.message);
+      }
+    }
     renderizarRoadmap(roadmapAtivoId);
+    const conteudo = elementos.conteudo();
+    marcarEntrada(conteudo);
+    aplicarStagger(conteudo);
   } else {
     roadmapAtivoId = null;
     renderizarEstadoVazio();
@@ -2208,6 +2335,11 @@ export async function inicializarUI() {
 
   try {
     await carregarDados();
+    try {
+      await carregarPerfil({ forcar: true });
+    } catch {
+      /* tema fica no default se profile falhar */
+    }
     const roadmaps = obterRoadmaps();
     if (roadmaps.length > 0) roadmapAtivoId = roadmaps[0].id;
     atualizarTela();

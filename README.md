@@ -79,6 +79,7 @@ Os dados ficam somente na máquina que executa a aplicação:
 
 - `data/roadmaps.json`: roadmaps e tarefas.
 - `data/sidebar.json`: grupos, ordem e atribuições da sidebar.
+- `data/projetos-finais.json`: Projeto Final (um por roadmap).
 
 Esses arquivos são criados em tempo de execução e ignorados pelo Git. Faça backup da pasta `data/` antes de reinstalar ou mover o projeto.
 
@@ -91,6 +92,7 @@ Com o servidor em execução, os principais endpoints são:
 - `POST /api/roadmaps/import`: importa um ou vários roadmaps em JSON.
 - Rotas em `/api/roadmaps/:id/tarefas`: gerenciam tarefas, subtarefas e tempo.
 - Rotas em `/api/sidebar`: gerenciam grupos, ordem e atribuições.
+- Rotas em `/api/projetos-finais`: Projeto Final (sugerir tópicos, gerar, CRUD, toggles).
 
 Os formatos aceitos na importação estão documentados em [GERAR_ROADMAP.md](docs/GERAR_ROADMAP.md).
 
@@ -105,6 +107,7 @@ Road-Learn/
 │   ├── routes/             # rotas HTTP
 │   ├── db.js               # persistência dos roadmaps
 │   ├── db-sidebar.js       # persistência da sidebar
+│   ├── db-projetos-finais.js
 │   └── index.js            # entrada do servidor Express
 ├── web/                    # interface web
 ├── .env.example            # exemplo de configuração opcional
@@ -116,6 +119,8 @@ Road-Learn/
 - [Capacidades do sistema](docs/CAPACIDADES.md)
 - [Geração e importação de roadmaps](docs/GERAR_ROADMAP.md)
 - [Instruções para geração com IA](docs/INSTRUCOES_IA_ROADMAP.md)
+- [Instruções — tópicos de Projeto Final](docs/INSTRUCOES_IA_TOPICOS_PROJETO_FINAL.md)
+- [Instruções — Projeto Final completo](docs/INSTRUCOES_IA_PROJETO_FINAL.md)
 - [Templates de exemplo](docs/templates/)
 
 ## Limitações atuais

@@ -73,4 +73,19 @@ export const api = {
     requisicao("PUT", "/sidebar/reordenar", { grupoId: grupoId || null, ids }),
   obterPerfil: () => requisicao("GET", "/profile"),
   reconstruirPerfil: () => requisicao("POST", "/profile/rebuild"),
+  atualizarIdentidade: (dados) => requisicao("PATCH", "/profile/identidade", dados),
+  atualizarTema: (dados) => requisicao("PATCH", "/profile/tema", dados),
+
+  obterProjetoFinal: (roadmapId) =>
+    requisicao("GET", `/projetos-finais?roadmapId=${encodeURIComponent(roadmapId)}`),
+  obterProjetoFinalPorId: (id) => requisicao("GET", `/projetos-finais/${id}`),
+  sugerirTopicosProjetoFinal: (roadmapId) =>
+    requisicao("POST", "/projetos-finais/sugerir-topicos", { roadmapId }),
+  gerarProjetoFinalIa: (roadmapId, topico) =>
+    requisicao("POST", "/projetos-finais/gerar", { roadmapId, topico }),
+  salvarProjetoFinal: (dados) => requisicao("POST", "/projetos-finais", dados),
+  atualizarProjetoFinal: (id, dados) => requisicao("PUT", `/projetos-finais/${id}`, dados),
+  toggleItemProjetoFinal: (id, dados) =>
+    requisicao("PUT", `/projetos-finais/${id}/itens`, dados),
+  excluirProjetoFinal: (id) => requisicao("DELETE", `/projetos-finais/${id}`),
 };

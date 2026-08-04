@@ -1,6 +1,24 @@
-import { lerPerfil, salvarPerfil, perfilVazio } from "./db-profile.js";
+import {
+  lerPerfil,
+  salvarPerfil,
+  perfilVazio,
+  identidadePadrao,
+  temaPadrao,
+  ICONES_IDENTIDADE,
+  PRESETS_TEMA,
+} from "./db-profile.js";
 import { encontrarHabilidadeSimilar } from "./habilidades-match.js";
 import { lerRoadmaps } from "./db.js";
+
+function erroHttp(status, message) {
+  const erro = new Error(message);
+  erro.status = status;
+  return erro;
+}
+
+function hexValido(v) {
+  return typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v.trim());
+}
 
 const XP_TAREFA = 10;
 const XP_SUBTAREFA = 2;
@@ -8,6 +26,24 @@ const XP_ROADMAP = 100;
 const LOG_MAX = 20;
 const TIERS = ["Comum", "Rara", "Épica", "Lendária", "Celestial"];
 const BADGE_FORMAS = ["", "circulo", "losango", "hexagono", "escudo", "estrela"];
+const MULTIPLICADOR_DIFICULDADE = {
+  facil: 1,
+  medio: 2,
+  dificil: 3,
+};
+
+function multiplicadorDificuldade(tarefa) {
+  const chave = String(tarefa?.dificuldade ?? "facil").toLowerCase();
+  return MULTIPLICADOR_DIFICULDADE[chave] ?? 1;
+}
+
+function xpTarefa(tarefa) {
+  return XP_TAREFA * multiplicadorDificuldade(tarefa);
+}
+
+function xpSubtarefa(tarefa) {
+  return XP_SUBTAREFA * multiplicadorDificuldade(tarefa);
+}
 
 function gerarId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -53,7 +89,7 @@ export function calcularNivelXp(xpBruto) {
 
 export function calcularTierHabilidade(tipo, nivel) {
   const n = Math.max(0, Number(nivel) || 0);
-  const passo = tipo === "base" ? 50 : 15;
+  const passo = tipo === "base" ? 25 : 10;
   const indice = Math.min(TIERS.length - 1, Math.floor(n / passo));
   const noTopo = indice >= TIERS.length - 1;
   return {
@@ -197,7 +233,7 @@ async function mutarPerfil(fn) {
 export async function aoConcluirTarefa(roadmap, tarefa) {
   return mutarPerfil((perfil) => {
     aplicarHabilidadesTarefa(perfil, roadmap, tarefa, 1);
-    registrarXp(perfil, XP_TAREFA, "tarefa", `Concluiu: ${tarefa.titulo}`);
+    registrarXp(perfil, xpTarefa(tarefa), "tarefa", `Concluiu: ${tarefa.titulo}`);
     aplicarBonusRoadmap(perfil, roadmap, true);
   });
 }
@@ -205,7 +241,7 @@ export async function aoConcluirTarefa(roadmap, tarefa) {
 export async function aoReabrirTarefa(roadmap, tarefa) {
   return mutarPerfil((perfil) => {
     aplicarHabilidadesTarefa(perfil, roadmap, tarefa, -1);
-    registrarXp(perfil, -XP_TAREFA, "tarefa", `Reabriu: ${tarefa.titulo}`);
+    registrarXp(perfil, -xpTarefa(tarefa), "tarefa", `Reabriu: ${tarefa.titulo}`);
     aplicarBonusRoadmap(perfil, roadmap, false);
   });
 }
@@ -214,13 +250,13 @@ export async function aoConcluirSubtarefa(roadmap, tarefa, subtarefa, { tarefaAc
   return mutarPerfil((perfil) => {
     registrarXp(
       perfil,
-      XP_SUBTAREFA,
+      xpSubtarefa(tarefa),
       "subtarefa",
       `Subtarefa: ${subtarefa.titulo || tarefa.titulo}`
     );
     if (tarefaAcabouDeConcluir) {
       aplicarHabilidadesTarefa(perfil, roadmap, tarefa, 1);
-      registrarXp(perfil, XP_TAREFA, "tarefa", `Concluiu: ${tarefa.titulo}`);
+      registrarXp(perfil, xpTarefa(tarefa), "tarefa", `Concluiu: ${tarefa.titulo}`);
       aplicarBonusRoadmap(perfil, roadmap, true);
     }
   });
@@ -230,13 +266,13 @@ export async function aoReabrirSubtarefa(roadmap, tarefa, subtarefa, { tarefaAca
   return mutarPerfil((perfil) => {
     registrarXp(
       perfil,
-      -XP_SUBTAREFA,
+      -xpSubtarefa(tarefa),
       "subtarefa",
       `Reabriu subtarefa: ${subtarefa.titulo || tarefa.titulo}`
     );
     if (tarefaAcabouDeReabrir) {
       aplicarHabilidadesTarefa(perfil, roadmap, tarefa, -1);
-      registrarXp(perfil, -XP_TAREFA, "tarefa", `Reabriu: ${tarefa.titulo}`);
+      registrarXp(perfil, -xpTarefa(tarefa), "tarefa", `Reabriu: ${tarefa.titulo}`);
       aplicarBonusRoadmap(perfil, roadmap, false);
     }
   });
@@ -251,9 +287,107 @@ export async function limparBonusRoadmapExcluido(roadmapId) {
   return enriquecerPerfil(perfil);
 }
 
+export async function atualizarIdentidade(dados) {
+  if (!dados || typeof dados !== "object") {
+    throw erroHttp(400, "Dados de identidade inválidos");
+  }
+
+  const perfil = await lerPerfil();
+  const atual = perfil.identidade ?? identidadePadrao();
+  const proxima = { ...atual };
+
+  if (dados.nomeExibicao !== undefined) {
+    proxima.nomeExibicao = String(dados.nomeExibicao ?? "").trim().slice(0, 48);
+  }
+  if (dados.icone !== undefined) {
+    if (!ICONES_IDENTIDADE.includes(dados.icone)) {
+      throw erroHttp(400, "Ícone inválido");
+    }
+    proxima.icone = dados.icone;
+  }
+  if (dados.cor !== undefined) {
+    if (!hexValido(dados.cor)) {
+      throw erroHttp(400, "Cor inválida (use #RRGGBB)");
+    }
+    proxima.cor = dados.cor.trim().toLowerCase();
+  }
+
+  perfil.identidade = proxima;
+  await salvarPerfil(perfil);
+  return enriquecerPerfil(perfil);
+}
+
+export async function atualizarTema(dados) {
+  if (!dados || typeof dados !== "object") {
+    throw erroHttp(400, "Dados de tema inválidos");
+  }
+
+  const perfil = await lerPerfil();
+  const atual = perfil.tema ?? temaPadrao();
+  const proximo = {
+    preset: atual.preset,
+    custom: { ...temaPadrao().custom, ...(atual.custom || {}) },
+  };
+
+  if (dados.preset !== undefined) {
+    if (!PRESETS_TEMA.includes(dados.preset)) {
+      throw erroHttp(400, "Preset de tema inválido");
+    }
+    proximo.preset = dados.preset;
+  }
+
+  if (dados.custom !== undefined) {
+    if (dados.custom === null) {
+      proximo.custom = { ...temaPadrao().custom };
+    } else if (typeof dados.custom !== "object") {
+      throw erroHttp(400, "Custom de tema inválido");
+    } else {
+      const c = dados.custom;
+      const hexOuNull = (v) => {
+        if (v == null || v === "") return null;
+        if (!hexValido(v)) throw erroHttp(400, "Cor inválida (use #RRGGBB)");
+        return v.trim().toLowerCase();
+      };
+
+      if ("accent" in c) proximo.custom.accent = hexOuNull(c.accent);
+      if ("bgApp" in c) proximo.custom.bgApp = hexOuNull(c.bgApp);
+      if ("bgElevated" in c) proximo.custom.bgElevated = hexOuNull(c.bgElevated);
+      if ("bgSurface" in c) proximo.custom.bgSurface = hexOuNull(c.bgSurface);
+      if ("bgGradientTo" in c) proximo.custom.bgGradientTo = hexOuNull(c.bgGradientTo);
+
+      if ("radius" in c) {
+        if (c.radius == null || c.radius === "") {
+          proximo.custom.radius = null;
+        } else {
+          const n = Number(c.radius);
+          if (!Number.isFinite(n)) throw erroHttp(400, "Radius inválido");
+          proximo.custom.radius = Math.max(0, Math.min(24, Math.round(n)));
+        }
+      }
+
+      if ("backgroundMode" in c) {
+        if (c.backgroundMode !== "solid" && c.backgroundMode !== "gradient") {
+          throw erroHttp(400, "backgroundMode deve ser solid ou gradient");
+        }
+        proximo.custom.backgroundMode = c.backgroundMode;
+      }
+    }
+  }
+
+  perfil.tema = proximo;
+  await salvarPerfil(perfil);
+  return enriquecerPerfil(perfil);
+}
+
 export async function rebuildPerfil() {
+  const anterior = await lerPerfil();
+  const identidade = anterior.identidade ?? identidadePadrao();
+  const tema = anterior.tema ?? temaPadrao();
+
   const roadmaps = await lerRoadmaps();
   const perfil = perfilVazio();
+  perfil.identidade = identidade;
+  perfil.tema = tema;
 
   const eventos = [];
 
@@ -287,13 +421,13 @@ export async function rebuildPerfil() {
     if (ev.tipo === "subtarefa") {
       registrarXp(
         perfil,
-        XP_SUBTAREFA,
+        xpSubtarefa(ev.tarefa),
         "subtarefa",
         `Subtarefa: ${ev.subtarefa.titulo || ev.tarefa.titulo}`
       );
     } else {
       aplicarHabilidadesTarefa(perfil, ev.roadmap, ev.tarefa, 1);
-      registrarXp(perfil, XP_TAREFA, "tarefa", `Concluiu: ${ev.tarefa.titulo}`);
+      registrarXp(perfil, xpTarefa(ev.tarefa), "tarefa", `Concluiu: ${ev.tarefa.titulo}`);
     }
   }
 
