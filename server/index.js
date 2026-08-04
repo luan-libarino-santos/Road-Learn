@@ -7,6 +7,7 @@ import roadmapsRouter from "./routes/roadmaps.js";
 import sidebarRouter from "./routes/sidebar.js";
 import profileRouter from "./routes/profile.js";
 import projetosFinaisRouter from "./routes/projetos-finais.js";
+import projetosIntegradosRouter from "./routes/projetos-integrados.js";
 import irRouter from "./ir/routes/ir.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,7 @@ app.use("/api/roadmaps", roadmapsRouter);
 app.use("/api/sidebar", sidebarRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/projetos-finais", projetosFinaisRouter);
+app.use("/api/projetos-integrados", projetosIntegradosRouter);
 app.use("/api/ir", irRouter);
 
 app.get("/", (_req, res) => {
@@ -43,7 +45,9 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`  → PC:      http://localhost:${PORT}`);
   const ip = obterIpLocal();
   if (ip) console.log(`  → Celular: http://${ip}:${PORT}`);
-  console.log(`\n  Dados salvos em: data/roadmaps.json, data/projetos-finais.json\n`);
+  console.log(
+    `\n  Dados salvos em: data/roadmaps.json, data/projetos-finais.json, data/projetos-integrados.json\n`
+  );
 });
 
 server.on("error", (erro) => {

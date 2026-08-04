@@ -59,10 +59,22 @@ import {
   renderizarPainelProjetoFinal,
   abrirModalGerarProjetoFinal,
 } from "./projetos-finais.js";
+import {
+  listarProjetosIntegrados,
+  carregarProjetoIntegrado,
+  obterProjetoIntegradoEmCache,
+  obterListaPiEmCache,
+  invalidarCacheProjetosIntegrados,
+  calcularProgressoProjetoIntegrado,
+  renderizarPainelProjetoIntegrado,
+  abrirModalGerarProjetoIntegrado,
+} from "./projetos-integrados.js";
 
 let roadmapAtivoId = null;
 let vistaPainel = false;
 let vistaAparencia = false;
+let vistaProjetoIntegrado = false;
+let projetoIntegradoAtivoId = null;
 let filtroTarefas = "todas";
 let filtroTag = "";
 let abaRoadmap = "tarefas";
@@ -423,6 +435,8 @@ export function renderizarSidebar() {
   liPainel.querySelector("button").addEventListener("click", () => {
     vistaPainel = true;
     vistaAparencia = false;
+    vistaProjetoIntegrado = false;
+    projetoIntegradoAtivoId = null;
     roadmapAtivoId = null;
     atualizarTela();
   });
@@ -440,9 +454,73 @@ export function renderizarSidebar() {
   liAparencia.querySelector("button").addEventListener("click", () => {
     vistaAparencia = true;
     vistaPainel = false;
+    vistaProjetoIntegrado = false;
+    projetoIntegradoAtivoId = null;
     roadmapAtivoId = null;
     atualizarTela();
   });
+
+  const liSecaoPi = document.createElement("li");
+  liSecaoPi.className = "sidebar-secao-titulo";
+  liSecaoPi.innerHTML = `<span>Projetos Integrados</span>`;
+  lista.appendChild(liSecaoPi);
+
+  const liNovoPi = document.createElement("li");
+  liNovoPi.innerHTML = `
+    <button class="roadmap-btn pi-novo-btn" data-acao-nav="novo-projeto-integrado" title="Criar Projeto Integrado com vários roadmaps">
+      <span class="roadmap-btn-nome">
+        <span class="roadmap-btn-inicial" aria-hidden="true">+</span>
+        <span class="roadmap-btn-nome-texto">Novo integrado</span>
+      </span>
+      <span class="roadmap-btn-meta">2+ roadmaps</span>
+    </button>`;
+  lista.appendChild(liNovoPi);
+  liNovoPi.querySelector("button").addEventListener("click", () => {
+    abrirModalGerarProjetoIntegrado({
+      abrirModal,
+      fecharModal,
+      atualizarTela,
+      mostrarErro,
+      elementos,
+      onSalvo: async (salvo) => {
+        vistaProjetoIntegrado = true;
+        vistaPainel = false;
+        vistaAparencia = false;
+        roadmapAtivoId = null;
+        projetoIntegradoAtivoId = salvo.id;
+        await atualizarTela();
+      },
+    });
+  });
+
+  const projetosIntegradosCache = obterListaPiEmCache() || [];
+  for (const pi of projetosIntegradosCache) {
+    const ativo =
+      vistaProjetoIntegrado && projetoIntegradoAtivoId === pi.id;
+    const prog = calcularProgressoProjetoIntegrado(pi);
+    const meta =
+      (pi.roadmapIds?.length ? `${pi.roadmapIds.length} roadmaps` : "") +
+      (prog.total ? ` · ${prog.progresso}%` : "");
+    const inicial = (pi.nome || "I").trim().charAt(0).toUpperCase() || "I";
+    const liPi = document.createElement("li");
+    liPi.innerHTML = `
+      <button class="roadmap-btn pi-btn ${ativo ? "ativo" : ""}" data-acao-nav="projeto-integrado" data-pi-id="${escaparHtml(pi.id)}" title="${escaparHtml(pi.nome)}">
+        <span class="roadmap-btn-nome">
+          <span class="roadmap-btn-inicial" aria-hidden="true">${escaparHtml(inicial)}</span>
+          <span class="roadmap-btn-nome-texto">${escaparHtml(pi.nome || "Projeto Integrado")}</span>
+        </span>
+        <span class="roadmap-btn-meta">${escaparHtml(meta)}</span>
+      </button>`;
+    lista.appendChild(liPi);
+    liPi.querySelector("button").addEventListener("click", () => {
+      vistaProjetoIntegrado = true;
+      vistaPainel = false;
+      vistaAparencia = false;
+      roadmapAtivoId = null;
+      projetoIntegradoAtivoId = pi.id;
+      atualizarTela();
+    });
+  }
 
   if (roadmaps.length === 0) {
     const vazio = document.createElement("li");
@@ -465,7 +543,7 @@ export function renderizarSidebar() {
   roadmapsVisiveis.forEach((roadmap, posicao) => {
     const li = document.createElement("li");
     li.className = "sidebar-roadmap-item";
-    const ativo = !vistaPainel && !vistaAparencia && roadmap.id === roadmapAtivoId;
+    const ativo = !vistaPainel && !vistaAparencia && !vistaProjetoIntegrado && roadmap.id === roadmapAtivoId;
     li.innerHTML = `
       <div class="sidebar-roadmap-ordem">
         <button type="button" class="btn-icone btn-mover-sidebar" data-acao-sidebar="roadmap-cima" data-roadmap="${roadmap.id}" title="Mover para cima" ${posicao === 0 ? "disabled" : ""}>↑</button>
@@ -1671,6 +1749,77 @@ async function handleAcao(e) {
     return;
   }
 
+  if (acao === "gerar-projeto-integrado") {
+    const projetoId = el.dataset.projeto || projetoIntegradoAtivoId;
+    const regenerar = el.dataset.regenerar === "1";
+    let existente = null;
+    if (regenerar && projetoId) {
+      existente =
+        obterProjetoIntegradoEmCache(projetoId) ||
+        (await carregarProjetoIntegrado(projetoId).catch(() => null));
+    }
+    abrirModalGerarProjetoIntegrado({
+      regenerar,
+      projetoExistente: existente,
+      abrirModal,
+      fecharModal,
+      atualizarTela,
+      mostrarErro,
+      elementos,
+      onSalvo: async (salvo) => {
+        vistaProjetoIntegrado = true;
+        vistaPainel = false;
+        vistaAparencia = false;
+        roadmapAtivoId = null;
+        projetoIntegradoAtivoId = salvo.id;
+        await atualizarTela();
+      },
+    });
+    return;
+  }
+
+  if (acao === "pi-toggle-item") {
+    await executarAcao(async () => {
+      const atualizado = await api.toggleItemProjetoIntegrado(el.dataset.projeto, {
+        colecao: el.dataset.colecao,
+        itemId: el.dataset.item,
+        etapaId: el.dataset.etapa || undefined,
+        concluido: el.checked,
+      });
+      invalidarCacheProjetosIntegrados(atualizado.id);
+      await carregarProjetoIntegrado(atualizado.id, { forcar: true });
+      await listarProjetosIntegrados({ forcar: true });
+    });
+    return;
+  }
+
+  if (acao === "pi-marcar-concluido") {
+    await executarAcao(async () => {
+      const concluido = el.dataset.concluido === "1";
+      const atualizado = await api.atualizarProjetoIntegrado(el.dataset.projeto, {
+        concluido,
+      });
+      invalidarCacheProjetosIntegrados(atualizado.id);
+      await carregarProjetoIntegrado(atualizado.id, { forcar: true });
+      await listarProjetosIntegrados({ forcar: true });
+    });
+    return;
+  }
+
+  if (acao === "pi-excluir") {
+    if (!confirm("Excluir este Projeto Integrado?")) return;
+    await executarAcao(async () => {
+      await api.excluirProjetoIntegrado(el.dataset.projeto);
+      invalidarCacheProjetosIntegrados(el.dataset.projeto);
+      if (projetoIntegradoAtivoId === el.dataset.projeto) {
+        projetoIntegradoAtivoId = null;
+        vistaProjetoIntegrado = false;
+      }
+      await listarProjetosIntegrados({ forcar: true });
+    });
+    return;
+  }
+
   if (acao === "filtrar") {
     filtroTarefas = el.dataset.filtro;
     atualizarTela();
@@ -1784,6 +1933,8 @@ async function handleAcao(e) {
       await executarAcao(async () => {
         await excluirRoadmap(el.dataset.id);
         invalidarCacheProjeto(el.dataset.id);
+        invalidarCacheProjetosIntegrados();
+        await listarProjetosIntegrados({ forcar: true });
         roadmapAtivoId = null;
         filtroTarefas = "todas";
         filtroTag = "";
@@ -1798,6 +1949,8 @@ export function selecionarRoadmap(id) {
   roadmapAtivoId = id;
   vistaPainel = false;
   vistaAparencia = false;
+  vistaProjetoIntegrado = false;
+  projetoIntegradoAtivoId = null;
   filtroTarefas = "todas";
   filtroTag = "";
   abaRoadmap = "tarefas";
@@ -1831,6 +1984,8 @@ export function mostrarModalNovoRoadmap() {
       }
       vistaPainel = false;
       vistaAparencia = false;
+      vistaProjetoIntegrado = false;
+      projetoIntegradoAtivoId = null;
       roadmapAtivoId = roadmap.id;
       filtroTarefas = "todas";
       filtroTag = "";
@@ -2174,6 +2329,8 @@ export function mostrarModalImportarJson() {
       const primeiro = resultado.roadmaps?.[0];
       vistaPainel = false;
       vistaAparencia = false;
+      vistaProjetoIntegrado = false;
+      projetoIntegradoAtivoId = null;
       if (primeiro) {
         roadmapAtivoId = primeiro.id;
         filtroTarefas = "todas";
@@ -2295,6 +2452,36 @@ async function atualizarTela() {
     }
     return;
   }
+  if (vistaProjetoIntegrado && projetoIntegradoAtivoId) {
+    const conteudo = elementos.conteudo();
+    let projeto = obterProjetoIntegradoEmCache(projetoIntegradoAtivoId);
+    if (projeto === undefined) {
+      conteudo.innerHTML = renderizarPainelProjetoIntegrado({
+        projeto: null,
+        carregando: true,
+      });
+      try {
+        projeto = await carregarProjetoIntegrado(projetoIntegradoAtivoId);
+      } catch (erro) {
+        invalidarCacheProjetosIntegrados(projetoIntegradoAtivoId);
+        mostrarErro(erro.message);
+        projeto = null;
+      }
+    }
+    if (!projeto) {
+      projetoIntegradoAtivoId = null;
+      vistaProjetoIntegrado = false;
+      renderizarEstadoVazio();
+      return;
+    }
+    conteudo.innerHTML = renderizarPainelProjetoIntegrado({
+      projeto,
+      carregando: false,
+    });
+    marcarEntrada(conteudo);
+    aplicarStagger(conteudo);
+    return;
+  }
   if (roadmapAtivoId && obterRoadmapPorId(roadmapAtivoId)) {
     if (obterProjetoEmCache(roadmapAtivoId) === undefined) {
       try {
@@ -2339,6 +2526,11 @@ export async function inicializarUI() {
       await carregarPerfil({ forcar: true });
     } catch {
       /* tema fica no default se profile falhar */
+    }
+    try {
+      await listarProjetosIntegrados({ forcar: true });
+    } catch {
+      /* sidebar de PI fica vazia se falhar */
     }
     const roadmaps = obterRoadmaps();
     if (roadmaps.length > 0) roadmapAtivoId = roadmaps[0].id;

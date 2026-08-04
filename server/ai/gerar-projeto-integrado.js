@@ -5,15 +5,14 @@ import { fileURLToPath } from "url";
 import { MODELOS_FALLBACK } from "./gerar-roadmap.js";
 import { registrarLogIa } from "./log-ia.js";
 import {
-  assertElegivelParaProjetoFinal,
-  montarContextoCompacto,
-  montarContextoCompleto,
-  normalizarProjetoFinal,
+  carregarRoadmapsElegiveis,
+  montarContextoIntegradoCompacto,
+  montarContextoIntegradoCompleto,
+  normalizarProjetoIntegrado,
   normalizarTopicoEscolhido,
-} from "../projetos-finais-service.js";
-import { obterRoadmapPorId } from "../roadmaps-service.js";
+} from "../projetos-integrados-service.js";
 
-const TIPO_LOG = "projeto-final";
+const TIPO_LOG = "projeto-integrado";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const INSTRUCOES_TOPICOS_PATH = join(
@@ -21,14 +20,14 @@ const INSTRUCOES_TOPICOS_PATH = join(
   "..",
   "..",
   "docs",
-  "INSTRUCOES_IA_TOPICOS_PROJETO_FINAL.md"
+  "INSTRUCOES_IA_TOPICOS_PROJETO_INTEGRADO.md"
 );
 const INSTRUCOES_PROJETO_PATH = join(
   __dirname,
   "..",
   "..",
   "docs",
-  "INSTRUCOES_IA_PROJETO_FINAL.md"
+  "INSTRUCOES_IA_PROJETO_INTEGRADO.md"
 );
 
 let cacheTopicos = null;
@@ -196,23 +195,6 @@ async function gerarJsonComIa(prompt, rotulo) {
   throw erro;
 }
 
-async function carregarRoadmapElegivel(roadmapId) {
-  const id = String(roadmapId ?? "").trim();
-  if (!id) {
-    const erro = new Error("roadmapId é obrigatório");
-    erro.status = 400;
-    throw erro;
-  }
-  const roadmap = await obterRoadmapPorId(id);
-  if (!roadmap) {
-    const erro = new Error("Roadmap não encontrado");
-    erro.status = 404;
-    throw erro;
-  }
-  assertElegivelParaProjetoFinal(roadmap);
-  return roadmap;
-}
-
 const CATEGORIAS_TOPICOS = new Set([
   "software",
   "github",
@@ -260,17 +242,19 @@ function normalizarRespostaTopicos(dados) {
 }
 
 /**
- * Fase 1: sugere 3 tópicos com contexto compacto.
+ * Fase 1: sugere 3 tópicos com contexto multi-roadmap compacto.
  */
-export async function sugerirTopicosProjetoFinal(roadmapId) {
-  const roadmap = await carregarRoadmapElegivel(roadmapId);
-  const contexto = montarContextoCompacto(roadmap);
+export async function sugerirTopicosProjetoIntegrado(roadmapIds) {
+  const carregados = await carregarRoadmapsElegiveis(roadmapIds);
+  const contexto = montarContextoIntegradoCompacto(carregados.paraPrompt, {
+    avisoTruncamento: carregados.avisoTruncamento,
+  });
 
   const prompt = `${obterInstrucoesTopicos()}
 
 ---
 
-## Contexto do roadmap (compacto)
+## Contexto dos roadmaps (compacto, multi)
 
 \`\`\`json
 ${JSON.stringify(contexto)}
@@ -278,24 +262,33 @@ ${JSON.stringify(contexto)}
 
 Responda APENAS com o JSON válido dos 3 tópicos, sem markdown e sem explicações.`;
 
-  const { dados, modeloUsado } = await gerarJsonComIa(prompt, "tópicos do Projeto Final");
+  const { dados, modeloUsado } = await gerarJsonComIa(
+    prompt,
+    "tópicos do Projeto Integrado"
+  );
   const topicos = normalizarRespostaTopicos(dados);
-  return { topicos, modeloUsado };
+  return {
+    topicos,
+    modeloUsado,
+    aviso: carregados.avisoTruncamento || undefined,
+  };
 }
 
 /**
- * Fase 2: gera o Projeto Final completo para o tópico escolhido.
+ * Fase 2: gera o Projeto Integrado completo para o tópico escolhido.
  */
-export async function gerarProjetoFinalComIa(roadmapId, topicoBruto) {
-  const roadmap = await carregarRoadmapElegivel(roadmapId);
+export async function gerarProjetoIntegradoComIa(roadmapIds, topicoBruto) {
+  const carregados = await carregarRoadmapsElegiveis(roadmapIds);
   const topico = normalizarTopicoEscolhido(topicoBruto);
-  const contexto = montarContextoCompleto(roadmap);
+  const contexto = montarContextoIntegradoCompleto(carregados.paraPrompt, {
+    avisoTruncamento: carregados.avisoTruncamento,
+  });
 
   const prompt = `${obterInstrucoesProjeto()}
 
 ---
 
-## Contexto do roadmap
+## Contexto dos roadmaps (orçado)
 
 \`\`\`json
 ${JSON.stringify(contexto)}
@@ -307,14 +300,14 @@ ${JSON.stringify(contexto)}
 ${JSON.stringify(topico)}
 \`\`\`
 
-Responda APENAS com o JSON válido do Projeto Final, sem markdown e sem explicações.`;
+Responda APENAS com o JSON válido do Projeto Integrado, sem markdown e sem explicações.`;
 
-  const { dados, modeloUsado } = await gerarJsonComIa(prompt, "Projeto Final");
+  const { dados, modeloUsado } = await gerarJsonComIa(prompt, "Projeto Integrado");
 
-  const projeto = normalizarProjetoFinal(
+  const projeto = normalizarProjetoIntegrado(
     {
       ...dados,
-      roadmapId: roadmap.id,
+      roadmapIds: carregados.roadmapIds,
       topicoOrigem: {
         titulo: topico.titulo,
         resumo: topico.resumo,
@@ -328,8 +321,12 @@ Responda APENAS com o JSON válido do Projeto Final, sem markdown e sem explica�
           ? dados.stackObrigatoria
           : topico.stackSugerida,
     },
-    { roadmapId: roadmap.id }
+    { roadmapIds: carregados.roadmapIds }
   );
 
-  return { projeto, modeloUsado };
+  return {
+    projeto,
+    modeloUsado,
+    aviso: carregados.avisoTruncamento || undefined,
+  };
 }

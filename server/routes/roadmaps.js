@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as service from "../roadmaps-service.js";
 import { gerarRoadmapComIa, previewPromptGeracao } from "../ai/gerar-roadmap.js";
 import { excluirProjetoPorRoadmapId } from "../projetos-finais-service.js";
+import { removerRoadmapDosProjetosIntegrados } from "../projetos-integrados-service.js";
 
 const router = Router();
 
@@ -153,6 +154,7 @@ router.delete("/:id", async (req, res, next) => {
   try {
     await service.excluirRoadmap(req.params.id);
     await excluirProjetoPorRoadmapId(req.params.id);
+    await removerRoadmapDosProjetosIntegrados(req.params.id);
     res.status(204).end();
   } catch (erro) {
     next(erro);

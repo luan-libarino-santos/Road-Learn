@@ -3089,6 +3089,104 @@ textarea[name="json"] {
   border-color: var(--border-strong);
 }
 
+/* ── Projetos Integrados (sidebar + wizard) ── */
+
+.sidebar-secao-titulo {
+  list-style: none;
+  padding: 14px 12px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.main.sidebar-recolhida .sidebar-secao-titulo {
+  display: none;
+}
+
+.pi-novo-btn .roadmap-btn-inicial {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.pi-eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pi-roadmaps-meta {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.pi-vista .pf-secao,
+.pi-vista .pf-cabecalho {
+  margin-top: 16px;
+}
+
+.pi-roadmap-select {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.pi-roadmap-opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  cursor: pointer;
+}
+
+.pi-roadmap-opcao:hover {
+  border-color: var(--border-strong);
+}
+
+.pi-roadmap-opcao:has(input:checked) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-surface));
+}
+
+.pi-roadmap-opcao input {
+  margin-top: 3px;
+}
+
+.pi-roadmap-opcao-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pi-roadmap-opcao-texto em {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pi-selecao-contador {
+  margin-top: 8px;
+}
+
+#pi-json-preview {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
 /* ── Identidade / Aparência / Motion ── */
 
 .ficha-identidade {

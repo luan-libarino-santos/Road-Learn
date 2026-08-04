@@ -24,6 +24,7 @@ Aplicação local para **planejar, acompanhar e organizar roadmaps de estudo**. 
 | Painel / Ficha | Atributos, XP, nível, você×você, heatmap neutro |
 | Importação JSON | Planos completos (IA-friendly) |
 | **Projeto Final** | Capstone por roadmap (≥80% tarefas): 3 tópicos IA → 1 escolhido → projeto com checklist, docs e boas práticas |
+| **Projeto Integrado** | Capstone multi-roadmap (≥2, cada um ≥80%): ilimitados; mesma geração em 2 fases + checklist |
 
 ---
 
@@ -109,10 +110,23 @@ A conclusão do Projeto Final **não** altera o domínio permanente das competê
 
 ---
 
+## 5c. Projeto Integrado (capstone multi-roadmap)
+
+Agrega **2 ou mais** roadmaps (ex.: backend + banco + front) num único projeto. Sem limite de quantidade.
+
+1. Sidebar → **Projetos Integrados** (abaixo de Personalização) → **Novo integrado**.
+2. Seleciona roadmaps elegíveis (cada um com ≥80% de tarefas).
+3. Mesmo fluxo do Projeto Final: 3 tópicos IA → 1 escolhido → projeto completo → checklist.
+
+Contexto enviado à IA é **orçado** (até 5 roadmaps no prompt, top competências/tarefas por roadmap) para não sobrecarregar o modelo.  
+Dados em `data/projetos-integrados.json`. Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_INTEGRADO.md` e `docs/INSTRUCOES_IA_PROJETO_INTEGRADO.md`.
+
+---
+
 ## 6. Onde roda
 
 - Porta 3000 · `iniciar.bat` / `npm start`
-- Dados em `data/roadmaps.json` e `data/projetos-finais.json`
+- Dados em `data/roadmaps.json`, `data/projetos-finais.json` e `data/projetos-integrados.json`
 - Sem login
 
 ---

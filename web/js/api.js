@@ -88,4 +88,17 @@ export const api = {
   toggleItemProjetoFinal: (id, dados) =>
     requisicao("PUT", `/projetos-finais/${id}/itens`, dados),
   excluirProjetoFinal: (id) => requisicao("DELETE", `/projetos-finais/${id}`),
+
+  listarProjetosIntegrados: () => requisicao("GET", "/projetos-integrados"),
+  obterProjetoIntegradoPorId: (id) => requisicao("GET", `/projetos-integrados/${id}`),
+  sugerirTopicosProjetoIntegrado: (roadmapIds) =>
+    requisicao("POST", "/projetos-integrados/sugerir-topicos", { roadmapIds }),
+  gerarProjetoIntegradoIa: (roadmapIds, topico) =>
+    requisicao("POST", "/projetos-integrados/gerar", { roadmapIds, topico }),
+  salvarProjetoIntegrado: (dados) => requisicao("POST", "/projetos-integrados", dados),
+  atualizarProjetoIntegrado: (id, dados) =>
+    requisicao("PUT", `/projetos-integrados/${id}`, dados),
+  toggleItemProjetoIntegrado: (id, dados) =>
+    requisicao("PUT", `/projetos-integrados/${id}/itens`, dados),
+  excluirProjetoIntegrado: (id) => requisicao("DELETE", `/projetos-integrados/${id}`),
 };
