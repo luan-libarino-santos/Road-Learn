@@ -7,16 +7,35 @@ function escaparHtml(texto) {
   return div.innerHTML;
 }
 
+/**
+ * Converte horas decimais (ex.: 0.5, 2.5) em texto legível.
+ * < 1h → "30 min" | horas inteiras → "2 Horas" | misto → "2:30 Horas"
+ */
 function formatarHoras(horas) {
-  if (!horas) return "0h";
-  if (horas === 1) return "1h";
-  return `${horas}h`;
+  const n = Number(horas);
+  if (!Number.isFinite(n) || n === 0) return "0 min";
+
+  const sinal = n < 0 ? "-" : "";
+  const totalMin = Math.round(Math.abs(n) * 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+
+  if (h === 0) return `${sinal}${m} min`;
+  if (m === 0) return `${sinal}${h} ${h === 1 ? "Hora" : "Horas"}`;
+  return `${sinal}${h}:${String(m).padStart(2, "0")} Horas`;
 }
 
 function formatarDelta(valor, sufixo = "") {
   if (!valor) return `0${sufixo}`;
   const sinal = valor > 0 ? "+" : "";
   return `${sinal}${valor}${sufixo}`;
+}
+
+function formatarDeltaHoras(valor) {
+  const n = Number(valor) || 0;
+  if (n === 0) return "0 min";
+  const texto = formatarHoras(n);
+  return n > 0 ? `+${texto}` : texto;
 }
 
 function formatarDeltaXp(delta) {
@@ -145,7 +164,7 @@ function renderizarComparacao(comp) {
         <span>${comp.anterior.concluidas} tarefas</span>
       </div>
       <div class="comp-semana-delta">
-        <span class="delta-neutro">${formatarDelta(dh, "h")}</span>
+        <span class="delta-neutro">${formatarDeltaHoras(dh)}</span>
         <span class="delta-neutro">${formatarDelta(dc, " tarefas")}</span>
       </div>
     </div>
@@ -157,7 +176,7 @@ function renderizarHeatmap(dias) {
     <div class="heatmap" title="Atividade dos últimos 84 dias">
       ${dias
         .map((d) => {
-          const title = `${d.data}: ${d.concluidas} concluída(s), ${d.horas}h`;
+          const title = `${d.data}: ${d.concluidas} concluída(s), ${formatarHoras(d.horas)}`;
           return `<span class="heatmap-dia nivel-${d.nivel}" title="${title}"></span>`;
         })
         .join("")}
@@ -210,7 +229,7 @@ function renderizarBarrasSemana(semanas) {
       ${semanas
         .map(
           (s) => `
-        <div class="barra-semana-item" title="${s.concluidas} tarefas · ${s.horas}h">
+        <div class="barra-semana-item" title="${s.concluidas} tarefas · ${formatarHoras(s.horas)}">
           <div class="barra-semana-coluna">
             <div class="barra-semana-preenchimento" style="height: ${((s.horas || s.concluidas) / max) * 100}%"></div>
           </div>
@@ -229,7 +248,7 @@ function renderizarTempoNaSemana(dias) {
       ${dias
         .map(
           (d) => `
-        <div class="barra-semana-item ${d.ehHoje ? "barra-dia-hoje" : ""}" title="${d.data}: ${d.horas}h · ${d.concluidas} tarefa(s)">
+        <div class="barra-semana-item ${d.ehHoje ? "barra-dia-hoje" : ""}" title="${d.data}: ${formatarHoras(d.horas)} · ${d.concluidas} tarefa(s)">
           <span class="barra-dia-valor">${formatarHoras(d.horas)}</span>
           <div class="barra-semana-coluna">
             <div class="barra-semana-preenchimento" style="height: ${(d.horas / max) * 100}%"></div>
