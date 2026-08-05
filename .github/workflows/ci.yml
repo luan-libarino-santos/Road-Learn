@@ -37,6 +37,9 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Verificar SQLite (better-sqlite3)
+        run: node -e "import('better-sqlite3').then(() => console.log('better-sqlite3 ok'))"
+
       - name: Executar Lint (se existir)
         run: |
           if npm run | grep -q "lint"; then

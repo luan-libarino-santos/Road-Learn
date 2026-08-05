@@ -8,7 +8,8 @@ Este guia explica o formato JSON aceito pelo sistema e como criar roadmaps compl
 |-------|------|
 | **Interface** | Botão **⤓ JSON** na sidebar → colar JSON ou escolher arquivo `.json` |
 | **API** | `POST /api/roadmaps/import` com body JSON |
-| **Arquivo vivo** | Editar `data/roadmaps.json` (só se souber o que está fazendo) |
+
+> A persistência interna é SQLite (`data/road-learn.db`). O JSON serve só para importar/exportar conteúdo — não edite o banco à mão.
 
 Templates:
 
@@ -417,12 +418,12 @@ Content-Type: application/json
 }
 ```
 
-### PowerShell
+### curl (Linux)
 
-```powershell
-Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/roadmaps/import" `
-  -ContentType "application/json" `
-  -InFile "docs\templates\roadmap-html.json"
+```bash
+curl -X POST http://localhost:3000/api/roadmaps/import \
+  -H "Content-Type: application/json" \
+  --data-binary @docs/templates/roadmap-html.json
 ```
 
 ---

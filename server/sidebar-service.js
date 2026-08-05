@@ -1,4 +1,4 @@
-import { lerSidebar, salvarSidebar } from "./db-sidebar.js";
+import { lerSidebar, salvarSidebar } from "./db/sidebar-repo.js";
 
 function gerarId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);

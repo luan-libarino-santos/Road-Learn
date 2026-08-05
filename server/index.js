@@ -3,6 +3,7 @@ import cors from "cors";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { networkInterfaces } from "os";
+import { initDb, DB_PATH } from "./db/connection.js";
 import roadmapsRouter from "./routes/roadmaps.js";
 import sidebarRouter from "./routes/sidebar.js";
 import profileRouter from "./routes/profile.js";
@@ -13,13 +14,16 @@ import irRouter from "./ir/routes/ir.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEB_DIR = join(__dirname, "..", "web");
 const PORT = process.env.PORT || 3000;
+
+initDb();
+
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/api/status", (_req, res) => {
-  res.json({ ok: true, armazenamento: "json" });
+  res.json({ ok: true, armazenamento: "sqlite" });
 });
 
 app.use("/api/roadmaps", roadmapsRouter);
@@ -45,15 +49,13 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`  → PC:      http://localhost:${PORT}`);
   const ip = obterIpLocal();
   if (ip) console.log(`  → Celular: http://${ip}:${PORT}`);
-  console.log(
-    `\n  Dados salvos em: data/roadmaps.json, data/projetos-finais.json, data/projetos-integrados.json\n`
-  );
+  console.log(`\n  Dados salvos em: ${DB_PATH}\n`);
 });
 
 server.on("error", (erro) => {
   if (erro.code === "EADDRINUSE") {
     console.error(`\n  Erro: a porta ${PORT} ja esta em uso.`);
-    console.error(`  Feche o outro servidor ou execute iniciar.bat novamente.\n`);
+    console.error(`  Feche o outro servidor ou execute o processo na porta ${PORT}.\n`);
   } else {
     console.error(erro);
   }

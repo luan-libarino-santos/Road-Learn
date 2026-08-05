@@ -1,7 +1,4 @@
-import {
-  lerProjetosIntegrados,
-  salvarProjetosIntegrados,
-} from "./db-projetos-integrados.js";
+import * as projetosRepo from "./db/projetos-repo.js";
 import {
   PROGRESSO_MINIMO_PROJETO_FINAL,
   assertElegivelParaProjetoFinal,
@@ -210,14 +207,16 @@ export function montarContextoIntegradoCompleto(roadmaps, { avisoTruncamento } =
 }
 
 async function obterLista() {
-  const lista = await lerProjetosIntegrados();
-  return lista.map((p) => {
-    try {
-      return normalizarProjetoIntegrado(p);
-    } catch {
-      return null;
-    }
-  }).filter(Boolean);
+  return projetosRepo
+    .listarProjetosIntegrados()
+    .map((p) => {
+      try {
+        return normalizarProjetoIntegrado(p);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
 }
 
 export async function listarProjetosIntegrados() {
@@ -225,8 +224,13 @@ export async function listarProjetosIntegrados() {
 }
 
 export async function obterProjetoIntegradoPorId(id) {
-  const lista = await obterLista();
-  return lista.find((p) => p.id === id) ?? null;
+  const bruto = projetosRepo.obterProjetoIntegradoPorId(id);
+  if (!bruto) return null;
+  try {
+    return normalizarProjetoIntegrado(bruto);
+  } catch {
+    return null;
+  }
 }
 
 export async function criarProjetoIntegrado(dados) {
@@ -240,19 +244,15 @@ export async function criarProjetoIntegrado(dados) {
     }
   }
 
-  const lista = await lerProjetosIntegrados();
   const projeto = normalizarProjetoIntegrado(dados, { roadmapIds });
-  lista.push(projeto);
-  await salvarProjetosIntegrados(lista);
-  return projeto;
+  return projetosRepo.upsertProjetoIntegrado(projeto);
 }
 
 export async function atualizarProjetoIntegrado(id, dados = {}) {
-  const lista = await lerProjetosIntegrados();
-  const index = lista.findIndex((p) => p.id === id);
-  if (index < 0) return null;
+  const atualBruto = projetosRepo.obterProjetoIntegradoPorId(id);
+  if (!atualBruto) return null;
 
-  const atual = normalizarProjetoIntegrado(lista[index]);
+  const atual = normalizarProjetoIntegrado(atualBruto);
   const mesclado = {
     ...atual,
     ...dados,
@@ -275,16 +275,13 @@ export async function atualizarProjetoIntegrado(id, dados = {}) {
     roadmapIds: mesclado.roadmapIds,
     preservarId: atual.id,
   });
-  lista[index] = projeto;
-  await salvarProjetosIntegrados(lista);
-  return projeto;
+  return projetosRepo.upsertProjetoIntegrado(projeto);
 }
 
 export async function excluirProjetoIntegrado(id) {
-  const lista = await lerProjetosIntegrados();
-  const nova = lista.filter((p) => p.id !== id);
-  if (nova.length === lista.length) return false;
-  await salvarProjetosIntegrados(nova);
+  const existe = projetosRepo.obterProjetoIntegradoPorId(id);
+  if (!existe) return false;
+  projetosRepo.excluirProjetoIntegrado(id);
   return true;
 }
 
@@ -296,7 +293,7 @@ export async function removerRoadmapDosProjetosIntegrados(roadmapId) {
   const id = String(roadmapId ?? "").trim();
   if (!id) return false;
 
-  const lista = await lerProjetosIntegrados();
+  const lista = projetosRepo.listarProjetosIntegrados();
   let mudou = false;
   const nova = [];
 
@@ -323,7 +320,7 @@ export async function removerRoadmapDosProjetosIntegrados(roadmapId) {
     }
   }
 
-  if (mudou) await salvarProjetosIntegrados(nova);
+  if (mudou) projetosRepo.salvarListaProjetosIntegrados(nova);
   return mudou;
 }
 
@@ -338,12 +335,11 @@ export async function toggleItemProjetoIntegrado(
   id,
   { colecao, itemId, concluido, etapaId }
 ) {
-  const lista = await lerProjetosIntegrados();
-  const index = lista.findIndex((p) => p.id === id);
-  if (index < 0) return null;
+  const bruto = projetosRepo.obterProjetoIntegradoPorId(id);
+  if (!bruto) return null;
 
-  const projeto = normalizarProjetoIntegrado(lista[index], {
-    roadmapIds: lista[index].roadmapIds,
+  const projeto = normalizarProjetoIntegrado(bruto, {
+    roadmapIds: bruto.roadmapIds,
     preservarId: id,
   });
 
@@ -393,9 +389,7 @@ export async function toggleItemProjetoIntegrado(
   }
 
   projeto.atualizadoEm = agoraIso();
-  lista[index] = projeto;
-  await salvarProjetosIntegrados(lista);
-  return projeto;
+  return projetosRepo.upsertProjetoIntegrado(projeto);
 }
 
 export { calcularProgressoProjeto, normalizarTopicoEscolhido };

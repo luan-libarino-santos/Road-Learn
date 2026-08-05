@@ -1,4 +1,4 @@
-import { lerProjetosFinais, salvarProjetosFinais } from "./db-projetos-finais.js";
+import * as projetosRepo from "./db/projetos-repo.js";
 import {
   calcularDominioCompetencias,
   calcularDominioGeral,
@@ -314,17 +314,17 @@ export function normalizarTopicoEscolhido(topico) {
 }
 
 async function obterLista() {
-  return (await lerProjetosFinais()).map((p) => normalizarProjetoFinal(p));
+  return projetosRepo.listarProjetosFinais().map((p) => normalizarProjetoFinal(p));
 }
 
 export async function obterProjetoPorRoadmapId(roadmapId) {
-  const lista = await obterLista();
-  return lista.find((p) => p.roadmapId === roadmapId) ?? null;
+  const projeto = projetosRepo.obterProjetoFinalPorRoadmapId(roadmapId);
+  return projeto ? normalizarProjetoFinal(projeto) : null;
 }
 
 export async function obterProjetoPorId(id) {
-  const lista = await obterLista();
-  return lista.find((p) => p.id === id) ?? null;
+  const projeto = projetosRepo.obterProjetoFinalPorId(id);
+  return projeto ? normalizarProjetoFinal(projeto) : null;
 }
 
 export async function upsertProjetoFinal(roadmapId, dados) {
@@ -335,8 +335,7 @@ export async function upsertProjetoFinal(roadmapId, dados) {
     throw erro;
   }
 
-  const lista = await lerProjetosFinais();
-  const existente = lista.find((p) => p.roadmapId === roadmapId);
+  const existente = projetosRepo.obterProjetoFinalPorRoadmapId(roadmapId);
   const projeto = normalizarProjetoFinal(
     { ...dados, roadmapId },
     {
@@ -348,18 +347,14 @@ export async function upsertProjetoFinal(roadmapId, dados) {
     projeto.criadoEm = existente.criadoEm || projeto.criadoEm;
   }
 
-  const semAtual = lista.filter((p) => p.roadmapId !== roadmapId);
-  semAtual.push(projeto);
-  await salvarProjetosFinais(semAtual);
-  return projeto;
+  return projetosRepo.upsertProjetoFinal(projeto);
 }
 
 export async function atualizarProjetoFinal(id, dados = {}) {
-  const lista = await lerProjetosFinais();
-  const index = lista.findIndex((p) => p.id === id);
-  if (index < 0) return null;
+  const atualBruto = projetosRepo.obterProjetoFinalPorId(id);
+  if (!atualBruto) return null;
 
-  const atual = normalizarProjetoFinal(lista[index]);
+  const atual = normalizarProjetoFinal(atualBruto);
   const mesclado = {
     ...atual,
     ...dados,
@@ -380,25 +375,15 @@ export async function atualizarProjetoFinal(id, dados = {}) {
     roadmapId: atual.roadmapId,
     preservarId: atual.id,
   });
-  lista[index] = projeto;
-  await salvarProjetosFinais(lista);
-  return projeto;
+  return projetosRepo.upsertProjetoFinal(projeto);
 }
 
 export async function excluirProjetoFinal(id) {
-  const lista = await lerProjetosFinais();
-  const nova = lista.filter((p) => p.id !== id);
-  if (nova.length === lista.length) return false;
-  await salvarProjetosFinais(nova);
-  return true;
+  return projetosRepo.excluirProjetoFinal(id);
 }
 
 export async function excluirProjetoPorRoadmapId(roadmapId) {
-  const lista = await lerProjetosFinais();
-  const nova = lista.filter((p) => p.roadmapId !== roadmapId);
-  if (nova.length === lista.length) return false;
-  await salvarProjetosFinais(nova);
-  return true;
+  return projetosRepo.excluirProjetoFinalPorRoadmapId(roadmapId);
 }
 
 const COLECOES_ITEM = new Set([
@@ -409,12 +394,11 @@ const COLECOES_ITEM = new Set([
 ]);
 
 export async function toggleItemProjeto(id, { colecao, itemId, concluido, etapaId }) {
-  const lista = await lerProjetosFinais();
-  const index = lista.findIndex((p) => p.id === id);
-  if (index < 0) return null;
+  const bruto = projetosRepo.obterProjetoFinalPorId(id);
+  if (!bruto) return null;
 
-  const projeto = normalizarProjetoFinal(lista[index], {
-    roadmapId: lista[index].roadmapId,
+  const projeto = normalizarProjetoFinal(bruto, {
+    roadmapId: bruto.roadmapId,
     preservarId: id,
   });
 
@@ -464,7 +448,5 @@ export async function toggleItemProjeto(id, { colecao, itemId, concluido, etapaI
   }
 
   projeto.atualizadoEm = agoraIso();
-  lista[index] = projeto;
-  await salvarProjetosFinais(lista);
-  return projeto;
+  return projetosRepo.upsertProjetoFinal(projeto);
 }

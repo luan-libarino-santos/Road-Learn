@@ -6,9 +6,9 @@ import {
   temaPadrao,
   ICONES_IDENTIDADE,
   PRESETS_TEMA,
-} from "./db-profile.js";
+} from "./db/profile-repo.js";
 import { encontrarHabilidadeSimilar } from "./habilidades-match.js";
-import { lerRoadmaps } from "./db.js";
+import { listarRoadmaps } from "./db/roadmaps-repo.js";
 
 function erroHttp(status, message) {
   const erro = new Error(message);
@@ -384,7 +384,7 @@ export async function rebuildPerfil() {
   const identidade = anterior.identidade ?? identidadePadrao();
   const tema = anterior.tema ?? temaPadrao();
 
-  const roadmaps = await lerRoadmaps();
+  const roadmaps = listarRoadmaps();
   const perfil = perfilVazio();
   perfil.identidade = identidade;
   perfil.tema = tema;
@@ -452,7 +452,7 @@ export async function garantirPerfilInicial() {
 
   if (!vazio) return enriquecerPerfil(perfil);
 
-  const roadmaps = await lerRoadmaps();
+  const roadmaps = listarRoadmaps();
   const temConclusoes = roadmaps.some((r) =>
     (r.tarefas ?? []).some(
       (t) => t.concluida || (t.subtarefas ?? []).some((s) => s.concluida)

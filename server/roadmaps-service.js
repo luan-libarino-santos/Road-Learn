@@ -1,4 +1,4 @@
-import { lerRoadmaps, salvarRoadmaps } from "./db.js";
+import * as roadmapsRepo from "./db/roadmaps-repo.js";
 import { removerRoadmapDasAtribuicoes } from "./sidebar-service.js";
 import {
   aoConcluirTarefa,
@@ -306,25 +306,16 @@ function normalizarRoadmap(roadmap) {
   return { ...roadmap, competencias, tarefas };
 }
 
-async function obterLista() {
-  return (await lerRoadmaps()).map(normalizarRoadmap);
-}
-
-async function persistir(roadmaps) {
-  await salvarRoadmaps(roadmaps);
-}
-
 export async function listarRoadmaps() {
-  return obterLista();
+  return roadmapsRepo.listarRoadmaps().map(normalizarRoadmap);
 }
 
 export async function obterRoadmapPorId(id) {
-  const roadmap = (await lerRoadmaps()).find((r) => r.id === id);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(id);
   return roadmap ? normalizarRoadmap(roadmap) : null;
 }
 
 export async function criarRoadmap(nome, descricao = "") {
-  const roadmaps = await lerRoadmaps();
   const roadmap = {
     id: gerarId(),
     nome: nome.trim(),
@@ -333,16 +324,14 @@ export async function criarRoadmap(nome, descricao = "") {
     competencias: [],
     tarefas: [],
   };
-  roadmaps.push(roadmap);
-  await persistir(roadmaps);
+  roadmapsRepo.inserirRoadmapCompleto(roadmap);
   return roadmap;
 }
 
 export async function atualizarRoadmap(id, dados = {}) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === id);
-  if (!roadmap) return null;
+  if (!roadmapsRepo.roadmapExiste(id)) return null;
 
+  const patch = {};
   if (dados.nome !== undefined) {
     const nome = String(dados.nome).trim();
     if (!nome) {
@@ -350,25 +339,23 @@ export async function atualizarRoadmap(id, dados = {}) {
       erro.status = 400;
       throw erro;
     }
-    roadmap.nome = nome;
+    patch.nome = nome;
   }
   if (dados.descricao !== undefined) {
-    roadmap.descricao = String(dados.descricao).trim();
+    patch.descricao = String(dados.descricao).trim();
   }
   if (dados.competencias !== undefined) {
-    roadmap.competencias = normalizarCompetencias(dados.competencias);
+    patch.competencias = normalizarCompetencias(dados.competencias);
   }
 
-  await persistir(roadmaps);
-  return normalizarRoadmap(roadmap);
+  return roadmapsRepo.atualizarMetadadosRoadmap(id, patch);
 }
 
 export async function adicionarCompetencia(roadmapId, dados) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
-  roadmap.competencias = normalizarCompetencias(roadmap.competencias ?? []);
+  const comps = normalizarCompetencias(roadmap.competencias ?? []);
   const nome = String(dados?.nome ?? "").trim();
   if (!nome) {
     const erro = new Error("Nome da competência é obrigatório");
@@ -382,22 +369,15 @@ export async function adicionarCompetencia(roadmapId, dados) {
       nome,
       descricao: dados.descricao ?? "",
     },
-    roadmap.competencias.length
+    comps.length
   );
-  roadmap.competencias.push(competencia);
-  await persistir(roadmaps);
-  return competencia;
+  return roadmapsRepo.inserirCompetencia(roadmapId, competencia);
 }
 
 export async function atualizarCompetencia(roadmapId, competenciaId, dados) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
-  if (!roadmap) return null;
+  if (!roadmapsRepo.roadmapExiste(roadmapId)) return null;
 
-  roadmap.competencias = normalizarCompetencias(roadmap.competencias ?? []);
-  const index = roadmap.competencias.findIndex((c) => c.id === competenciaId);
-  if (index === -1) return null;
-
+  const patch = {};
   if (dados.nome !== undefined) {
     const nome = String(dados.nome).trim();
     if (!nome) {
@@ -405,28 +385,18 @@ export async function atualizarCompetencia(roadmapId, competenciaId, dados) {
       erro.status = 400;
       throw erro;
     }
-    roadmap.competencias[index].nome = nome;
+    patch.nome = nome;
   }
   if (dados.descricao !== undefined) {
-    roadmap.competencias[index].descricao = String(dados.descricao).trim();
+    patch.descricao = String(dados.descricao).trim();
   }
 
-  await persistir(roadmaps);
-  return roadmap.competencias[index];
+  return roadmapsRepo.atualizarCompetencia(roadmapId, competenciaId, patch);
 }
 
 export async function excluirCompetencia(roadmapId, competenciaId) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
-  if (!roadmap) return;
-
-  roadmap.competencias = (roadmap.competencias ?? []).filter((c) => c.id !== competenciaId);
-  (roadmap.tarefas ?? []).forEach((t) => {
-    t.competenciasIds = (t.competenciasIds ?? t.competencias ?? []).filter(
-      (id) => id !== competenciaId
-    );
-  });
-  await persistir(roadmaps);
+  if (!roadmapsRepo.roadmapExiste(roadmapId)) return;
+  roadmapsRepo.excluirCompetencia(roadmapId, competenciaId);
 }
 
 /**
@@ -548,8 +518,7 @@ export async function importarDeJson(payload) {
 
   const avisos = [];
   const importados = [];
-  const roadmaps = await lerRoadmaps();
-  const idsExistentes = new Set(roadmaps.map((r) => r.id));
+  const idsExistentes = new Set(roadmapsRepo.listarIdsRoadmaps());
 
   for (let i = 0; i < lista.length; i++) {
     let montado;
@@ -568,24 +537,21 @@ export async function importarDeJson(payload) {
     }
 
     idsExistentes.add(montado.id);
-    roadmaps.push(montado);
+    roadmapsRepo.inserirRoadmapCompleto(montado);
     importados.push(montado);
   }
 
-  await persistir(roadmaps);
   return { importados, avisos };
 }
 
 export async function excluirRoadmap(id) {
-  const roadmaps = (await lerRoadmaps()).filter((r) => r.id !== id);
-  await persistir(roadmaps);
+  roadmapsRepo.excluirRoadmap(id);
   await removerRoadmapDasAtribuicoes(id);
   await limparBonusRoadmapExcluido(id);
 }
 
 export async function adicionarTarefa(roadmapId, tarefa) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const agora = agoraIso();
@@ -618,14 +584,12 @@ export async function adicionarTarefa(roadmapId, tarefa) {
     comps
   );
 
-  roadmap.tarefas.push(novaTarefa);
-  await persistir(roadmaps);
+  roadmapsRepo.inserirTarefa(roadmapId, novaTarefa);
   return novaTarefa;
 }
 
 export async function atualizarTarefa(roadmapId, tarefaId, dados) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const index = roadmap.tarefas.findIndex((t) => t.id === tarefaId);
@@ -692,7 +656,6 @@ export async function atualizarTarefa(roadmapId, tarefaId, dados) {
   const mudouConclusao =
     dados.concluida !== undefined && Boolean(dados.concluida) !== atual.concluida;
 
-  // Histórico automático
   if (mudouConclusao) {
     if (dados.concluida) {
       atualizada.concluidaEm = agoraIso();
@@ -730,8 +693,7 @@ export async function atualizarTarefa(roadmapId, tarefaId, dados) {
     }
   }
 
-  roadmap.tarefas[index] = atualizada;
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, atualizada);
 
   if (mudouConclusao) {
     if (atualizada.concluida) {
@@ -752,8 +714,7 @@ export async function registrarTempo(roadmapId, tarefaId, horas) {
     throw erro;
   }
 
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const index = roadmap.tarefas.findIndex((t) => t.id === tarefaId);
@@ -762,14 +723,12 @@ export async function registrarTempo(roadmapId, tarefaId, horas) {
   const atual = normalizarTarefa(roadmap.tarefas[index], index);
   atual.horasReais = Math.max(0, (atual.horasReais || 0) + delta);
   adicionarHistorico(atual, "tempo", delta > 0 ? `+${delta}h registradas` : `${delta}h ajustadas`);
-  roadmap.tarefas[index] = atual;
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, atual);
   return atual;
 }
 
 export async function iniciarTimer(roadmapId, tarefaId) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const index = roadmap.tarefas.findIndex((t) => t.id === tarefaId);
@@ -780,14 +739,12 @@ export async function iniciarTimer(roadmapId, tarefaId) {
 
   atual.timerAtivoDesde = agoraIso();
   adicionarHistorico(atual, "timer_inicio", "");
-  roadmap.tarefas[index] = atual;
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, atual);
   return atual;
 }
 
 export async function pararTimer(roadmapId, tarefaId) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const index = roadmap.tarefas.findIndex((t) => t.id === tarefaId);
@@ -803,47 +760,22 @@ export async function pararTimer(roadmapId, tarefaId) {
   atual.horasReais = Math.round(((atual.horasReais || 0) + horas) * 100) / 100;
   atual.timerAtivoDesde = null;
   adicionarHistorico(atual, "timer_fim", horas > 0 ? `+${horas}h pelo timer` : "Timer parado");
-  roadmap.tarefas[index] = atual;
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, atual);
   return atual;
 }
 
 export async function excluirTarefa(roadmapId, tarefaId) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
-  if (!roadmap) return;
-
-  roadmap.tarefas = roadmap.tarefas.filter((t) => t.id !== tarefaId);
-  roadmap.tarefas.forEach((t) => {
-    t.dependsOn = (t.dependsOn ?? []).filter((id) => id !== tarefaId);
-  });
-  roadmap.tarefas.forEach((t, i) => {
-    t.ordem = i;
-  });
-  await persistir(roadmaps);
+  if (!roadmapsRepo.roadmapExiste(roadmapId)) return;
+  roadmapsRepo.excluirTarefa(roadmapId, tarefaId);
 }
 
 export async function reordenarTarefas(roadmapId, idsOrdenados) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
-  if (!roadmap) return null;
-
-  const porId = new Map(roadmap.tarefas.map((t) => [t.id, t]));
-  const reordenadas = idsOrdenados.map((id) => porId.get(id)).filter(Boolean);
-
-  if (reordenadas.length !== roadmap.tarefas.length) return null;
-
-  reordenadas.forEach((t, i) => {
-    t.ordem = i;
-  });
-  roadmap.tarefas = reordenadas;
-  await persistir(roadmaps);
-  return normalizarRoadmap(roadmap);
+  const roadmap = roadmapsRepo.reordenarTarefas(roadmapId, idsOrdenados);
+  return roadmap ? normalizarRoadmap(roadmap) : null;
 }
 
 export async function moverTarefa(roadmapId, tarefaId, direcao) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const tarefas = [...roadmap.tarefas].sort((a, b) => a.ordem - b.ordem);
@@ -853,17 +785,13 @@ export async function moverTarefa(roadmapId, tarefaId, direcao) {
   if (index === -1 || novoIndex < 0 || novoIndex >= tarefas.length) return null;
 
   [tarefas[index], tarefas[novoIndex]] = [tarefas[novoIndex], tarefas[index]];
-  tarefas.forEach((t, i) => {
-    t.ordem = i;
-  });
-  roadmap.tarefas = tarefas;
-  await persistir(roadmaps);
-  return normalizarRoadmap(roadmap);
+  const ids = tarefas.map((t) => t.id);
+  const atualizado = roadmapsRepo.reordenarTarefas(roadmapId, ids);
+  return atualizado ? normalizarRoadmap(atualizado) : null;
 }
 
 export async function adicionarSubtarefa(roadmapId, tarefaId, titulo) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const tarefa = roadmap.tarefas.find((t) => t.id === tarefaId);
@@ -872,13 +800,12 @@ export async function adicionarSubtarefa(roadmapId, tarefaId, titulo) {
   const subtarefa = { id: gerarId(), titulo: titulo.trim(), concluida: false };
   tarefa.subtarefas = tarefa.subtarefas ?? [];
   tarefa.subtarefas.push(subtarefa);
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, normalizarTarefa(tarefa));
   return subtarefa;
 }
 
 export async function atualizarSubtarefa(roadmapId, tarefaId, subtarefaId, dados) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return null;
 
   const tarefa = roadmap.tarefas.find((t) => t.id === tarefaId);
@@ -912,7 +839,7 @@ export async function atualizarSubtarefa(roadmapId, tarefaId, subtarefaId, dados
     }
   }
 
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, normalizarTarefa(tarefa));
 
   const mudouSub =
     dados.concluida !== undefined && Boolean(dados.concluida) !== subEstavaConcluida;
@@ -932,13 +859,12 @@ export async function atualizarSubtarefa(roadmapId, tarefaId, subtarefaId, dados
 }
 
 export async function excluirSubtarefa(roadmapId, tarefaId, subtarefaId) {
-  const roadmaps = await lerRoadmaps();
-  const roadmap = roadmaps.find((r) => r.id === roadmapId);
+  const roadmap = roadmapsRepo.obterRoadmapPorId(roadmapId);
   if (!roadmap) return;
 
   const tarefa = roadmap.tarefas.find((t) => t.id === tarefaId);
   if (!tarefa) return;
 
   tarefa.subtarefas = (tarefa.subtarefas ?? []).filter((s) => s.id !== subtarefaId);
-  await persistir(roadmaps);
+  roadmapsRepo.salvarTarefa(roadmapId, normalizarTarefa(tarefa));
 }

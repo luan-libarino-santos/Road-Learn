@@ -19,6 +19,8 @@ id_ed25519.*
 
 # Dados gerados pela aplicação
 data/*.json
+data/*.db
+data/*.db-*
 !data/.gitkeep
 
 # Logs e arquivos de execução
