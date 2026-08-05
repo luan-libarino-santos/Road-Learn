@@ -222,6 +222,26 @@ function renderizarBarrasSemana(semanas) {
   `;
 }
 
+function renderizarTempoNaSemana(dias) {
+  const max = Math.max(1, ...dias.map((d) => d.horas));
+  return `
+    <div class="barras-semana barras-dias-semana">
+      ${dias
+        .map(
+          (d) => `
+        <div class="barra-semana-item ${d.ehHoje ? "barra-dia-hoje" : ""}" title="${d.data}: ${d.horas}h · ${d.concluidas} tarefa(s)">
+          <span class="barra-dia-valor">${formatarHoras(d.horas)}</span>
+          <div class="barra-semana-coluna">
+            <div class="barra-semana-preenchimento" style="height: ${(d.horas / max) * 100}%"></div>
+          </div>
+          <span class="barra-semana-rotulo">${escaparHtml(d.rotulo)}</span>
+        </div>`
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 export function renderizarDashboard(container, roadmaps, perfil = null) {
   const a = calcularAnalyticsGlobais(roadmaps);
   const totalTipo = Object.values(a.porTipo).reduce((s, n) => s + n, 0) || 1;
@@ -244,6 +264,10 @@ export function renderizarDashboard(container, roadmaps, perfil = null) {
           <span class="metrica-label">XP total</span>
         </div>
         <div class="metrica-card">
+          <span class="metrica-valor">${formatarHoras(a.horasHoje)}</span>
+          <span class="metrica-label">Tempo no Dia</span>
+        </div>
+        <div class="metrica-card">
           <span class="metrica-valor">${formatarHoras(a.horasSemanaAtual)}</span>
           <span class="metrica-label">Horas na semana</span>
         </div>
@@ -256,6 +280,12 @@ export function renderizarDashboard(container, roadmaps, perfil = null) {
           <span class="metrica-label">Tarefas no total</span>
         </div>
       </div>
+    </section>
+
+    <section class="painel-secao">
+      <h2>Tempo na semana</h2>
+      <p class="painel-subtitulo">Horas registradas em cada dia desta semana.</p>
+      ${renderizarTempoNaSemana(a.diasDaSemana)}
     </section>
 
     <section class="painel-secao">

@@ -490,6 +490,25 @@ export function calcularAnalyticsGlobais(roadmaps) {
   const semanaAtual = somarHorasNoIntervalo(atividadePorDia, inicioSemana, fimSemana);
   const semanaPassada = somarHorasNoIntervalo(atividadePorDia, inicioSemanaPassada, fimSemanaPassada);
 
+  const infoHoje = atividadePorDia.get(hoje) ?? { concluidas: 0, horas: 0, eventos: 0 };
+  const horasHoje = Math.round(infoHoje.horas * 10) / 10;
+
+  const rotulosDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  const diasDaSemana = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(inicioSemana);
+    d.setDate(inicioSemana.getDate() + i);
+    const chave = diaChave(d);
+    const info = atividadePorDia.get(chave) ?? { concluidas: 0, horas: 0, eventos: 0 };
+    diasDaSemana.push({
+      data: chave,
+      rotulo: rotulosDias[i],
+      horas: Math.round(info.horas * 10) / 10,
+      concluidas: info.concluidas,
+      ehHoje: chave === hoje,
+    });
+  }
+
   const inicioMes = new Date(base.getFullYear(), base.getMonth(), 1);
   let horasMesAtual = 0;
   let concluidasMesAtual = 0;
@@ -515,6 +534,7 @@ export function calcularAnalyticsGlobais(roadmaps) {
     streak: diasEmSequencia,
     heatmap,
     semanas,
+    diasDaSemana,
     progressoTempo,
     comparacaoSemanal: {
       atual: semanaAtual,
@@ -522,6 +542,7 @@ export function calcularAnalyticsGlobais(roadmaps) {
       deltaHoras: Math.round((semanaAtual.horas - semanaPassada.horas) * 10) / 10,
       deltaConcluidas: semanaAtual.concluidas - semanaPassada.concluidas,
     },
+    horasHoje,
     horasSemanaAtual: semanaAtual.horas,
     horasMesAtual: Math.round(horasMesAtual * 10) / 10,
     concluidasSemanaAtual: semanaAtual.concluidas,

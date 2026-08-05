@@ -156,6 +156,6 @@ export const IR_CONFIG = {
     "{techTitle} {topicTitle} Best Practices",
   ],
 
-  githubUserAgent: "SistemaAprendizado-IR/1.0",
+  githubUserAgent: "RoadLearn-IR/1.0",
   redditUserAgent: "web:sistema-aprendizado-ir:v1.0 (learning roadmap tool)",
 };
