@@ -493,6 +493,96 @@ export function montarRoadmapDeJson(dados) {
   });
 }
 
+/**
+ * Garante um id livre: se `id` já estiver em `ocupados`, gera outro.
+ * Sempre registra o id final em `ocupados`. Retorna { id, remapeado, antigo }.
+ */
+function garantirIdLivre(id, ocupados) {
+  const atual = id || gerarId();
+  if (!ocupados.has(atual)) {
+    ocupados.add(atual);
+    return { id: atual, remapeado: false, antigo: atual };
+  }
+  let novo = gerarId();
+  while (ocupados.has(novo)) novo = gerarId();
+  ocupados.add(novo);
+  return { id: novo, remapeado: true, antigo: atual };
+}
+
+/**
+ * Remapeia IDs de competências, tarefas, links, subtarefas e histórico que
+ * colidem com o banco (PRIMARY KEY global). Atualiza dependsOn e competenciasIds.
+ */
+function remapearIdsColidentes(montado, ocupados, avisos) {
+  const mapaCompetencias = new Map();
+  const mapaTarefas = new Map();
+
+  for (const comp of montado.competencias ?? []) {
+    const { id, remapeado, antigo } = garantirIdLivre(comp.id, ocupados.competencias);
+    if (remapeado) {
+      mapaCompetencias.set(antigo, id);
+      avisos.push(
+        `Roadmap "${montado.nome}": competência id "${antigo}" já existia — gerado "${id}"`
+      );
+    }
+    comp.id = id;
+  }
+
+  for (const tarefa of montado.tarefas ?? []) {
+    const { id, remapeado, antigo } = garantirIdLivre(tarefa.id, ocupados.tarefas);
+    if (remapeado) {
+      mapaTarefas.set(antigo, id);
+      avisos.push(
+        `Roadmap "${montado.nome}": tarefa id "${antigo}" já existia — gerado "${id}"`
+      );
+    }
+    tarefa.id = id;
+
+    for (const link of tarefa.links ?? []) {
+      const r = garantirIdLivre(link.id, ocupados.links);
+      if (r.remapeado) {
+        avisos.push(
+          `Roadmap "${montado.nome}": link id "${r.antigo}" já existia — gerado "${r.id}"`
+        );
+      }
+      link.id = r.id;
+    }
+
+    for (const sub of tarefa.subtarefas ?? []) {
+      const r = garantirIdLivre(sub.id, ocupados.subtarefas);
+      if (r.remapeado) {
+        avisos.push(
+          `Roadmap "${montado.nome}": subtarefa id "${r.antigo}" já existia — gerado "${r.id}"`
+        );
+      }
+      sub.id = r.id;
+    }
+
+    for (const h of tarefa.historico ?? []) {
+      const r = garantirIdLivre(h.id, ocupados.historico);
+      if (r.remapeado) {
+        avisos.push(
+          `Roadmap "${montado.nome}": histórico id "${r.antigo}" já existia — gerado "${r.id}"`
+        );
+      }
+      h.id = r.id;
+    }
+  }
+
+  if (!mapaTarefas.size && !mapaCompetencias.size) return;
+
+  for (const tarefa of montado.tarefas ?? []) {
+    if (mapaTarefas.size && Array.isArray(tarefa.dependsOn)) {
+      tarefa.dependsOn = tarefa.dependsOn.map((dep) => mapaTarefas.get(dep) ?? dep);
+    }
+    if (mapaCompetencias.size && Array.isArray(tarefa.competenciasIds)) {
+      tarefa.competenciasIds = tarefa.competenciasIds.map(
+        (cid) => mapaCompetencias.get(cid) ?? cid
+      );
+    }
+  }
+}
+
 export async function importarDeJson(payload) {
   let lista = [];
 
@@ -518,7 +608,7 @@ export async function importarDeJson(payload) {
 
   const avisos = [];
   const importados = [];
-  const idsExistentes = new Set(roadmapsRepo.listarIdsRoadmaps());
+  const ocupados = roadmapsRepo.listarIdsOcupadosImportacao();
 
   for (let i = 0; i < lista.length; i++) {
     let montado;
@@ -528,15 +618,15 @@ export async function importarDeJson(payload) {
       throw new Error(`Roadmap #${i + 1}: ${erro.message}`);
     }
 
-    if (idsExistentes.has(montado.id)) {
-      const antigo = montado.id;
-      montado.id = gerarId();
+    const roadmapId = garantirIdLivre(montado.id, ocupados.roadmaps);
+    if (roadmapId.remapeado) {
       avisos.push(
-        `Roadmap "${montado.nome}": id "${antigo}" já existia — gerado novo id "${montado.id}"`
+        `Roadmap "${montado.nome}": id "${roadmapId.antigo}" já existia — gerado novo id "${roadmapId.id}"`
       );
     }
+    montado.id = roadmapId.id;
 
-    idsExistentes.add(montado.id);
+    remapearIdsColidentes(montado, ocupados, avisos);
     roadmapsRepo.inserirRoadmapCompleto(montado);
     importados.push(montado);
   }

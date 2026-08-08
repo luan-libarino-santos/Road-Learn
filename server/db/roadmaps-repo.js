@@ -199,6 +199,20 @@ export function listarIdsRoadmaps() {
     .map((r) => r.id);
 }
 
+/** IDs já usados no banco — usados no import para evitar colisão de PRIMARY KEY. */
+export function listarIdsOcupadosImportacao() {
+  const db = getDb();
+  const ids = (sql) => new Set(db.prepare(sql).all().map((r) => r.id));
+  return {
+    roadmaps: ids(`SELECT id FROM roadmaps`),
+    competencias: ids(`SELECT id FROM competencias`),
+    tarefas: ids(`SELECT id FROM tarefas`),
+    links: ids(`SELECT id FROM links`),
+    subtarefas: ids(`SELECT id FROM subtarefas`),
+    historico: ids(`SELECT id FROM historico_tarefas`),
+  };
+}
+
 export function roadmapExiste(id) {
   return Boolean(getDb().prepare(`SELECT 1 FROM roadmaps WHERE id = ?`).get(id));
 }
