@@ -83,6 +83,27 @@ function validarListaEnum(lista, permitidos, rotulo) {
   }
 }
 
+function resolverTamanhoSugerido(tempo, profundidade) {
+  const porTempo = {
+    "1 semana": "Pequeno (5–10 tarefas)",
+    "1 mês": "Médio (11–20 tarefas)",
+    "3 meses": "Completo (21–30 tarefas)",
+    "6 meses": "Extenso (31+ tarefas)",
+  };
+  if (porTempo[tempo]) return porTempo[tempo];
+
+  const porProfundidade = {
+    Resumo: "Pequeno (5–10 tarefas)",
+    Normal: "Médio (11–20 tarefas)",
+    Completo: "Completo (21–30 tarefas)",
+    Extenso: "Extenso (31+ tarefas)",
+  };
+  const faixaProf = porProfundidade[profundidade] ?? "Médio (11–20 tarefas)";
+
+  if (tempo === "Sem prazo") return faixaProf;
+  return `Inferir pela carga "${tempo}" (referência pela profundidade: ${faixaProf})`;
+}
+
 function montarPrompt({
   tema,
   objetivos,
@@ -97,6 +118,7 @@ function montarPrompt({
   const blocoRestricoes = restricoesTrim
     ? `\n- **Restrições / Observações:** ${restricoesTrim}`
     : "";
+  const tamanho = resolverTamanhoSugerido(tempo, profundidade);
 
   return `${obterInstrucoes()}
 
@@ -112,6 +134,7 @@ Gere o roadmap com estes parâmetros:
 - **Formato de aprendizado:** ${estilo}
 - **Profundidade:** ${profundidade}
 - **Tempo disponível:** ${tempo}
+- **Tamanho sugerido:** ${tamanho}
 - **Tipos de atividades:** ${tiposAtividade.join("; ")}${blocoRestricoes}
 
 Responda APENAS com o JSON válido, sem markdown e sem explicações.`;

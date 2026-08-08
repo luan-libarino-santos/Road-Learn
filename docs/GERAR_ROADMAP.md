@@ -94,7 +94,7 @@ Também aceita lista de strings: `"competencias": ["Routing", "Blade"]`.
 | `descricao` | string | **recomendado** | `""` | Propósito da tarefa — o que ela desenvolve e por que é importante |
 | `id` | string | recomendado* | gerado | *Use ids estáveis se houver `dependsOn` |
 | `competencias` | string[] | **recomendado** | `[]` | Ids ou nomes das skills que a tarefa desenvolve |
-| `tipo` | string | não | `"pratica"` | `pratica` \| `pesquisa` \| `analise` |
+| `tipo` | string | não | `"pratica"` | `pratica` \| `pesquisa` \| `projeto` \| `analise` |
 | `dificuldade` | string | não | `"medio"` | `facil` \| `medio` \| `dificil` |
 | `prioridade` | string | não | `"media"` | `baixa` \| `media` \| `alta` |
 | `horasEstimadas` | number | não | `0` | Estimativa (aceita decimal) |
@@ -109,6 +109,8 @@ Também aceita lista de strings: `"competencias": ["Routing", "Blade"]`.
 | `links` | array | não | `[]` | Recursos tipados |
 | `subtarefas` | array | não | `[]` | Checklist |
 | `ordem` | number | não | índice | Posição na lista |
+
+**Tipos de tarefa:** `pratica` = exercício pontual; `projeto` = mini-entregável que integra várias competências (fim de um bloco); `pesquisa` = estudo/docs; `analise` = revisão/auditoria. O **projeto final/capstone** do roadmap é feature separada (aba Projeto), não uma tarefa `tipo: "projeto"` de fechamento geral.
 
 Campos geridos pelo sistema (não precisa enviar na geração por IA):
 
@@ -311,7 +313,7 @@ Regras do schema (cada tarefa DEVE ter):
 - "id" (padrão m{N}_t{K})
 - "titulo"
 - "descricao" — o que a tarefa desenvolve, por que é importante, o que será praticado
-- "tipo": "pratica" | "pesquisa" | "analise"
+- "tipo": "pratica" | "pesquisa" | "projeto" | "analise"
 - "dificuldade": "facil" | "medio" | "dificil"
 - "prioridade": "baixa" | "media" | "alta"
 - "horasEstimadas" (número)
@@ -374,7 +376,7 @@ Regras do schema:
   - "id" estável ("t1", "t2", …)
   - "titulo"
   - "descricao" (obrigatório — explique o propósito da tarefa: o que ela desenvolve, por que é importante e o que o aluno vai aprender ou praticar)
-  - "tipo": "pratica" | "pesquisa" | "analise"
+  - "tipo": "pratica" | "pesquisa" | "projeto" | "analise"
   - "dificuldade": "facil" | "medio" | "dificil"
   - "prioridade": "baixa" | "media" | "alta"
   - "horasEstimadas" (número)

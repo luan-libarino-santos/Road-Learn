@@ -4,6 +4,7 @@ import { carregarSidebar } from "./sidebar-meta.js";
 export const TIPOS_TAREFA = {
   pratica: { label: "Prática", cor: "#8fa3b8", fundo: "rgba(143, 163, 184, 0.18)" },
   pesquisa: { label: "Pesquisa", cor: "#6b9e8a", fundo: "rgba(107, 158, 138, 0.18)" },
+  projeto: { label: "Projeto", cor: "#5c8a9e", fundo: "rgba(92, 138, 158, 0.18)" },
   analise: { label: "Análise", cor: "#c4a574", fundo: "rgba(196, 165, 116, 0.18)" },
 };
 
@@ -369,7 +370,7 @@ export function calcularAnalyticsGlobais(roadmaps) {
   });
 
   const concluidas = todas.filter((t) => t.concluida);
-  const porTipo = { pratica: 0, pesquisa: 0, analise: 0 };
+  const porTipo = { pratica: 0, pesquisa: 0, projeto: 0, analise: 0 };
   todas.forEach((t) => {
     if (porTipo[t.tipo] !== undefined) porTipo[t.tipo] += 1;
   });

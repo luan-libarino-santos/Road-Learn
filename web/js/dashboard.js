@@ -352,7 +352,7 @@ export function renderizarDashboard(container, roadmaps, perfil = null) {
 
     <section class="painel-secao">
       <h2>Distribuição por tipo</h2>
-      <p class="painel-subtitulo">Proporção de prática, pesquisa e análise.</p>
+      <p class="painel-subtitulo">Proporção de prática, pesquisa, projeto e análise.</p>
       <div class="distribuicao-tipos">
         ${Object.entries(TIPOS_TAREFA)
           .map(([id, info]) => {

@@ -111,6 +111,7 @@ export function renderizarGrafoDependencias(tarefas) {
             const classe = [
               "grafo-node",
               "arvore-node",
+              t.tipo === "projeto" ? "grafo-node-projeto" : "",
               t.concluida ? "concluida" : "",
               bloqueada && !t.concluida ? "bloqueada" : "",
               !bloqueada && !t.concluida ? "liberada" : "",
@@ -120,6 +121,7 @@ export function renderizarGrafoDependencias(tarefas) {
 
             let fill = "var(--grafo-fill)";
             let stroke = tipo.cor;
+            let strokeWidth = t.tipo === "projeto" ? 2.25 : bloqueada && !t.concluida ? 1 : 1.5;
             if (t.concluida) {
               fill = "var(--grafo-done-fill)";
               stroke = "var(--grafo-done)";
@@ -130,7 +132,7 @@ export function renderizarGrafoDependencias(tarefas) {
 
             return `
               <g class="${classe}" transform="translate(${p.x}, ${p.y})" data-tarefa-id="${t.id}">
-                <rect width="${p.w}" height="${p.h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${bloqueada && !t.concluida ? 1 : 1.5}"></rect>
+                <rect width="${p.w}" height="${p.h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"></rect>
                 <text x="10" y="22" class="grafo-titulo">${escaparHtml(t.titulo.slice(0, 22))}${t.titulo.length > 22 ? "…" : ""}</text>
                 <text x="10" y="40" class="grafo-meta">${t.concluida ? "desbloqueada · feita" : bloqueada ? "bloqueada" : "disponível"} · ${tipo.label}</text>
               </g>`;

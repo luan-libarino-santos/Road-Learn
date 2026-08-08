@@ -2141,6 +2141,27 @@ const IA_PROFUNDIDADES = ["Resumo", "Normal", "Completo", "Extenso"];
 const IA_TEMPOS = ["1 semana", "1 mês", "3 meses", "6 meses", "Sem prazo", "Personalizado"];
 const IA_TIPOS_ATIVIDADE = ["Conceitos", "Exercícios", "Projetos", "Pesquisas", "Leituras", "Revisões"];
 
+const IA_TAMANHO_POR_TEMPO = {
+  "1 semana": "Pequeno · ~5–10 tarefas",
+  "1 mês": "Médio · ~11–20 tarefas",
+  "3 meses": "Completo · ~21–30 tarefas",
+  "6 meses": "Extenso · ~31+ tarefas",
+};
+const IA_TAMANHO_POR_PROFUNDIDADE = {
+  Resumo: "Pequeno · ~5–10 tarefas",
+  Normal: "Médio · ~11–20 tarefas",
+  Completo: "Completo · ~21–30 tarefas",
+  Extenso: "Extenso · ~31+ tarefas",
+};
+
+function textoTamanhoSugeridoIa(tempo, profundidade) {
+  if (IA_TAMANHO_POR_TEMPO[tempo]) return IA_TAMANHO_POR_TEMPO[tempo];
+  const faixa = IA_TAMANHO_POR_PROFUNDIDADE[profundidade] ?? IA_TAMANHO_POR_PROFUNDIDADE.Normal;
+  if (tempo === "Sem prazo") return faixa;
+  if (tempo === "Personalizado") return `Inferir pela carga · referência: ${faixa}`;
+  return `Inferir pela carga · referência: ${faixa}`;
+}
+
 function renderizarOpcoesIa({ nome, label, tipo, opcoes, valor, valores = [] }) {
   const selecionados = new Set(valores);
   return `
@@ -2259,6 +2280,7 @@ export function mostrarModalImportarJson() {
           <span>Tempo personalizado</span>
           <input type="text" name="ia_tempo_custom" id="ia-tempo-custom" placeholder="Ex.: 2 semanas, 10h por semana…" autocomplete="off">
         </label>
+        <p class="campo-dica" id="ia-tamanho-dica" aria-live="polite"></p>
         ${renderizarOpcoesIa({
           nome: "ia_tipo_atividade",
           label: "Tipos de atividades",
@@ -2363,10 +2385,27 @@ export function mostrarModalImportarJson() {
           if (tempoCustomInput) tempoCustomInput.required = personalizado && abaImport === "ia";
         };
 
+        const sincronizarTamanhoDica = () => {
+          const dica = form.querySelector("#ia-tamanho-dica");
+          if (!dica) return;
+          const tempo =
+            form.querySelector('input[name="ia_tempo"]:checked')?.value ?? "Sem prazo";
+          const profundidade =
+            form.querySelector('input[name="ia_profundidade"]:checked')?.value ?? "Normal";
+          dica.textContent = `Tamanho esperado: ${textoTamanhoSugeridoIa(tempo, profundidade)}.`;
+        };
+
         form.querySelectorAll('input[name="ia_tempo"]').forEach((input) => {
-          input.addEventListener("change", sincronizarTempoCustom);
+          input.addEventListener("change", () => {
+            sincronizarTempoCustom();
+            sincronizarTamanhoDica();
+          });
+        });
+        form.querySelectorAll('input[name="ia_profundidade"]').forEach((input) => {
+          input.addEventListener("change", sincronizarTamanhoDica);
         });
         sincronizarTempoCustom();
+        sincronizarTamanhoDica();
 
         const btnPreview = form.querySelector("#ia-preview-prompt");
         const painelPreview = form.querySelector("#ia-preview-painel");

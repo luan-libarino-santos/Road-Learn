@@ -11,6 +11,7 @@ import {
 export const TIPOS_TAREFA = {
   pratica: { label: "Prática", cor: "#7b2cbf", fundo: "#ede0f7" },
   pesquisa: { label: "Pesquisa", cor: "#4f6db8", fundo: "#e3eaf8" },
+  projeto: { label: "Projeto", cor: "#1a7a6d", fundo: "#d8f0eb" },
   analise: { label: "Análise", cor: "#c77d0a", fundo: "#fdf0dc" },
 };
 
