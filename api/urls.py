@@ -1,0 +1,57 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("saude", views.saude),
+    path("csrf", views.csrf),
+    path("analytics", views.analytics),
+    path("timer", views.timer),
+    path("roadmaps/import", views.roadmaps_importar),
+    path("roadmaps/gerar/preview", views.roadmaps_gerar_preview),
+    path("roadmaps/gerar", views.roadmaps_gerar),
+    path("roadmaps", views.roadmaps_lista),
+    path("roadmaps/<str:roadmap_id>/competencias/<str:competencia_id>", views.competencia_detalhe),
+    path("roadmaps/<str:roadmap_id>/competencias", views.competencias_criar),
+    path("roadmaps/<str:roadmap_id>/tarefas/reordenar", views.tarefas_reordenar),
+    path(
+        "roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/subtarefas/<str:subtarefa_id>",
+        views.subtarefa_detalhe,
+    ),
+    path(
+        "roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/subtarefas",
+        views.subtarefas_criar,
+    ),
+    path("roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/tempo", views.tarefa_tempo),
+    path(
+        "roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/timer/iniciar",
+        views.tarefa_timer_iniciar,
+    ),
+    path(
+        "roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/timer/parar",
+        views.tarefa_timer_parar,
+    ),
+    path("roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>/mover", views.tarefa_mover),
+    path("roadmaps/<str:roadmap_id>/tarefas/<str:tarefa_id>", views.tarefa_detalhe),
+    path("roadmaps/<str:roadmap_id>/tarefas", views.tarefas_criar),
+    path("roadmaps/<str:roadmap_id>", views.roadmap_detalhe),
+    path("sidebar/grupos/reordenar", views.sidebar_grupos_reordenar),
+    path("sidebar/grupos/<str:grupo_id>", views.sidebar_grupo),
+    path("sidebar/grupos", views.sidebar_grupos),
+    path("sidebar/atribuicoes/<str:roadmap_id>", views.sidebar_atribuir),
+    path("sidebar/reordenar", views.sidebar_reordenar),
+    path("sidebar", views.sidebar),
+    path("profile/rebuild", views.perfil_rebuild),
+    path("profile/identidade", views.perfil_identidade),
+    path("profile", views.perfil_get),
+    path("projetos-finais/sugerir-topicos", views.pf_sugerir),
+    path("projetos-finais/gerar", views.pf_gerar),
+    path("projetos-finais/<str:projeto_id>/itens", views.pf_itens),
+    path("projetos-finais/<str:projeto_id>", views.pf_detalhe),
+    path("projetos-finais", views.projetos_finais),
+    path("projetos-integrados/sugerir-topicos", views.pi_sugerir),
+    path("projetos-integrados/gerar", views.pi_gerar),
+    path("projetos-integrados/<str:projeto_id>/itens", views.pi_itens),
+    path("projetos-integrados/<str:projeto_id>", views.pi_detalhe),
+    path("projetos-integrados", views.projetos_integrados),
+]

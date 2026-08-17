@@ -105,7 +105,7 @@ Com **≥ 80% das tarefas** do roadmap concluídas, o usuário pode gerar **um**
 2. O usuário escolhe **1** tópico.
 3. **Fase 2 (mesmo modal):** a IA gera o projeto completo — objetivo, stack, requisitos, checklist, etapas, README, `.gitignore`, estrutura de pastas e boas práticas.
 
-Dados em SQLite (`data/road-learn.db`). Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_FINAL.md` e `docs/INSTRUCOES_IA_PROJETO_FINAL.md`.  
+Dados em SQLite (`db.sqlite3`). Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_FINAL.md` e `docs/INSTRUCOES_IA_PROJETO_FINAL.md`.  
 A conclusão do Projeto Final **não** altera o domínio permanente das competências (previsto para evolução futura).
 
 ---
@@ -119,14 +119,14 @@ Agrega **2 ou mais** roadmaps (ex.: backend + banco + front) num único projeto.
 3. Mesmo fluxo do Projeto Final: 3 tópicos IA → 1 escolhido → projeto completo → checklist.
 
 Contexto enviado à IA é **orçado** (até 5 roadmaps no prompt, top competências/tarefas por roadmap) para não sobrecarregar o modelo.  
-Dados em SQLite (`data/road-learn.db`). Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_INTEGRADO.md` e `docs/INSTRUCOES_IA_PROJETO_INTEGRADO.md`.
+Dados em SQLite (`db.sqlite3`). Prompts: `docs/INSTRUCOES_IA_TOPICOS_PROJETO_INTEGRADO.md` e `docs/INSTRUCOES_IA_PROJETO_INTEGRADO.md`.
 
 ---
 
 ## 6. Onde roda
 
-- Porta 3000 · `npm start` / `npm run dev` (Linux)
-- Dados em `data/road-learn.db` (SQLite)
+- Porta **8002** · Gunicorn / `python manage.py runserver 8002`
+- Dados em `db.sqlite3` (SQLite)
 - Sem login
 
 ---

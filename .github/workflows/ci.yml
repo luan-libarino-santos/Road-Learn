@@ -4,62 +4,44 @@ on:
   push:
     branches:
       - "**"
-
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Node.js CI
+  backend:
+    name: Django
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [22]
-
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-
-      - name: Exibir versões
-        run: |
-          node --version
-          npm --version
-
+          python-version: "3.12"
       - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Testes
+        run: pytest
+        env:
+          SECRET_KEY: ci-test-secret
+          DEBUG: "True"
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar
         run: npm ci
-
-      - name: Verificar SQLite (better-sqlite3)
-        run: node -e "import('better-sqlite3').then(() => console.log('better-sqlite3 ok'))"
-
-      - name: Executar Lint (se existir)
-        run: |
-          if npm run | grep -q "lint"; then
-            npm run lint
-          else
-            echo "Nenhum script 'lint' encontrado. Pulando..."
-          fi
-
-      - name: Executar Testes (se existirem)
-        run: |
-          if npm run | grep -q "test"; then
-            npm test
-          else
-            echo "Nenhum script 'test' encontrado. Pulando..."
-          fi
-
-      - name: Executar Build (se existir)
-        run: |
-          if npm run | grep -q "build"; then
-            npm run build
-          else
-            echo "Nenhum script 'build' encontrado. Pulando..."
-          fi
+      - name: Build
+        run: npm run build

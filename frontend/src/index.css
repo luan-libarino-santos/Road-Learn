@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@380;480;580;700&family=Syne:wght@700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #0a0a0b;
+  --color-ink-2: #111113;
+  --color-panel: #1a1c20;
+  --color-line: #2a2e36;
+  --color-accent: #8ec5e8;
+  --color-sand: #e8eaef;
+  --color-mute: #9aa3b5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(900px 420px at 8% -10%, rgba(142, 197, 232, 0.12), transparent 50%),
+    radial-gradient(700px 360px at 100% 0%, rgba(154, 163, 181, 0.08), transparent 45%),
+    #0a0a0b;
+  color: #e8eaef;
+  font-family: var(--font-sans);
+}
+
+.page-title {
+  font-family: var(--font-display);
+  margin: 0;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  line-height: 1.1;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #8ec5e8;
+  color: #0a0a0b;
+}
