@@ -1,137 +1,634 @@
-# API Road-Learn — camada para IA e Hub
+# API Road-Learn — referência completa
 
-> **Status:** implementado em `roadmaps/ai_services.py` + `api/ai_views.py` (rotas ativas em `/api/v1/ai/*`).
+> **Status:** implementado. Camada IA em `roadmaps/ai_services.py` + `api/ai_views.py`. API comum em `api/views.py`.
 
-Especificação da camada **`/api/v1/ai/`** do Road-Learn (porta **8002**).
-
-Objetivo: cada intenção do assistente ou de outro módulo do Hub se resolve em **1 chamada HTTP**, com **pouco JSON** e **sem carregar árvore inteira** de roadmaps/tarefas.
+Contrato REST do Road-Learn (porta **8002**): endpoints da **SPA**, da **Personal AI** e dos **demais módulos do Hub**.
 
 ---
 
-## 1. Problema hoje
+## 1. Visão geral
 
-A API genérica (`/roadmaps`, `/roadmaps/{id}`, `/analytics`, `/profile`) funciona para a SPA, mas é cara para consumo por IA:
-
-| Intenção do usuário | Caminho atual | Custo |
-|---------------------|---------------|-------|
-| "O que devo estudar agora?" | `GET /roadmaps` → `GET /roadmaps/{id}` (N roadmaps) | Árvore completa, histórico, subtarefas, links |
-| "Como está meu progresso?" | `GET /roadmaps` + cálculo na IA | Repete domínio/tarefas em cada roadmap |
-| "Como foi minha semana?" | `GET /analytics` | Heatmap 84 dias, 8 semanas, progresso acumulado (~3–8 KB) |
-| "Posso gerar projeto final?" | `GET /roadmaps/{id}` + regra 80% na IA | Lógica duplicada fora do backend |
-
-A Personal AI e os demais módulos do Hub precisam de **respostas fechadas**, não de CRUDs para navegar.
-
----
-
-## 2. Princípios de desempenho
-
-| Princípio | Por quê |
-|-----------|---------|
-| **1 endpoint = 1 intenção** | Menos round-trips; roteador determinístico no assistente |
-| **Resposta `summary` + `data`** | `summary` vai direto ao usuário; `data` só se o Gemini precisar elaborar |
-| **Campos mínimos** | `id`, `titulo`, `status`, datas — sem anexos, HTML, histórico completo |
-| **Janelas temporais nativas** | `hoje`, `semana`, `mes` como rotas ou query fixa, não filtros improvisados |
-| **Comparações prontas** | "vs semana passada" calculado no servidor |
-| **Snippets, não arquivos inteiros** | Trecho + score + path (padrão Arquivos no Hub) |
-| **Erros estruturados** | `{ "ok": false, "code", "message" }` — IA não inventa |
-| **Manifest de capacidades** | `GET /saude` lista o que o módulo oferece à IA |
-
-### Envelope padrão
-
-Toda rota `/api/v1/ai/*` retorna:
-
-```json
-{
-  "ok": true,
-  "summary": "Frase pronta para o usuário, em pt-BR.",
-  "data": { }
-}
-```
-
-- **`summary`**: 1–2 frases, factual, sem markdown pesado. O assistente pode repetir quase literalmente.
-- **`data`**: payload mínimo para follow-up ou tool call. Pode ser omitido quando vazio.
-- Campos extras no root (ex.: `roadmap`, `tarefa`) são permitidos **somente** quando reduzem aninhamento e continuam mínimos.
-
-### Erros
-
-```json
-{
-  "ok": false,
-  "code": "ROADMAP_NAO_ENCONTRADO",
-  "message": "Roadmap 'docker' não existe."
-}
-```
-
-| HTTP | Quando |
-|------|--------|
-| 400 | Query inválida (`roadmap` inexistente, enum errado) |
-| 404 | Recurso não encontrado |
-| 503 | `GEMINI_API_KEY` ausente (rotas de geração IA) |
-
-Códigos estáveis (`code`) para o roteador do assistente — não depender da string `message`.
-
----
-
-## 3. Base, auth e manifest
-
-### Base URL
-
-```
-http://<host>:8002/api/v1
-```
-
-Em produção, usar `HUB_ROADLEARN_URL` do `.env` dos outros módulos.
+| Item | Valor |
+|------|-------|
+| Base URL | `http://<host>:8002/api/v1` |
+| Produção | `HUB_ROADLEARN_URL` no `.env` dos outros apps |
+| Formato | JSON UTF-8, **camelCase** nos campos |
+| Locale | `pt-BR`, timezone `America/Sao_Paulo` |
+| Datas | ISO 8601 (`2026-08-17T14:30:00-03:00` ou `…Z`) |
+| Banco | SQLite (`db.sqlite3`) |
 
 ### Autenticação
 
-| Consumidor | Header |
-|------------|--------|
-| Hub / Personal AI | `Authorization: Bearer <ROADLEARN_API_KEY>` |
-| SPA (browser) | Sessão + CSRF (mutações) |
+| Consumidor | Como autenticar |
+|------------|-----------------|
+| **Hub / Personal AI** | `Authorization: Bearer <ROADLEARN_API_KEY>` (opcional — app monousuário) |
+| **SPA (browser)** | Cookie de sessão Django + `X-CSRFToken` em mutações |
 
-Rotas `/ai/*` são **somente leitura** (`GET`). `AllowAny` com API key opcional — mesma política monousuário do app.
+Mutações da SPA: obter token com `GET /api/v1/csrf` e enviar no header `X-CSRFToken`.
 
-### Manifest em `/saude`
+### Erros
 
-Estender a resposta atual de `GET /api/v1/saude`:
+**API comum** (`/roadmaps`, `/profile`, …):
+
+```json
+{ "erro": "Mensagem legível em pt-BR" }
+```
+
+**API IA** (`/ai/*`):
+
+```json
+{ "ok": false, "code": "ROADMAP_NAO_ENCONTRADO", "message": "Roadmap 'docker' não existe." }
+```
+
+**DRF** (raro): `{ "detail": "…" }`
+
+### Convenções
+
+- IDs: base36 + sufixo aleatório (`gerar_id()` em `core/ids.py`)
+- Tipos de tarefa: `pratica`, `pesquisa`, `projeto`, `analise`
+- Dificuldade: `facil`, `medio`, `dificil`
+- Prioridade: `baixa`, `media`, `alta`
+- Tipos de link: `video`, `artigo`, `doc`, `repo`, `outro`
+
+---
+
+## 2. Índice de endpoints
+
+Prefixo: `/api/v1` (omitido na tabela).
+
+### 2.1 Sistema
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/saude` | Health check + links Hub + manifest IA |
+| GET | `/csrf` | Token CSRF para a SPA |
+| GET | `/analytics` | Métricas globais (heatmap, streak, comparação semanal) |
+| GET | `/timer` | Timer de tarefa aberto |
+
+### 2.2 Roadmaps
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/roadmaps` | Lista roadmaps completos + domínio |
+| POST | `/roadmaps` | Cria roadmap vazio |
+| GET | `/roadmaps/{id}` | Detalhe completo + domínio |
+| PUT | `/roadmaps/{id}` | Atualiza nome/descrição |
+| DELETE | `/roadmaps/{id}` | Exclui roadmap |
+| POST | `/roadmaps/import` | Importa roadmap(s) via JSON |
+| POST | `/roadmaps/gerar/preview` | Preview do prompt IA (sem chamar Gemini) |
+| POST | `/roadmaps/gerar` | Gera roadmap via Gemini |
+
+### 2.3 Competências
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| POST | `/roadmaps/{id}/competencias` | Adiciona competência |
+| PUT | `/roadmaps/{id}/competencias/{cid}` | Atualiza competência |
+| DELETE | `/roadmaps/{id}/competencias/{cid}` | Remove competência |
+
+### 2.4 Tarefas e subtarefas
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| POST | `/roadmaps/{id}/tarefas` | Cria tarefa |
+| PUT | `/roadmaps/{id}/tarefas/reordenar` | Reordena tarefas |
+| PUT | `/roadmaps/{id}/tarefas/{tid}` | Atualiza tarefa |
+| DELETE | `/roadmaps/{id}/tarefas/{tid}` | Exclui tarefa |
+| POST | `/roadmaps/{id}/tarefas/{tid}/tempo` | Registra horas manualmente |
+| POST | `/roadmaps/{id}/tarefas/{tid}/timer/iniciar` | Inicia timer |
+| POST | `/roadmaps/{id}/tarefas/{tid}/timer/parar` | Para timer e credita horas |
+| PUT | `/roadmaps/{id}/tarefas/{tid}/mover` | Move tarefa ↑/↓ (`direcao`: 1 ou -1) |
+| POST | `/roadmaps/{id}/tarefas/{tid}/subtarefas` | Cria subtarefa |
+| PUT | `/roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}` | Atualiza subtarefa |
+| DELETE | `/roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}` | Remove subtarefa |
+
+### 2.5 Sidebar
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/sidebar` | Grupos + atribuições de roadmaps |
+| POST | `/sidebar/grupos` | Cria grupo |
+| PUT | `/sidebar/grupos/reordenar` | Reordena grupos |
+| PUT | `/sidebar/grupos/{grupo_id}` | Renomeia grupo |
+| DELETE | `/sidebar/grupos/{grupo_id}` | Exclui grupo |
+| PUT | `/sidebar/atribuicoes/{roadmap_id}` | Atribui roadmap a grupo |
+| PUT | `/sidebar/reordenar` | Reordena roadmaps dentro de grupo ou “todos” |
+
+### 2.6 Perfil (gamificação)
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/profile` | Ficha: XP, nível, habilidades, identidade |
+| POST | `/profile/rebuild` | Recalcula perfil a partir dos roadmaps |
+| PATCH | `/profile/identidade` | Atualiza nome/ícone/cor de exibição |
+
+### 2.7 Projetos finais (1 por roadmap)
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/projetos-finais?roadmapId=` | Obtém projeto final do roadmap |
+| POST | `/projetos-finais` | Cria/atualiza projeto final (JSON manual) |
+| GET | `/projetos-finais/{id}` | Detalhe por ID do projeto |
+| PUT | `/projetos-finais/{id}` | Atualiza projeto |
+| DELETE | `/projetos-finais/{id}` | Exclui projeto |
+| PUT | `/projetos-finais/{id}/itens` | Marca item de checklist |
+| POST | `/projetos-finais/sugerir-topicos` | IA sugere 3 tópicos (Gemini) |
+| POST | `/projetos-finais/gerar` | IA gera projeto completo (Gemini) |
+
+### 2.8 Projetos integrados (multi-roadmap)
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/projetos-integrados` | Lista projetos integrados |
+| POST | `/projetos-integrados` | Cria projeto integrado |
+| GET | `/projetos-integrados/{id}` | Detalhe |
+| PUT | `/projetos-integrados/{id}` | Atualiza |
+| DELETE | `/projetos-integrados/{id}` | Exclui |
+| PUT | `/projetos-integrados/{id}/itens` | Marca item de checklist |
+| POST | `/projetos-integrados/sugerir-topicos` | IA sugere 3 tópicos |
+| POST | `/projetos-integrados/gerar` | IA gera projeto completo |
+
+### 2.9 Camada IA (Personal AI / Hub)
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/ai/proximo` | Próxima tarefa sugerida |
+| GET | `/ai/progresso` | Progresso global ou por roadmap |
+| GET | `/ai/resumo-semana` | Semana atual vs anterior |
+| GET | `/ai/hoje` | Atividade do dia |
+| GET | `/ai/revisao` | Tarefas com revisão espaçada vencida |
+| GET | `/ai/roadmap/{id}/resumo` | Snapshot enxuto de um roadmap |
+| GET | `/ai/roadmap/{id}/elegibilidade-projeto` | Elegível para Projeto Final (≥80%) |
+
+### 2.10 Fora de `/api/v1`
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET | `/backup/` | Download do `db.sqlite3` |
+| * | `/*` | SPA React (exceto `api/`, `admin/`, `static/`, `backup/`) |
+
+---
+
+## 3. API comum — detalhes
+
+### 3.1 `GET /saude`
+
+Health check e manifest para integração Hub.
+
+**Resposta 200:**
 
 ```json
 {
   "ok": true,
   "app": "road-learn",
   "armazenamento": "sqlite",
-  "hub": { "dinheiro": "...", "treinos": "...", "tasks": "..." },
+  "hub": {
+    "dinheiro": "http://host:8000",
+    "treinos": "http://host:3001",
+    "tasks": "http://host:8001"
+  },
   "ai": {
     "versao": "1",
     "basePath": "/api/v1/ai",
     "intencoes": [
-      { "id": "proximo", "metodo": "GET", "path": "/proximo", "descricao": "Próxima tarefa sugerida" },
-      { "id": "progresso", "metodo": "GET", "path": "/progresso", "descricao": "Progresso global e por roadmap" },
-      { "id": "resumo-semana", "metodo": "GET", "path": "/resumo-semana", "descricao": "Tempo e tarefas da semana vs anterior" },
-      { "id": "hoje", "metodo": "GET", "path": "/hoje", "descricao": "Atividade do dia" },
-      { "id": "revisao", "metodo": "GET", "path": "/revisao", "descricao": "Tarefas com revisão espaçada vencida" },
-      { "id": "roadmap-resumo", "metodo": "GET", "path": "/roadmap/{id}/resumo", "descricao": "Snapshot enxuto de um roadmap" },
-      { "id": "elegibilidade-projeto", "metodo": "GET", "path": "/roadmap/{id}/elegibilidade-projeto", "descricao": "Se pode gerar Projeto Final (≥80%)" }
+      { "id": "proximo", "metodo": "GET", "path": "/proximo", "descricao": "Próxima tarefa sugerida" }
     ]
   }
 }
 ```
 
-O assistente descobre capacidades com **1 GET** em `/saude` — sem hardcodar rotas por módulo.
+---
+
+### 3.2 `GET /csrf`
+
+**Resposta 200:** `{ "csrfToken": "…" }`
 
 ---
 
-## 4. Rotas `/api/v1/ai/*`
+### 3.3 `GET /analytics`
 
-### 4.1 `GET /ai/proximo`
+Métricas globais de estudo. Payload grande (~3–8 KB) — **preferir `/ai/resumo-semana`** para consumo por IA.
 
-**Intenção:** "O que devo estudar agora?" / "Qual o próximo passo?"
+**Resposta 200 (campos principais):**
 
-**Query opcional:**
-
-| Param | Tipo | Descrição |
+| Campo | Tipo | Descrição |
 |-------|------|-----------|
-| `roadmap` | string | ID do roadmap. Se omitido, usa heurística global (ver abaixo) |
+| `totalRoadmaps` | number | Quantidade de roadmaps |
+| `totalTarefas` | number | Total de tarefas |
+| `totalConcluidas` | number | Tarefas concluídas |
+| `porTipo` | object | Contagem por `pratica`, `pesquisa`, `projeto`, `analise` |
+| `horasEstimadas` / `horasReais` | number | Soma global |
+| `atributos` | array | Horas por atributo (Back-end, Front-end…) |
+| `streak` / `diasEmSequencia` | number | Dias consecutivos com atividade |
+| `heatmap` | array[84] | Atividade diária (`data`, `concluidas`, `horas`, `nivel`) |
+| `semanas` | array[8] | Resumo semanal (`rotulo`, `concluidas`, `horas`) |
+| `diasDaSemana` | array[7] | Semana corrente dia a dia |
+| `comparacaoSemanal` | object | `atual`, `anterior`, `deltaHoras`, `deltaConcluidas` |
+| `horasHoje` | number | Horas registradas hoje |
+| `horasSemanaAtual` / `horasMesAtual` | number | Acumulados |
+| `concluidasSemanaAtual` / `concluidasMesAtual` | number | Tarefas concluídas no período |
+
+---
+
+### 3.4 `GET /timer`
+
+**Resposta 200:**
+
+```json
+{
+  "aberta": {
+    "tarefaId": "abc12",
+    "roadmapId": "docker",
+    "titulo": "Redes",
+    "timerAtivoDesde": "2026-08-17T14:30:00-03:00"
+  }
+}
+```
+
+`aberta` é `null` se nenhum timer ativo.
+
+---
+
+### 3.5 Roadmaps
+
+#### `GET /roadmaps`
+
+Lista **todos** os roadmaps com tarefas completas, histórico, subtarefas e links. Inclui `dominio` e `competenciasDominio` calculados.
+
+> **Personal AI:** para listar roadmaps com pouco JSON, usar `GET /ai/progresso` → `data.porRoadmap` (id, nome, progresso, domínio).
+
+#### `POST /roadmaps`
+
+**Body:** `{ "nome": "Docker", "descricao": "opcional" }`
+
+**201:** roadmap criado (vazio, sem tarefas).
+
+**400:** `{ "erro": "Nome é obrigatório" }`
+
+#### `GET /roadmaps/{id}`
+
+Roadmap completo + `dominio` + `competenciasDominio`.
+
+**404:** `{ "erro": "Roadmap não encontrado" }`
+
+#### `PUT /roadmaps/{id}`
+
+**Body:** `{ "nome": "…", "descricao": "…" }` (campos opcionais).
+
+#### `DELETE /roadmaps/{id}`
+
+**204** sem corpo.
+
+#### `POST /roadmaps/import`
+
+Importa um ou mais roadmaps a partir de JSON (formato de `docs/templates/`).
+
+**Body:** objeto roadmap ou `{ "roadmaps": [ … ] }`.
+
+**201:**
+
+```json
+{
+  "quantidade": 1,
+  "avisos": [],
+  "roadmaps": [ { "id": "…", "nome": "…", "tarefas": [ … ] } ]
+}
+```
+
+#### `POST /roadmaps/gerar/preview`
+
+Monta o prompt sem chamar o Gemini.
+
+**Body:** `{ "tema": "Docker", "nivel": "intermediário", … }` (ver `docs/GERAR_ROADMAP.md`).
+
+#### `POST /roadmaps/gerar`
+
+Gera roadmap via Gemini e persiste.
+
+**Body:** mesmo do preview + confirmação.
+
+**Resposta:** roadmap criado + `modeloUsado`.
+
+**503:** `GEMINI_API_KEY` ausente.
+
+---
+
+### 3.6 Competências
+
+#### `POST /roadmaps/{id}/competencias`
+
+**Body:** `{ "nome": "Networking", "descricao": "…" }`
+
+**201:** competência criada `{ id, nome, descricao, ordem }`.
+
+#### `PUT /roadmaps/{id}/competencias/{cid}`
+
+**Body:** `{ "nome": "…", "descricao": "…" }`
+
+#### `DELETE /roadmaps/{id}/competencias/{cid}`
+
+**204**
+
+---
+
+### 3.7 Tarefas
+
+#### `POST /roadmaps/{id}/tarefas`
+
+**Body (campos principais):**
+
+```json
+{
+  "titulo": "Redes",
+  "tipo": "pratica",
+  "descricao": "",
+  "prazo": "",
+  "horasEstimadas": 2,
+  "dificuldade": "medio",
+  "prioridade": "alta",
+  "tags": [],
+  "atributos": ["Back-end"],
+  "dependsOn": ["tarefa_anterior_id"],
+  "competenciasIds": ["comp_id"],
+  "reviewAfterDays": 7,
+  "criterioConclusao": "…",
+  "links": []
+}
+```
+
+**201:** tarefa criada.
+
+**400:** tarefa bloqueada por dependência ao tentar concluir via PUT.
+
+#### `PUT /roadmaps/{id}/tarefas/reordenar`
+
+**Body:** `{ "ids": ["t3", "t1", "t2"] }`
+
+#### `PUT /roadmaps/{id}/tarefas/{tid}`
+
+Atualização parcial. Campos comuns: `concluida`, `titulo`, `horasReais`, `prioridade`, `dependsOn`, etc.
+
+Ao marcar `concluida: true`: dispara XP/habilidades no perfil. Subtarefas todas concluídas auto-concluem a tarefa pai.
+
+#### `DELETE /roadmaps/{id}/tarefas/{tid}`
+
+**204**
+
+#### `POST /roadmaps/{id}/tarefas/{tid}/tempo`
+
+**Body:** `{ "horas": 1.5 }`
+
+#### `POST /roadmaps/{id}/tarefas/{tid}/timer/iniciar`
+
+Inicia timer (para timer anterior se houver).
+
+#### `POST /roadmaps/{id}/tarefas/{tid}/timer/parar`
+
+Para timer e credita horas em `horasReais`.
+
+#### `PUT /roadmaps/{id}/tarefas/{tid}/mover`
+
+**Body:** `{ "direcao": 1 }` (↑) ou `{ "direcao": -1 }` (↓).
+
+---
+
+### 3.8 Subtarefas
+
+#### `POST /roadmaps/{id}/tarefas/{tid}/subtarefas`
+
+**Body:** `{ "titulo": "Ler capítulo 3" }`
+
+#### `PUT /roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}`
+
+**Body:** `{ "titulo": "…", "concluida": true }`
+
+#### `DELETE /roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}`
+
+**204**
+
+---
+
+### 3.9 Sidebar
+
+#### `GET /sidebar`
+
+```json
+{
+  "grupos": [{ "id": "g1", "nome": "Back-end", "ordem": 0 }],
+  "atribuicoes": {
+    "roadmap_id": { "grupoId": "g1", "ordem": 0, "ordemTodos": 1 }
+  }
+}
+```
+
+#### `POST /sidebar/grupos`
+
+**Body:** `{ "nome": "DevOps" }`
+
+#### `PUT /sidebar/grupos/reordenar`
+
+**Body:** `{ "ids": ["g1", "g2"] }`
+
+#### `PUT /sidebar/grupos/{grupo_id}`
+
+**Body:** `{ "nome": "Novo nome" }`
+
+#### `PUT /sidebar/atribuicoes/{roadmap_id}`
+
+**Body:** `{ "grupoId": "g1" }` ou `{ "grupoId": null }` para “sem grupo”.
+
+#### `PUT /sidebar/reordenar`
+
+**Body:** `{ "grupoId": "g1", "ids": ["rm1", "rm2"] }` — `grupoId` null = ordem global (`ordemTodos`).
+
+---
+
+### 3.10 Perfil
+
+#### `GET /profile`
+
+Retorna ficha completa: `xp`, `nivel`, `habilidades`, `habilidadesBase`, `habilidadesEspeciais`, `identidade`, `logXp`, `badge`.
+
+#### `POST /profile/rebuild`
+
+Recalcula XP e habilidades a partir de todos os roadmaps.
+
+#### `PATCH /profile/identidade`
+
+**Body:** `{ "nomeExibicao": "Luan", "icone": "book", "cor": "blue" }`
+
+---
+
+### 3.11 Projetos finais
+
+Regra de elegibilidade: **≥ 80%** das tarefas do roadmap concluídas (`PROGRESSO_MINIMO`).
+
+#### `GET /projetos-finais?roadmapId={id}`
+
+Retorna projeto ou `null`.
+
+#### `POST /projetos-finais`
+
+**Body:** `{ "roadmapId": "…", … }` — upsert manual.
+
+#### `GET /PUT /DELETE /projetos-finais/{id}`
+
+CRUD por ID do projeto.
+
+#### `PUT /projetos-finais/{id}/itens`
+
+**Body:**
+
+```json
+{
+  "colecao": "checklistImplementacao",
+  "itemId": "item_1",
+  "concluido": true,
+  "etapaId": "opcional_para_etapas"
+}
+```
+
+Coleções: `requisitosTecnicos`, `requisitosFuncionais`, `checklistImplementacao`, `boasPraticas`.
+
+#### `POST /projetos-finais/sugerir-topicos`
+
+**Body:** `{ "roadmapId": "…" }`
+
+**Resposta:** `{ "topicos": [ … ], "modeloUsado": "…" }` — 3 tópicos `Topico`.
+
+#### `POST /projetos-finais/gerar`
+
+**Body:** `{ "roadmapId": "…", "topico": { … } }`
+
+**Resposta:** projeto final completo persistido.
+
+---
+
+### 3.12 Projetos integrados
+
+Regra: **≥ 2 roadmaps**, cada um com **≥ 80%** de tarefas concluídas.
+
+#### `GET /projetos-integrados`
+
+Lista todos os projetos integrados.
+
+#### `POST /projetos-integrados`
+
+**Body:** `{ "nome": "…", "roadmapIds": ["id1", "id2"], … }`
+
+#### `GET /PUT /DELETE /projetos-integrados/{id}`
+
+CRUD padrão.
+
+#### `PUT /projetos-integrados/{id}/itens`
+
+Mesmo contrato de `projetos-finais/{id}/itens`.
+
+#### `POST /projetos-integrados/sugerir-topicos`
+
+**Body:** `{ "roadmapIds": ["id1", "id2"] }`
+
+#### `POST /projetos-integrados/gerar`
+
+**Body:** `{ "roadmapIds": ["…"], "topico": { … } }`
+
+---
+
+## 4. Modelos de dados (API comum)
+
+### Roadmap
+
+```json
+{
+  "id": "abc123",
+  "nome": "Docker",
+  "descricao": "…",
+  "criadoEm": "2026-01-15T10:00:00Z",
+  "competencias": [{ "id": "c1", "nome": "Networking", "descricao": "" }],
+  "tarefas": [],
+  "dominio": { "dominio": 54, "total": 5, "cobertas": 4 },
+  "competenciasDominio": [{ "id": "c1", "nome": "Networking", "dominio": 40, "totalTarefas": 5, "tarefasConcluidas": 2, "coberta": true }]
+}
+```
+
+### Tarefa
+
+```json
+{
+  "id": "t1",
+  "titulo": "Redes",
+  "descricao": "",
+  "prazo": "",
+  "horasEstimadas": 2,
+  "horasReais": 1.5,
+  "concluida": false,
+  "concluidaEm": null,
+  "tipo": "pratica",
+  "ordem": 0,
+  "dificuldade": "medio",
+  "prioridade": "alta",
+  "tags": [],
+  "atributos": ["Back-end"],
+  "dependsOn": ["t0"],
+  "competenciasIds": ["c1"],
+  "reviewAfterDays": 7,
+  "timerAtivoDesde": null,
+  "links": [{ "id": "l1", "titulo": "Doc", "url": "https://…", "tipo": "doc" }],
+  "subtarefas": [{ "id": "s1", "titulo": "…", "concluida": false }],
+  "historico": [{ "id": "h1", "em": "…", "tipo": "concluida", "detalhe": "…" }],
+  "criadaEm": "…"
+}
+```
+
+### Topico (IA — projetos)
+
+```json
+{
+  "id": "top1",
+  "titulo": "API REST com Docker",
+  "resumo": "…",
+  "categoria": "portfólio",
+  "stackSugerida": ["Node", "Docker"],
+  "competenciasAlvoIds": ["c1"]
+}
+```
+
+---
+
+## 5. API IA (`/api/v1/ai/*`)
+
+Camada otimizada para **Personal AI** e Hub: 1 endpoint = 1 intenção, resposta com `summary` + `data` mínimo.
+
+### Princípios
+
+| Princípio | Detalhe |
+|-----------|---------|
+| Somente leitura | Todos os endpoints são `GET` |
+| Envelope | `{ ok, summary, data? }` — campos extras no root quando reduzem aninhamento |
+| Erros | `{ ok: false, code, message }` com HTTP 400/404 |
+| Descoberta | `GET /saude` → `ai.intencoes` |
+
+### Quando usar IA vs comum
+
+| Pergunta / necessidade | Use |
+|------------------------|-----|
+| Quais roadmaps tenho? | `GET /ai/progresso` → `porRoadmap` |
+| O que estudar agora? | `GET /ai/proximo` |
+| Progresso geral ou de um roadmap | `GET /ai/progresso` |
+| Como foi a semana? | `GET /ai/resumo-semana` |
+| Editar tarefa, importar JSON, timer | API comum (`/roadmaps/…`) |
+| Heatmap completo, gráficos SPA | `GET /analytics` |
+| Gerar roadmap/projeto com Gemini | `POST /roadmaps/gerar`, `/projetos-finais/gerar` |
+
+---
+
+### 5.1 `GET /ai/proximo`
+
+**Intenção:** "O que devo estudar agora?"
+
+| Query | Descrição |
+|-------|-----------|
+| `roadmap` | ID do roadmap (opcional) |
 
 **Resposta 200:**
 
@@ -139,12 +636,7 @@ O assistente descobre capacidades com **1 GET** em `/saude` — sem hardcodar ro
 {
   "ok": true,
   "summary": "Próximo: Docker — Redes (67% do roadmap). Tarefa liberada, prioridade alta.",
-  "roadmap": {
-    "id": "docker",
-    "nome": "Docker",
-    "progressoPct": 67,
-    "dominioPct": 54
-  },
+  "roadmap": { "id": "docker", "nome": "Docker", "progressoPct": 67, "dominioPct": 54 },
   "tarefa": {
     "id": "abc12",
     "titulo": "Redes",
@@ -160,30 +652,28 @@ O assistente descobre capacidades com **1 GET** em `/saude` — sem hardcodar ro
 }
 ```
 
-**Regras de seleção (backend, determinísticas):**
+**Regras de seleção:**
 
-1. Considerar apenas tarefas **não concluídas** e **não bloqueadas** (`dependsOn` satisfeito — reutilizar `tarefa_esta_bloqueada` em `roadmaps/normalize.py`).
-2. Se `roadmap` informado: restringir a esse roadmap.
-3. Se omitido: entre roadmaps com tarefas liberadas, preferir o de **menor progresso %** entre os que aparecem na sidebar (ordem de `SidebarAtribuicao`); empate → menor `ordem` da tarefa.
-4. Ordenação da tarefa: revisão vencida (`reviewAfterDays` + `concluidaEm`) → `prioridade` (alta > média > baixa) → `dificuldade` (fácil primeiro para momentum) → `ordem`.
-5. Retornar até **2 alternativas** (ids + título + motivo curto).
-6. Se não houver tarefa liberada: `ok: true`, `summary` explicando (ex.: "Todas as tarefas de Docker estão bloqueadas ou concluídas."), `tarefa: null`.
+1. Apenas tarefas não concluídas e não bloqueadas (`dependsOn` satisfeito).
+2. Com `roadmap`: restringe a esse roadmap.
+3. Sem `roadmap`: roadmap com tarefas liberadas e **menor progresso %** (ordem sidebar como desempate).
+4. Ordenação: revisão vencida → prioridade (alta > média > baixa) → dificuldade (fácil primeiro) → `ordem`.
+5. Até **2 alternativas**.
+6. Sem tarefa liberada: `tarefa: null`, `summary` explicativo.
 
-**Ganho vs hoje:** 1 objeto (~400 B) em vez de roadmap inteiro (5–50 KB).
+**404:** roadmap inexistente (`ROADMAP_NAO_ENCONTRADO`).
 
 ---
 
-### 4.2 `GET /ai/progresso`
+### 5.2 `GET /ai/progresso`
 
-**Intenção:** "Como está meu progresso?" / "Quanto falta no Docker?"
+**Intenção:** "Como está meu progresso?" / listar roadmaps com métricas.
 
-**Query opcional:**
+| Query | Descrição |
+|-------|-----------|
+| `roadmap` | Detalha um roadmap (opcional) |
 
-| Param | Tipo | Descrição |
-|-------|------|-----------|
-| `roadmap` | string | Se informado, detalha só esse roadmap |
-
-**Resposta 200 (global):**
+**Global (sem query):**
 
 ```json
 {
@@ -207,16 +697,14 @@ O assistente descobre capacidades com **1 GET** em `/saude` — sem hardcodar ro
         "dominioPct": 54,
         "tarefasConcluidas": 12,
         "tarefasTotal": 18,
-        "competenciasDestaque": [
-          { "nome": "Networking", "dominioPct": 40 }
-        ]
+        "competenciasDestaque": [{ "nome": "Networking", "dominioPct": 40 }]
       }
     ]
   }
 }
 ```
 
-**Resposta 200 (`?roadmap=docker`):**
+**Filtrado (`?roadmap=docker`):**
 
 ```json
 {
@@ -235,17 +723,13 @@ O assistente descobre capacidades com **1 GET** em `/saude` — sem hardcodar ro
 }
 ```
 
-**Implementação:** reutilizar `calcular_dominio_geral`, `calcular_dominio_competencias` (`roadmaps/normalize.py`). Competências: top 3 por menor domínio (maior gap de estudo).
-
 ---
 
-### 4.3 `GET /ai/resumo-semana`
+### 5.3 `GET /ai/resumo-semana`
 
-**Intenção:** "Como foi minha semana?" / "Estudei mais que semana passada?"
+**Intenção:** "Como foi minha semana?"
 
-Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_Paulo`).
-
-**Resposta 200:**
+Janela: segunda 00:00 → domingo 23:59 (`America/Sao_Paulo`).
 
 ```json
 {
@@ -256,30 +740,20 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
     "atual": { "horas": 8.5, "tarefasConcluidas": 14 },
     "anterior": { "horas": 6.0, "tarefasConcluidas": 11 },
     "delta": { "horas": 2.5, "tarefasConcluidas": 3 },
-    "porDia": [
-      { "data": "2026-08-11", "rotulo": "Seg", "horas": 1.5, "concluidas": 2 }
-    ],
-    "roadmapsMaisAtivos": [
-      { "id": "docker", "nome": "Docker", "tarefasConcluidas": 6, "horas": 4.0 }
-    ]
+    "porDia": [{ "data": "2026-08-11", "rotulo": "Seg", "horas": 1.5, "concluidas": 2 }],
+    "roadmapsMaisAtivos": [{ "id": "docker", "nome": "Docker", "tarefasConcluidas": 6, "horas": 4.0 }]
   }
 }
 ```
 
-**Implementação:** extrair de `calcular_analytics_globais` apenas `comparacaoSemanal`, `diasDaSemana` e agregar por `roadmapId` — **não** retornar `heatmap`, `semanas[8]`, `progressoTempo`.
-
 ---
 
-### 4.4 `GET /ai/hoje`
-
-**Intenção:** "O que fiz hoje?" / "Quantas horas hoje?"
-
-**Resposta 200:**
+### 5.4 `GET /ai/hoje`
 
 ```json
 {
   "ok": true,
-  "summary": "Hoje: 1,5 h registradas, 2 tarefas concluídas. Timer ativo em 'Redes' (Docker).",
+  "summary": "Hoje: 1,5 h registradas, 2 tarefas concluídas. Timer ativo em 'Redes' (docker).",
   "data": {
     "data": "2026-08-17",
     "horas": 1.5,
@@ -297,22 +771,22 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
 }
 ```
 
-**Implementação:** `horasHoje` + tarefas com `concluidaEm` no dia + `GET /timer` enxuto.
+`timerAtivo` é `null` se não houver timer aberto.
 
 ---
 
-### 4.5 `GET /ai/revisao`
+### 5.5 `GET /ai/revisao`
 
-**Intenção:** "O que preciso revisar?" (revisão espaçada)
+| Query | Default | Máx |
+|-------|---------|-----|
+| `limite` | 5 | 10 |
 
-**Query opcional:** `limite` (default 5, max 10)
-
-**Resposta 200:**
+Tarefa concluída com `reviewAfterDays > 0` e prazo de revisão vencido.
 
 ```json
 {
   "ok": true,
-  "summary": "3 tarefas pedem revisão: Controllers (Laravel), Middleware, Rotas.",
+  "summary": "3 tarefas pedem revisão: Controllers, Middleware, Rotas.",
   "data": {
     "total": 3,
     "tarefas": [
@@ -330,15 +804,11 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
 }
 ```
 
-**Regra:** tarefa concluída com `reviewAfterDays > 0` e `hoje > concluidaEm + reviewAfterDays`.
-
 ---
 
-### 4.6 `GET /ai/roadmap/{id}/resumo`
+### 5.6 `GET /ai/roadmap/{id}/resumo`
 
-**Intenção:** contexto mínimo de um roadmap sem árvore completa.
-
-**Resposta 200:**
+Snapshot enxuto sem árvore de tarefas.
 
 ```json
 {
@@ -350,10 +820,7 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
     "descricao": "Containerização do zero ao deploy",
     "progressoPct": 67,
     "dominioPct": 54,
-    "competencias": [
-      { "nome": "Images", "dominioPct": 80 },
-      { "nome": "Networking", "dominioPct": 40 }
-    ],
+    "competencias": [{ "nome": "Images", "dominioPct": 80 }],
     "proximaLiberada": { "id": "abc12", "titulo": "Redes" },
     "bloqueadas": 2,
     "revisaoPendente": 1
@@ -363,11 +830,7 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
 
 ---
 
-### 4.7 `GET /ai/roadmap/{id}/elegibilidade-projeto`
-
-**Intenção:** "Posso gerar o Projeto Final deste roadmap?"
-
-**Resposta 200:**
+### 5.7 `GET /ai/roadmap/{id}/elegibilidade-projeto`
 
 ```json
 {
@@ -383,159 +846,178 @@ Sem query — janela **segunda 00:00 → domingo 23:59** (timezone `America/Sao_
 }
 ```
 
-**Implementação:** regra `PROGRESSO_MINIMO = 80` de `projetos/services.py` + checagem `ProjetoFinal` por `roadmap_id`.
-
 ---
 
-## 5. Mapa intenção → rota (Personal AI)
+### 5.8 Mapa intenção → rota (Personal AI)
 
 | Pergunta do usuário | Rota | Enviar `data` ao Gemini? |
 |---------------------|------|----------------------------|
-| O que estudar agora? | `/ai/proximo` | Não — `summary` basta |
+| Quais roadmaps tenho? | `/ai/progresso` | Não — `porRoadmap` ou `summary` |
+| O que estudar agora? | `/ai/proximo` | Não |
 | Progresso geral | `/ai/progresso` | Só se pedir detalhe por skill |
 | Progresso do Docker | `/ai/progresso?roadmap=docker` | Raramente |
 | Como foi a semana? | `/ai/resumo-semana` | Não |
 | O que fiz hoje? | `/ai/hoje` | Não |
 | O que revisar? | `/ai/revisao` | Se lista > 3 itens |
-| Fala do roadmap X | `/ai/roadmap/{id}/resumo` | Só se pergunta técnica |
+| Contexto do roadmap X | `/ai/roadmap/{id}/resumo` | Só se pergunta técnica |
 | Posso fazer projeto final? | `/ai/roadmap/{id}/elegibilidade-projeto` | Não |
+| Criar/editar tarefa | `/roadmaps/{id}/tarefas` | — (API comum) |
+| Gerar roadmap com IA | `/roadmaps/gerar` | — (API comum) |
 
-**Meta:** ≥ 80% das perguntas de estudo respondidas só com `summary`, sem segunda chamada ao Gemini.
+**Fluxo recomendado:**
 
----
-
-## 6. API genérica vs camada AI
-
-| | `/api/v1/roadmaps`, `/analytics`, … | `/api/v1/ai/*` |
-|--|--------------------------------------|----------------|
-| **Consumidor** | SPA React | Personal AI, Tasks, Hub |
-| **Formato** | Recursos completos | Intenção + summary |
-| **Tamanho** | KB a dezenas de KB | ~200 B – 2 KB |
-| **Mutações** | POST/PUT/DELETE | Apenas GET |
-| **Cache** | Curto / invalidação por mutação | Cache 30–60 s aceitável |
-
-A SPA **não** migra para `/ai/*` — continua com endpoints ricos. A camada AI é paralela, não substituta.
+1. `GET /saude` → descobrir `ai.intencoes`
+2. Classificar intenção → 1 rota `/ai/*` ou API comum
+3. Responder com `summary`; incluir `data` no Gemini só quando necessário
 
 ---
 
-## 7. Implementação sugerida
+## 6. Integração Hub
 
-### 7.1 Arquivos
+### Variáveis `.env`
 
-```
-roadmaps/
-  ai_views.py      # handlers finos (ou api/ai_views.py)
-  ai_services.py   # proximo, progresso, resumo_semana, revisao, elegibilidade
-api/
-  urls.py          # path("ai/proximo", ...), prefixo ai/
-```
-
-### 7.2 Dependências internas (já existentes)
-
-| Função / módulo | Uso |
-|-----------------|-----|
-| `listar_roadmaps()` | Fonte única de roadmaps |
-| `tarefa_esta_bloqueada()` | Filtro de tarefas liberadas |
-| `calcular_dominio_geral()` / `calcular_dominio_competencias()` | Progresso e domínio |
-| `calcular_analytics_globais()` | Extrair fatias temporais |
-| `projetos/services.py` | Elegibilidade projeto final |
-| `sidebar` persist | Ordem de roadmaps ativos |
-
-### 7.3 Rotas em `api/urls.py`
-
-```python
-path("ai/proximo", views.ai_proximo),
-path("ai/progresso", views.ai_progresso),
-path("ai/resumo-semana", views.ai_resumo_semana),
-path("ai/hoje", views.ai_hoje),
-path("ai/revisao", views.ai_revisao),
-path("ai/roadmap/<str:roadmap_id>/resumo", views.ai_roadmap_resumo),
-path("ai/roadmap/<str:roadmap_id>/elegibilidade-projeto", views.ai_elegibilidade_projeto),
+```env
+ROADLEARN_API_KEY=…
+HUB_ROADLEARN_URL=http://150.230.230.89:8002
+HUB_DINHEIRO_URL=…
+HUB_TASKS_URL=…
+HUB_TREINOS_URL=…
+GEMINI_API_KEY=…
 ```
 
-### 7.4 Testes mínimos
-
-- `test_ai_proximo_retorna_tarefa_liberada`
-- `test_ai_proximo_roadmap_inexistente_404`
-- `test_ai_progresso_global_e_filtrado`
-- `test_ai_resumo_semana_delta`
-- `test_ai_revisao_respeita_review_after_days`
-- `test_saude_inclui_manifest_ai`
-
----
-
-## 8. Integração Hub
-
-### 8.1 Personal AI (router)
-
-1. `GET {ROADLEARN}/api/v1/saude` → ler `ai.intencoes`
-2. Classificar intenção do usuário → 1 rota `/ai/*`
-3. Responder com `summary`; incluir `data` no prompt do Gemini só quando necessário
-
-### 8.2 Tasks (exemplo)
-
-Criar lembrete de revisão sem duplicar lógica:
+### Exemplo: Personal AI
 
 ```http
-GET /api/v1/ai/revisao?limite=3
+GET http://host:8002/api/v1/ai/proximo
 Authorization: Bearer <ROADLEARN_API_KEY>
 ```
 
-Se `data.total > 0`, Tasks pode `POST /api/v1/tarefas/` com `origem: "road-learn"`, `origem_id: "revisao:{tarefaId}"`.
-
-### 8.3 Variáveis `.env`
-
-```env
-ROADLEARN_API_KEY=...
-HUB_ROADLEARN_URL=http://150.230.230.89:8002
-```
-
----
-
-## 9. Limites e anti-padrões
-
-**Não fazer:**
-
-- Retornar `tarefas[]` completo com `historico`, `subtarefas`, `links` em rotas `/ai/*`
-- Expor `GET /ai/roadmaps` espelhando `GET /roadmaps` (duplicata sem ganho)
-- Delegar comparação semanal ao Gemini com 2× `GET /analytics`
-- Usar `?view=ai` em rotas genéricas **e** `/ai/*` ao mesmo tempo (escolher um — este doc adota prefixo `/ai/`)
-
-**Limites:**
-
-| Item | Valor |
-|------|-------|
-| `alternativas` em `/proximo` | máx. 2 |
-| `revisao?limite` | máx. 10 |
-| `competencias` em resumos | máx. 5 |
-| `porRoadmap` em progresso global | todos os roadmaps da sidebar (tipicamente < 10) |
-
----
-
-## 10. Roadmap de entrega
-
-| Fase | Entrega | Impacto |
-|------|---------|---------|
-| **P0** | `/ai/proximo`, `/ai/progresso`, `/ai/resumo-semana` + manifest em `/saude` | Cobre 3 perguntas mais frequentes |
-| **P1** | `/ai/hoje`, `/ai/revisao`, `/ai/roadmap/{id}/resumo` | Ritmo diário e revisão espaçada |
-| **P2** | `/ai/roadmap/{id}/elegibilidade-projeto` | Integração com fluxo de projetos |
-| **P3** | Cache leve + testes de contrato para Personal AI | Estabilidade em produção |
-
----
-
-## 11. Referência rápida
+### Exemplo: Tasks criar lembrete de revisão
 
 ```http
-GET /api/v1/saude
-GET /api/v1/ai/proximo
-GET /api/v1/ai/proximo?roadmap=docker
-GET /api/v1/ai/progresso
-GET /api/v1/ai/progresso?roadmap=docker
-GET /api/v1/ai/resumo-semana
-GET /api/v1/ai/hoje
-GET /api/v1/ai/revisao?limite=5
-GET /api/v1/ai/roadmap/{id}/resumo
-GET /api/v1/ai/roadmap/{id}/elegibilidade-projeto
+GET /api/v1/ai/revisao?limite=3
 ```
 
-Documentação relacionada: [CAPACIDADES.md](./CAPACIDADES.md) (domínio do produto), [padrao_desenvolvimento.md](./padrao_desenvolvimento.md) (padrão Hub).
+Se `data.total > 0`, Tasks pode `POST` em seu próprio `/api/v1/tarefas/` com `origem: "road-learn"`, `origem_id: "revisao:{tarefaId}"`.
+
+---
+
+## 7. Limites e anti-padrões (camada IA)
+
+| Item | Limite |
+|------|--------|
+| `alternativas` em `/ai/proximo` | máx. 2 |
+| `revisao?limite` | máx. 10 |
+| `competencias` em resumos | máx. 5 |
+| Cache aceitável | 30–60 s |
+
+**Evitar:**
+
+- Usar `GET /roadmaps` na IA quando `GET /ai/progresso` ou `/ai/roadmap/{id}/resumo` bastam
+- Usar `GET /analytics` na IA quando `GET /ai/resumo-semana` ou `/ai/hoje` bastam
+- Duplicar lógica de elegibilidade (80%) ou seleção de próxima tarefa no Gemini
+
+---
+
+## 8. Referência rápida (todas as rotas)
+
+```http
+# Sistema
+GET  /api/v1/saude
+GET  /api/v1/csrf
+GET  /api/v1/analytics
+GET  /api/v1/timer
+
+# IA
+GET  /api/v1/ai/proximo
+GET  /api/v1/ai/proximo?roadmap={id}
+GET  /api/v1/ai/progresso
+GET  /api/v1/ai/progresso?roadmap={id}
+GET  /api/v1/ai/resumo-semana
+GET  /api/v1/ai/hoje
+GET  /api/v1/ai/revisao?limite=5
+GET  /api/v1/ai/roadmap/{id}/resumo
+GET  /api/v1/ai/roadmap/{id}/elegibilidade-projeto
+
+# Roadmaps
+GET    /api/v1/roadmaps
+POST   /api/v1/roadmaps
+GET    /api/v1/roadmaps/{id}
+PUT    /api/v1/roadmaps/{id}
+DELETE /api/v1/roadmaps/{id}
+POST   /api/v1/roadmaps/import
+POST   /api/v1/roadmaps/gerar/preview
+POST   /api/v1/roadmaps/gerar
+
+# Competências
+POST   /api/v1/roadmaps/{id}/competencias
+PUT    /api/v1/roadmaps/{id}/competencias/{cid}
+DELETE /api/v1/roadmaps/{id}/competencias/{cid}
+
+# Tarefas
+POST   /api/v1/roadmaps/{id}/tarefas
+PUT    /api/v1/roadmaps/{id}/tarefas/reordenar
+PUT    /api/v1/roadmaps/{id}/tarefas/{tid}
+DELETE /api/v1/roadmaps/{id}/tarefas/{tid}
+POST   /api/v1/roadmaps/{id}/tarefas/{tid}/tempo
+POST   /api/v1/roadmaps/{id}/tarefas/{tid}/timer/iniciar
+POST   /api/v1/roadmaps/{id}/tarefas/{tid}/timer/parar
+PUT    /api/v1/roadmaps/{id}/tarefas/{tid}/mover
+POST   /api/v1/roadmaps/{id}/tarefas/{tid}/subtarefas
+PUT    /api/v1/roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}
+DELETE /api/v1/roadmaps/{id}/tarefas/{tid}/subtarefas/{sid}
+
+# Sidebar
+GET    /api/v1/sidebar
+POST   /api/v1/sidebar/grupos
+PUT    /api/v1/sidebar/grupos/reordenar
+PUT    /api/v1/sidebar/grupos/{grupo_id}
+DELETE /api/v1/sidebar/grupos/{grupo_id}
+PUT    /api/v1/sidebar/atribuicoes/{roadmap_id}
+PUT    /api/v1/sidebar/reordenar
+
+# Perfil
+GET    /api/v1/profile
+POST   /api/v1/profile/rebuild
+PATCH  /api/v1/profile/identidade
+
+# Projetos finais
+GET    /api/v1/projetos-finais?roadmapId={id}
+POST   /api/v1/projetos-finais
+GET    /api/v1/projetos-finais/{id}
+PUT    /api/v1/projetos-finais/{id}
+DELETE /api/v1/projetos-finais/{id}
+PUT    /api/v1/projetos-finais/{id}/itens
+POST   /api/v1/projetos-finais/sugerir-topicos
+POST   /api/v1/projetos-finais/gerar
+
+# Projetos integrados
+GET    /api/v1/projetos-integrados
+POST   /api/v1/projetos-integrados
+GET    /api/v1/projetos-integrados/{id}
+PUT    /api/v1/projetos-integrados/{id}
+DELETE /api/v1/projetos-integrados/{id}
+PUT    /api/v1/projetos-integrados/{id}/itens
+POST   /api/v1/projetos-integrados/sugerir-topicos
+POST   /api/v1/projetos-integrados/gerar
+
+# Backup
+GET    /backup/
+```
+
+---
+
+## 9. Implementação (referência de código)
+
+| Camada | Arquivo |
+|--------|---------|
+| Rotas | `api/urls.py` |
+| Views comuns | `api/views.py` |
+| Views IA | `api/ai_views.py` |
+| Serviços IA | `roadmaps/ai_services.py` |
+| Persistência | `roadmaps/persist.py`, `roadmaps/services.py` |
+| Analytics | `roadmaps/analytics.py` |
+| Projetos + Gemini | `projetos/services.py`, `projetos/ia.py` |
+| Testes IA | `tests/test_ai_api.py` |
+
+Documentação relacionada: [CAPACIDADES.md](./CAPACIDADES.md), [padrao_desenvolvimento.md](./padrao_desenvolvimento.md), [GERAR_ROADMAP.md](./GERAR_ROADMAP.md).
