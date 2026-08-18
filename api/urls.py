@@ -1,8 +1,15 @@
 from django.urls import path
 
-from . import views
+from . import ai_views, views
 
 urlpatterns = [
+    path("ai/proximo", ai_views.ai_proximo),
+    path("ai/progresso", ai_views.ai_progresso),
+    path("ai/resumo-semana", ai_views.ai_resumo_semana),
+    path("ai/hoje", ai_views.ai_hoje),
+    path("ai/revisao", ai_views.ai_revisao),
+    path("ai/roadmap/<str:roadmap_id>/resumo", ai_views.ai_roadmap_resumo),
+    path("ai/roadmap/<str:roadmap_id>/elegibilidade-projeto", ai_views.ai_elegibilidade_projeto),
     path("saude", views.saude),
     path("csrf", views.csrf),
     path("analytics", views.analytics),

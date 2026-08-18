@@ -50,7 +50,7 @@ from roadmaps.services import (
     reordenar_tarefas,
     timer_aberto,
 )
-from roadmaps import sidebar as sidebar_svc
+from roadmaps import ai_services, sidebar as sidebar_svc
 
 
 def _erro(exc):
@@ -72,6 +72,7 @@ def saude(request):
                 "treinos": hub_publico(request, settings.HUB_TREINOS_URL),
                 "tasks": hub_publico(request, settings.HUB_TASKS_URL),
             },
+            "ai": ai_services.manifest_ai(),
         }
     )
 
