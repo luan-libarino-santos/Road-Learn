@@ -62,7 +62,9 @@ export default function App() {
   const [tiposAtv, setTiposAtv] = useState<string[]>(["Conceitos", "Exercícios"]);
   const [restricoes, setRestricoes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [copiando, setCopiando] = useState(false);
   const [promptCopiado, setPromptCopiado] = useState(false);
+  const [promptPreview, setPromptPreview] = useState("");
 
   const reload = useCallback(async () => {
     const [rms, sb, pf, saude, pis, tm] = await Promise.all([
@@ -143,8 +145,31 @@ export default function App() {
     set(list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
   }
 
+  function copiarParaAreaDeTransferencia(texto: string) {
+    const apiClipboard = navigator.clipboard;
+    if (apiClipboard && typeof apiClipboard.writeText === "function") {
+      return apiClipboard.writeText(texto);
+    }
+    const campo = document.createElement("textarea");
+    campo.value = texto;
+    campo.setAttribute("readonly", "");
+    campo.style.position = "fixed";
+    campo.style.top = "0";
+    campo.style.left = "0";
+    campo.style.width = "1px";
+    campo.style.height = "1px";
+    campo.style.opacity = "0";
+    document.body.appendChild(campo);
+    campo.focus();
+    campo.select();
+    campo.setSelectionRange(0, texto.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(campo);
+    if (!ok) throw new Error("Não foi possível copiar o prompt neste navegador.");
+  }
+
   async function copiarPrompt() {
-    setBusy(true);
+    setCopiando(true);
     try {
       const { prompt } = await api.roadmaps.gerarPreview({
         tema,
@@ -156,13 +181,14 @@ export default function App() {
         tiposAtividade: tiposAtv,
         restricoes,
       });
-      await navigator.clipboard.writeText(prompt);
+      setPromptPreview(prompt);
+      await copiarParaAreaDeTransferencia(prompt);
       setPromptCopiado(true);
-      setTimeout(() => setPromptCopiado(false), 2500);
+      window.setTimeout(() => setPromptCopiado(false), 2500);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Falha ao gerar o prompt");
+      window.alert(err instanceof Error ? err.message : "Falha ao montar o prompt");
     } finally {
-      setBusy(false);
+      setCopiando(false);
     }
   }
 
@@ -353,18 +379,26 @@ export default function App() {
                 className="w-full rounded-xl border border-line bg-ink px-3 py-2 outline-none"
                 rows={2}
               />
+              {promptPreview ? (
+                <textarea
+                  readOnly
+                  value={promptPreview}
+                  className="w-full rounded-xl border border-line bg-ink px-3 py-2 font-mono text-xs text-mute outline-none"
+                  rows={8}
+                />
+              ) : null}
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setModal(null)} className="text-sm text-mute">
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  disabled={busy || !tema.trim()}
+                  disabled={copiando || !tema.trim()}
                   onClick={() => void copiarPrompt()}
                   className="rounded-xl border border-line px-4 py-2 text-sm font-medium text-mute disabled:opacity-50"
-                  title="Copia o prompt que seria enviado à IA, sem gerar o roadmap"
+                  title="Monta e copia o prompt sem enviar nada ao Gemini"
                 >
-                  {promptCopiado ? "Copiado!" : "Copiar Prompt"}
+                  {promptCopiado ? "Copiado!" : copiando ? "Montando…" : "Copiar Prompt"}
                 </button>
                 <button
                   type="button"
