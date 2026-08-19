@@ -1,6 +1,6 @@
 # API Road-Learn — referência completa
 
-> **Status:** implementado. Camada IA em `roadmaps/ai_services.py` + `api/ai_views.py`. API comum em `api/views.py`.
+> **Status:** implementado. Camada IA em `roadmaps/ai_services.py` + `api/ai_views.py`. Busca de fontes (YouTube + Brave) em `core/search_service.py` + `api/search_views.py`. API comum em `api/views.py`.
 
 Contrato REST do Road-Learn (porta **8002**): endpoints da **SPA**, da **Personal AI** e dos **demais módulos do Hub**.
 
@@ -40,6 +40,12 @@ Mutações da SPA: obter token com `GET /api/v1/csrf` e enviar no header `X-CSRF
 { "ok": false, "code": "ROADMAP_NAO_ENCONTRADO", "message": "Roadmap 'docker' não existe." }
 ```
 
+**API de busca** (`/busca/*`):
+
+```json
+{ "ok": false, "fonte": "youtube", "code": "YOUTUBE_NAO_CONFIGURADO", "message": "…", "resultados": [] }
+```
+
 **DRF** (raro): `{ "detail": "…" }`
 
 ### Convenções
@@ -60,10 +66,12 @@ Prefixo: `/api/v1` (omitido na tabela).
 
 | Método | Path | Descrição |
 |--------|------|-----------|
-| GET | `/saude` | Health check + links Hub + manifest IA |
+| GET | `/saude` | Health check + links Hub + manifest IA + manifest busca |
 | GET | `/csrf` | Token CSRF para a SPA |
 | GET | `/analytics` | Métricas globais (heatmap, streak, comparação semanal) |
 | GET | `/timer` | Timer de tarefa aberto |
+| GET | `/config` | Status mascarado das chaves de API (Gemini, YouTube, Brave) |
+| POST | `/config` | Grava chaves no `.env` do servidor |
 
 ### 2.2 Roadmaps
 
@@ -160,7 +168,20 @@ Prefixo: `/api/v1` (omitido na tabela).
 | GET | `/ai/roadmap/{id}/resumo` | Snapshot enxuto de um roadmap |
 | GET | `/ai/roadmap/{id}/elegibilidade-projeto` | Elegível para Projeto Final (≥80%) |
 
-### 2.10 Fora de `/api/v1`
+### 2.10 Busca de fontes (Hub)
+
+APIs públicas para **qualquer módulo do Hub** (Tasks, Personal AI, Treinos, etc.). O Road-Learn concentra as chaves YouTube e Brave; os demais apps só consomem HTTP.
+
+| Método | Path | Descrição |
+|--------|------|-----------|
+| GET, POST | `/busca/youtube` | Busca vídeos (YouTube Data API v3) |
+| GET, POST | `/busca/brave` | Busca páginas web (Brave Search) |
+| GET, POST | `/busca` | Agrega YouTube + Brave no mesmo envelope |
+| POST | `/buscar-fontes` | Alias da SPA: `{ fontes: [{ titulo, url, tipo }] }` |
+
+Descoberta: `GET /saude` → `busca`. Autenticação Bearer opcional (app monousuário). CSRF **não** é exigido nestas rotas.
+
+### 2.11 Fora de `/api/v1`
 
 | Método | Path | Descrição |
 |--------|------|-----------|
@@ -193,9 +214,21 @@ Health check e manifest para integração Hub.
     "intencoes": [
       { "id": "proximo", "metodo": "GET", "path": "/proximo", "descricao": "Próxima tarefa sugerida" }
     ]
+  },
+  "busca": {
+    "versao": "1",
+    "basePath": "/api/v1/busca",
+    "intencoes": [
+      { "id": "youtube", "metodo": "GET", "path": "/youtube", "descricao": "Busca vídeos no YouTube Data API v3" },
+      { "id": "brave", "metodo": "GET", "path": "/brave", "descricao": "Busca páginas na web via Brave Search" },
+      { "id": "agregada", "metodo": "GET", "path": "/", "descricao": "YouTube + Brave no mesmo envelope" }
+    ],
+    "fontes": { "youtube": true, "brave": true }
   }
 }
 ```
+
+`busca.fontes.*` indica se a chave correspondente está configurada **neste momento** (sem revelar o valor).
 
 ---
 
@@ -532,6 +565,40 @@ Mesmo contrato de `projetos-finais/{id}/itens`.
 
 **Body:** `{ "roadmapIds": ["…"], "topico": { … } }`
 
+### 3.13 Configurações (`/config`)
+
+Chaves de API persistidas no `.env` do servidor. Destinado à SPA (`/configuracoes`). **Não** devolve o valor real — só máscara.
+
+#### `GET /config`
+
+**Resposta 200:**
+
+```json
+{
+  "geminiApiKey": "AIza...xyz9",
+  "youtubeApiKey": "",
+  "braveApiKey": "BSAA...k2m1"
+}
+```
+
+String vazia = não configurada. Máscara: 4 primeiros + `...` + 4 últimos caracteres.
+
+#### `POST /config`
+
+**Body** (todos opcionais; campo vazio ou mascarado é ignorado):
+
+```json
+{
+  "geminiApiKey": "AIzaSy…",
+  "youtubeApiKey": "AIzaSy…",
+  "braveApiKey": "BSA…"
+}
+```
+
+**Resposta 200:** `{ "ok": true, "atualizados": ["youtubeApiKey"] }`
+
+Após gravar, o processo aplica as chaves em memória (`django.conf.settings`) sem reinício. CSRF **é** exigido (rota da SPA).
+
 ---
 
 ## 4. Modelos de dados (API comum)
@@ -619,6 +686,7 @@ Camada otimizada para **Personal AI** e Hub: 1 endpoint = 1 intenção, resposta
 | Editar tarefa, importar JSON, timer | API comum (`/roadmaps/…`) |
 | Heatmap completo, gráficos SPA | `GET /analytics` |
 | Gerar roadmap/projeto com Gemini | `POST /roadmaps/gerar`, `/projetos-finais/gerar` |
+| Vídeos / artigos para outro módulo do Hub | `GET /busca/youtube`, `GET /busca/brave` |
 
 ---
 
@@ -863,6 +931,7 @@ Snapshot enxuto sem árvore de tarefas.
 | Posso fazer projeto final? | `/ai/roadmap/{id}/elegibilidade-projeto` | Não |
 | Criar/editar tarefa | `/roadmaps/{id}/tarefas` | — (API comum) |
 | Gerar roadmap com IA | `/roadmaps/gerar` | — (API comum) |
+| Fontes (vídeo/artigo) | `/busca/youtube` ou `/busca/brave` | — (API de busca) |
 
 **Fluxo recomendado:**
 
@@ -872,7 +941,263 @@ Snapshot enxuto sem árvore de tarefas.
 
 ---
 
-## 6. Integração Hub
+## 6. API de busca (`/api/v1/busca/*`)
+
+O Road-Learn **centraliza** as chaves YouTube Data API v3 e Brave Search. Qualquer módulo do Hub (Tasks, Personal AI, Treinos, Arquivos, Dinheiro) pode pedir resultados HTTP sem ter as chaves próprias.
+
+A SPA do Road-Learn usa o mesmo backend no botão **Buscar Fontes** de uma tarefa já criada (nunca automático).
+
+### Princípios
+
+| Princípio | Detalhe |
+|-----------|---------|
+| Duas fontes independentes | `/busca/youtube` e `/busca/brave` — um módulo chama só o que precisa |
+| Agregada opcional | `/busca` junta as duas no mesmo envelope |
+| Sem CSRF | `@authentication_classes([])` — Hub chama direto, sem cookie |
+| Bearer opcional | `Authorization: Bearer <ROADLEARN_API_KEY>` (app monousuário) |
+| Chaves no Road-Learn | `YOUTUBE_API_KEY` e `BRAVE_API_KEY` no `.env`, editáveis em `/configuracoes` |
+| Limite | `limite` / `maxResults`: 1–10 (padrão **5**) |
+| Descoberta | `GET /saude` → `busca.intencoes` e `busca.fontes` |
+
+### Quando usar cada rota
+
+| Necessidade do módulo | Use |
+|-----------------------|-----|
+| Só vídeos | `GET /busca/youtube?q=` |
+| Só artigos / docs / sites | `GET /busca/brave?q=` |
+| Os dois, um request | `GET /busca?q=` |
+| SPA Road-Learn (links da tarefa) | `POST /buscar-fontes` `{ query }` |
+
+### Entrada (GET e POST)
+
+Query string (GET) ou JSON (POST) — nomes aceitos nos dois:
+
+| Campo | Aliases | Obrigatório | Descrição |
+|-------|---------|-------------|-----------|
+| `q` | `query` | sim | Texto de busca |
+| `limite` | `maxResults` | não | Quantidade por fonte (1–10, padrão 5) |
+
+```http
+GET /api/v1/busca/youtube?q=docker+redes&limite=5
+```
+
+```http
+POST /api/v1/busca/brave
+Content-Type: application/json
+
+{ "query": "docker redes overlay", "limite": 5 }
+```
+
+### Envelope comum de uma fonte
+
+```json
+{
+  "ok": true,
+  "fonte": "youtube",
+  "query": "docker redes",
+  "configurada": true,
+  "total": 2,
+  "resultados": [ ]
+}
+```
+
+Erro:
+
+```json
+{
+  "ok": false,
+  "fonte": "youtube",
+  "query": "docker redes",
+  "configurada": false,
+  "total": 0,
+  "resultados": [],
+  "code": "YOUTUBE_NAO_CONFIGURADO",
+  "message": "YOUTUBE_API_KEY não configurada. Defina em /configuracoes."
+}
+```
+
+### Códigos HTTP e `code`
+
+| HTTP | `code` | Quando |
+|------|--------|--------|
+| 400 | `QUERY_OBRIGATORIA` | Sem `q` / `query` |
+| 200 | — | Busca ok (lista pode ser vazia) |
+| 503 | `YOUTUBE_NAO_CONFIGURADO` | Sem `YOUTUBE_API_KEY` |
+| 503 | `BRAVE_NAO_CONFIGURADO` | Sem `BRAVE_API_KEY` |
+| 503 | `BUSCA_NAO_CONFIGURADA` | Agregada sem nenhuma chave |
+| 504 | `YOUTUBE_TIMEOUT` / `BRAVE_TIMEOUT` | Upstream > 10 s |
+| 502 | `YOUTUBE_INDISPONIVEL` / `BRAVE_INDISPONIVEL` | HTTP/erro da API externa |
+
+---
+
+### 6.1 `GET|POST /busca/youtube`
+
+Proxy da [YouTube Data API v3 Search](https://developers.google.com/youtube/v3/docs/search/list): `part=snippet`, `type=video`.
+
+**Item de `resultados`:**
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `titulo` | string | Título do vídeo |
+| `url` | string | `https://www.youtube.com/watch?v={videoId}` |
+| `tipo` | `"video"` | Sempre `video` |
+| `videoId` | string | ID YouTube |
+| `canal` | string | Nome do canal |
+| `publicadoEm` | string | ISO 8601 da API |
+| `descricao` | string | Snippet |
+| `thumbnail` | string | URL da thumb `default` (pode ser `""`) |
+
+**Exemplo 200:**
+
+```json
+{
+  "ok": true,
+  "fonte": "youtube",
+  "query": "docker redes",
+  "configurada": true,
+  "total": 1,
+  "resultados": [
+    {
+      "titulo": "Docker Networking Explained",
+      "url": "https://www.youtube.com/watch?v=abc123xyz",
+      "tipo": "video",
+      "videoId": "abc123xyz",
+      "canal": "TechWorld with Nana",
+      "publicadoEm": "2023-04-12T14:00:00Z",
+      "descricao": "Bridge, overlay, host…",
+      "thumbnail": "https://i.ytimg.com/vi/abc123xyz/default.jpg"
+    }
+  ]
+}
+```
+
+---
+
+### 6.2 `GET|POST /busca/brave`
+
+Proxy da [Brave Search API](https://brave.com/search/api/) (`/res/v1/web/search`). Header interno `X-Subscription-Token`.
+
+**Item de `resultados`:**
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `titulo` | string | Título da página |
+| `url` | string | URL absoluta |
+| `tipo` | `"artigo"` | Sempre `artigo` (compatível com `TIPOS_LINK` do Road-Learn) |
+| `descricao` | string | Snippet |
+| `site` | string | Nome do perfil/domínio (`profile.name`) |
+| `favicon` | string | URL do favicon (pode ser `""`) |
+
+**Exemplo 200:**
+
+```json
+{
+  "ok": true,
+  "fonte": "brave",
+  "query": "docker overlay network",
+  "configurada": true,
+  "total": 1,
+  "resultados": [
+    {
+      "titulo": "Overlay network driver | Docker Docs",
+      "url": "https://docs.docker.com/engine/network/drivers/overlay/",
+      "tipo": "artigo",
+      "descricao": "The overlay network driver creates a distributed network…",
+      "site": "docs.docker.com",
+      "favicon": "https://docs.docker.com/favicon.ico"
+    }
+  ]
+}
+```
+
+---
+
+### 6.3 `GET|POST /busca` (agregada)
+
+Um request, duas fontes. `resultados` no root é a lista **achatada** `{ titulo, url, tipo }` (YouTube primeiro, depois Brave) — pronta para gravar como `Link` de tarefa.
+
+Cada fonte também vem aninhada com o envelope completo (metadados extras).
+
+Se **nenhuma** chave estiver configurada: HTTP **503** `BUSCA_NAO_CONFIGURADA`.
+
+Se uma fonte estiver off e a outra ok: HTTP **200**, `ok: true`; a fonte off aparece com `ok: false` no objeto aninhado.
+
+**Exemplo 200:**
+
+```json
+{
+  "ok": true,
+  "query": "docker redes",
+  "total": 2,
+  "youtube": {
+    "ok": true,
+    "fonte": "youtube",
+    "query": "docker redes",
+    "configurada": true,
+    "total": 1,
+    "resultados": [ { "titulo": "…", "url": "https://www.youtube.com/watch?v=abc", "tipo": "video", "videoId": "abc" } ]
+  },
+  "brave": {
+    "ok": true,
+    "fonte": "brave",
+    "query": "docker redes",
+    "configurada": true,
+    "total": 1,
+    "resultados": [ { "titulo": "…", "url": "https://docs.docker.com/…", "tipo": "artigo" } ]
+  },
+  "resultados": [
+    { "titulo": "…", "url": "https://www.youtube.com/watch?v=abc", "tipo": "video" },
+    { "titulo": "…", "url": "https://docs.docker.com/…", "tipo": "artigo" }
+  ]
+}
+```
+
+---
+
+### 6.4 `POST /buscar-fontes` (alias SPA)
+
+Mantido para o botão **Buscar Fontes** no painel da tarefa. Não usa envelope Hub.
+
+**Body:** `{ "query": "título da tarefa", "limite": 5 }`
+
+**Resposta 200:** `{ "fontes": [ { "titulo", "url", "tipo" } ] }`
+
+Fonte sem chave é **omitida** (lista pode ser `[]`, HTTP 200). Fonte com falha upstream também some da lista.
+
+---
+
+### 6.5 Exemplos para outros módulos
+
+**Personal AI / Tasks — só YouTube:**
+
+```http
+GET http://host:8002/api/v1/busca/youtube?q=revisao+spaced+repetition&limite=3
+Authorization: Bearer <ROADLEARN_API_KEY>
+```
+
+**Tasks — sugerir leitura ao criar lembrete:**
+
+```http
+GET http://host:8002/api/v1/busca/brave?q=pomodoro+tecnica
+```
+
+**Fluxo recomendado no Hub:**
+
+1. `GET /saude` → se `busca.fontes.youtube === false`, não chamar `/busca/youtube` (evita 503).
+2. Chamar a fonte desejada com `q` curto (título da tarefa / assunto).
+3. Persistência fica no **módulo consumidor** (Tasks grava o próprio link; Road-Learn grava `tarefa.links`).
+
+**cURL:**
+
+```bash
+curl -sG "http://127.0.0.1:8002/api/v1/busca/youtube" --data-urlencode "q=python asyncio"
+curl -sG "http://127.0.0.1:8002/api/v1/busca/brave" --data-urlencode "q=python asyncio docs" --data-urlencode "limite=5"
+curl -sG "http://127.0.0.1:8002/api/v1/busca" --data-urlencode "q=python asyncio"
+```
+
+---
+
+## 7. Integração Hub
 
 ### Variáveis `.env`
 
@@ -883,6 +1208,8 @@ HUB_DINHEIRO_URL=…
 HUB_TASKS_URL=…
 HUB_TREINOS_URL=…
 GEMINI_API_KEY=…
+YOUTUBE_API_KEY=…
+BRAVE_API_KEY=…
 ```
 
 ### Exemplo: Personal AI
@@ -900,14 +1227,29 @@ GET /api/v1/ai/revisao?limite=3
 
 Se `data.total > 0`, Tasks pode `POST` em seu próprio `/api/v1/tarefas/` com `origem: "road-learn"`, `origem_id: "revisao:{tarefaId}"`.
 
+### Exemplo: módulo qualquer buscando fontes
+
+```http
+GET /api/v1/busca/youtube?q=docker+redes&limite=5
+Authorization: Bearer <ROADLEARN_API_KEY>
+```
+
+```http
+GET /api/v1/busca/brave?q=docker+overlay+network
+Authorization: Bearer <ROADLEARN_API_KEY>
+```
+
+Descobrir se as chaves existem sem chamar a busca: `GET /saude` → `busca.fontes.youtube` / `busca.fontes.brave`.
+
 ---
 
-## 7. Limites e anti-padrões (camada IA)
+## 8. Limites e anti-padrões (camada IA)
 
 | Item | Limite |
 |------|--------|
 | `alternativas` em `/ai/proximo` | máx. 2 |
 | `revisao?limite` | máx. 10 |
+| `limite` em `/busca/*` | máx. 10 (padrão 5) |
 | `competencias` em resumos | máx. 5 |
 | Cache aceitável | 30–60 s |
 
@@ -916,10 +1258,11 @@ Se `data.total > 0`, Tasks pode `POST` em seu próprio `/api/v1/tarefas/` com `o
 - Usar `GET /roadmaps` na IA quando `GET /ai/progresso` ou `/ai/roadmap/{id}/resumo` bastam
 - Usar `GET /analytics` na IA quando `GET /ai/resumo-semana` ou `/ai/hoje` bastam
 - Duplicar lógica de elegibilidade (80%) ou seleção de próxima tarefa no Gemini
+- Chamar YouTube/Brave direto de outro módulo — usar `/api/v1/busca/*`
 
 ---
 
-## 8. Referência rápida (todas as rotas)
+## 9. Referência rápida (todas as rotas)
 
 ```http
 # Sistema
@@ -927,6 +1270,17 @@ GET  /api/v1/saude
 GET  /api/v1/csrf
 GET  /api/v1/analytics
 GET  /api/v1/timer
+GET  /api/v1/config
+POST /api/v1/config
+
+# Busca de fontes (Hub)
+GET  /api/v1/busca/youtube?q={texto}&limite=5
+POST /api/v1/busca/youtube
+GET  /api/v1/busca/brave?q={texto}&limite=5
+POST /api/v1/busca/brave
+GET  /api/v1/busca?q={texto}&limite=5
+POST /api/v1/busca
+POST /api/v1/buscar-fontes
 
 # IA
 GET  /api/v1/ai/proximo
@@ -1007,17 +1361,21 @@ GET    /backup/
 
 ---
 
-## 9. Implementação (referência de código)
+## 10. Implementação (referência de código)
 
 | Camada | Arquivo |
 |--------|---------|
 | Rotas | `api/urls.py` |
 | Views comuns | `api/views.py` |
 | Views IA | `api/ai_views.py` |
+| Views busca | `api/search_views.py` |
+| Views config (.env) | `api/config_views.py` |
 | Serviços IA | `roadmaps/ai_services.py` |
+| Serviços busca | `core/search_service.py` |
 | Persistência | `roadmaps/persist.py`, `roadmaps/services.py` |
 | Analytics | `roadmaps/analytics.py` |
 | Projetos + Gemini | `projetos/services.py`, `projetos/ia.py` |
 | Testes IA | `tests/test_ai_api.py` |
+| Testes busca | `tests/test_busca_api.py` |
 
 Documentação relacionada: [CAPACIDADES.md](./CAPACIDADES.md), [padrao_desenvolvimento.md](./padrao_desenvolvimento.md), [GERAR_ROADMAP.md](./GERAR_ROADMAP.md).

@@ -27,6 +27,8 @@ for host in ("150.230.230.89", "testserver"):
 
 ROADLEARN_API_KEY = env("ROADLEARN_API_KEY", default="")
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+YOUTUBE_API_KEY = env("YOUTUBE_API_KEY", default="")
+BRAVE_API_KEY = env("BRAVE_API_KEY", default="")
 HUB_DINHEIRO_URL = env("HUB_DINHEIRO_URL", default="")
 HUB_TREINOS_URL = env("HUB_TREINOS_URL", default="")
 HUB_TASKS_URL = env("HUB_TASKS_URL", default="")

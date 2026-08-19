@@ -11,6 +11,7 @@ const FichaPage = lazy(() => import("./pages/Ficha"));
 const RoadmapPage = lazy(() => import("./pages/Roadmap"));
 const AparenciaPage = lazy(() => import("./pages/Aparencia"));
 const ProjetoIntegradoPage = lazy(() => import("./pages/ProjetoIntegrado"));
+const ConfiguracoesPage = lazy(() => import("./pages/Configuracoes"));
 
 function Fallback() {
   return <p className="text-sm text-mute">Carregando…</p>;
@@ -178,6 +179,7 @@ export default function App() {
           <Route path="/" element={pagina(<FichaPage />)} />
           <Route path="/roadmaps/:id" element={pagina(<RoadmapPage />)} />
           <Route path="/aparencia" element={pagina(<AparenciaPage />)} />
+          <Route path="/configuracoes" element={pagina(<ConfiguracoesPage />)} />
           <Route path="/projetos-integrados/:id" element={pagina(<ProjetoIntegradoPage />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

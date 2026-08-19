@@ -1,6 +1,7 @@
 import type {
   Analytics,
   HubLinks,
+  LinkItem,
   Perfil,
   Projeto,
   Roadmap,
@@ -37,6 +38,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export type Saude = { ok: boolean; app: string; armazenamento: string; hub: HubLinks };
+export type ConfigKeys = { geminiApiKey: string; youtubeApiKey: string; braveApiKey: string };
+export type ConfigSaveResult = { ok: boolean; atualizados: string[] };
+export type FonteSugerida = Pick<LinkItem, "titulo" | "url" | "tipo">;
 
 export const api = {
   saude: () => request<Saude>("/api/v1/saude"),
@@ -193,4 +197,17 @@ export const api = {
     remove: (id: string) =>
       request<void>(`/api/v1/projetos-integrados/${id}`, { method: "DELETE" }),
   },
+  config: {
+    get: () => request<ConfigKeys>("/api/v1/config"),
+    save: (dados: ConfigKeys) =>
+      request<ConfigSaveResult>("/api/v1/config", {
+        method: "POST",
+        body: JSON.stringify(dados),
+      }),
+  },
+  buscarFontes: (query: string) =>
+    request<{ fontes: FonteSugerida[] }>("/api/v1/buscar-fontes", {
+      method: "POST",
+      body: JSON.stringify({ query }),
+    }),
 };

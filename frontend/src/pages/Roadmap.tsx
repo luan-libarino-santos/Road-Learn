@@ -1,8 +1,9 @@
-import { Check, ChevronDown, ChevronUp, Clock, Pause, Play, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Clock, ExternalLink, Loader2, Pause, Play, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Modal } from "../components/Modal";
 import { api } from "../lib/api";
+import type { FonteSugerida } from "../lib/api";
 import { useCatalogo } from "../lib/catalogo";
 import { DIFICULDADES, formatHoras, PRIORIDADES, TIPOS } from "../lib/format";
 import { layoutGrafo } from "../lib/grafo";
@@ -26,6 +27,8 @@ export default function RoadmapPage() {
   const [projeto, setProjeto] = useState<Projeto | null>(null);
   const [topicos, setTopicos] = useState<Topico[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [buscandoFontes, setBuscandoFontes] = useState<string | null>(null);
+  const [resultadosFontes, setResultadosFontes] = useState<Record<string, FonteSugerida[]>>({});
 
   async function carregar() {
     if (!id) return;
@@ -73,6 +76,34 @@ export default function RoadmapPage() {
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Não foi possível atualizar");
     }
+  }
+
+  async function buscarFontesTarefa(t: Tarefa) {
+    if (!id) return;
+    setBuscandoFontes(t.id);
+    try {
+      const { fontes } = await api.buscarFontes(t.titulo);
+      setResultadosFontes((prev) => ({ ...prev, [t.id]: fontes }));
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Falha ao buscar fontes.");
+    } finally {
+      setBuscandoFontes(null);
+    }
+  }
+
+  async function adicionarLink(t: Tarefa, fonte: FonteSugerida) {
+    if (!id) return;
+    const novosLinks = [
+      ...(t.links ?? []),
+      { titulo: fonte.titulo, url: fonte.url, tipo: fonte.tipo },
+    ];
+    await api.roadmaps.updateTarefa(id, t.id, { links: novosLinks });
+    await carregar();
+    // Remove a sugestão adicionada
+    setResultadosFontes((prev) => ({
+      ...prev,
+      [t.id]: (prev[t.id] ?? []).filter((f) => f.url !== fonte.url),
+    }));
   }
 
   if (!roadmap) {
@@ -232,6 +263,86 @@ export default function RoadmapPage() {
                           <Trash2 size={14} />
                         </button>
                       </div>
+
+                      {/* Links existentes */}
+                      {t.links.length > 0 && (
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-medium tracking-wide text-mute uppercase">Fontes</p>
+                          {t.links.map((l) => (
+                            <a
+                              key={l.id}
+                              href={l.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 rounded-lg border border-line px-2 py-1.5 text-xs text-sand/80 hover:text-accent"
+                            >
+                              <ExternalLink size={11} className="shrink-0" />
+                              <span className="truncate">{l.titulo || l.url}</span>
+                              <span className="ml-auto shrink-0 rounded bg-panel px-1 text-[10px] text-mute">
+                                {l.tipo}
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Botão buscar fontes */}
+                      <div>
+                        <button
+                          type="button"
+                          disabled={buscandoFontes === t.id}
+                          onClick={() => void buscarFontesTarefa(t)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2 py-1 text-xs text-mute hover:text-accent disabled:opacity-50"
+                        >
+                          {buscandoFontes === t.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <Search size={12} />
+                          )}
+                          {buscandoFontes === t.id ? "Buscando…" : "Buscar Fontes"}
+                        </button>
+                      </div>
+
+                      {/* Resultados da busca */}
+                      {resultadosFontes[t.id] !== undefined && (
+                        <div className="space-y-1">
+                          {resultadosFontes[t.id].length === 0 ? (
+                            <p className="text-xs text-mute">
+                              Nenhum resultado.{" "}
+                              <Link to="/configuracoes" className="text-accent hover:underline">
+                                Verifique as chaves de API.
+                              </Link>
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-[11px] font-medium tracking-wide text-mute uppercase">
+                                Sugestões
+                              </p>
+                              {resultadosFontes[t.id].map((f) => (
+                                <div
+                                  key={f.url}
+                                  className="flex items-center gap-2 rounded-lg border border-line bg-ink px-2 py-1.5 text-xs"
+                                >
+                                  <span className="shrink-0 rounded bg-panel px-1 text-[10px] text-mute">
+                                    {f.tipo}
+                                  </span>
+                                  <span className="min-w-0 flex-1 truncate text-sand/80">
+                                    {f.titulo}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => void adicionarLink(t, f)}
+                                    className="shrink-0 rounded bg-accent px-1.5 py-0.5 text-[10px] font-medium text-ink"
+                                  >
+                                    + Adicionar
+                                  </button>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
+
                       <ul className="space-y-1">
                         {t.subtarefas.map((s) => (
                           <li key={s.id} className="flex items-center gap-2 text-xs">

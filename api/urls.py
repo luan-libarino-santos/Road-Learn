@@ -1,8 +1,13 @@
 from django.urls import path
 
-from . import ai_views, views
+from . import ai_views, config_views, search_views, views
 
 urlpatterns = [
+    path("config", config_views.config),
+    path("busca/youtube", search_views.busca_youtube),
+    path("busca/brave", search_views.busca_brave),
+    path("busca", search_views.busca_agregada),
+    path("buscar-fontes", search_views.buscar_fontes),
     path("ai/proximo", ai_views.ai_proximo),
     path("ai/progresso", ai_views.ai_progresso),
     path("ai/resumo-semana", ai_views.ai_resumo_semana),

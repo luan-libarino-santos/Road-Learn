@@ -6,6 +6,7 @@ import {
   Palette,
   Pause,
   Plus,
+  Settings,
   User,
   X,
 } from "lucide-react";
@@ -106,6 +107,10 @@ export function SideNav({ onNavigate }: { onNavigate?: () => void }) {
         <NavLink to="/aparencia" className={({ isActive }) => linkClass(isActive)} onClick={onNavigate}>
           <Palette size={16} />
           Personalização
+        </NavLink>
+        <NavLink to="/configuracoes" className={({ isActive }) => linkClass(isActive)} onClick={onNavigate}>
+          <Settings size={16} />
+          Configurações
         </NavLink>
       </nav>
       {grupos.length > 0 && (

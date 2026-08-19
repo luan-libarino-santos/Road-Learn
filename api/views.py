@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from core.errors import AppError
 from core.hub import hub_publico
+from core.search_service import manifest_busca
 from perfil.services import (
     atualizar_identidade,
     garantir_perfil_inicial,
@@ -73,6 +74,7 @@ def saude(request):
                 "tasks": hub_publico(request, settings.HUB_TASKS_URL),
             },
             "ai": ai_services.manifest_ai(),
+            "busca": manifest_busca(),
         }
     )
 
