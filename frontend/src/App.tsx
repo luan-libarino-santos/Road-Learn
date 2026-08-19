@@ -62,6 +62,7 @@ export default function App() {
   const [tiposAtv, setTiposAtv] = useState<string[]>(["Conceitos", "Exercícios"]);
   const [restricoes, setRestricoes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [promptCopiado, setPromptCopiado] = useState(false);
 
   const reload = useCallback(async () => {
     const [rms, sb, pf, saude, pis, tm] = await Promise.all([
@@ -140,6 +141,29 @@ export default function App() {
 
   function toggle(list: string[], item: string, set: (v: string[]) => void) {
     set(list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
+  }
+
+  async function copiarPrompt() {
+    setBusy(true);
+    try {
+      const { prompt } = await api.roadmaps.gerarPreview({
+        tema,
+        objetivos,
+        experiencia,
+        estilo,
+        profundidade,
+        tempo,
+        tiposAtividade: tiposAtv,
+        restricoes,
+      });
+      await navigator.clipboard.writeText(prompt);
+      setPromptCopiado(true);
+      setTimeout(() => setPromptCopiado(false), 2500);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Falha ao gerar o prompt");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function gerarIa() {
@@ -332,6 +356,15 @@ export default function App() {
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setModal(null)} className="text-sm text-mute">
                   Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || !tema.trim()}
+                  onClick={() => void copiarPrompt()}
+                  className="rounded-xl border border-line px-4 py-2 text-sm font-medium text-mute disabled:opacity-50"
+                  title="Copia o prompt que seria enviado à IA, sem gerar o roadmap"
+                >
+                  {promptCopiado ? "Copiado!" : "Copiar Prompt"}
                 </button>
                 <button
                   type="button"
