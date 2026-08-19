@@ -25,12 +25,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers.set("X-CSRFToken", csrf);
   }
   const response = await fetch(path, { ...init, headers, credentials: "same-origin" });
-  if (response.status === 204) return undefined as T;
-  const data = await response.json().catch(() => ({}));
+  if (response.status === 204) return null as T;
+  const texto = await response.text();
+  let data: unknown = null;
+  if (texto) {
+    try {
+      data = JSON.parse(texto);
+    } catch {
+      data = {};
+    }
+  }
   if (!response.ok) {
     const erro =
-      (data as { erro?: string; detail?: string }).erro ??
-      (data as { detail?: string }).detail ??
+      (data as { erro?: string; detail?: string } | null)?.erro ??
+      (data as { detail?: string } | null)?.detail ??
       "Falha na requisição.";
     throw new Error(typeof erro === "string" ? erro : JSON.stringify(data));
   }

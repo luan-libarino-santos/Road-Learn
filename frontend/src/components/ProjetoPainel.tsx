@@ -16,7 +16,7 @@ function Lista({
   colecao: string;
   onToggle: Props["onToggle"];
 }) {
-  if (!itens.length) return null;
+  if (!itens?.length) return null;
   return (
     <div className="rounded-2xl border border-line bg-panel/40 p-3">
       <p className="mb-2 text-xs tracking-wide text-mute uppercase">{titulo}</p>
@@ -53,29 +53,29 @@ export function ProjetoPainel({ projeto, onToggle }: Props) {
       )}
       <Lista
         titulo="Requisitos técnicos"
-        itens={projeto.requisitosTecnicos}
+        itens={projeto.requisitosTecnicos ?? []}
         colecao="requisitosTecnicos"
         onToggle={onToggle}
       />
       <Lista
         titulo="Requisitos funcionais"
-        itens={projeto.requisitosFuncionais}
+        itens={projeto.requisitosFuncionais ?? []}
         colecao="requisitosFuncionais"
         onToggle={onToggle}
       />
       <Lista
         titulo="Implementação"
-        itens={projeto.checklistImplementacao}
+        itens={projeto.checklistImplementacao ?? []}
         colecao="checklistImplementacao"
         onToggle={onToggle}
       />
       <Lista
         titulo="Boas práticas"
-        itens={projeto.boasPraticas}
+        itens={projeto.boasPraticas ?? []}
         colecao="boasPraticas"
         onToggle={onToggle}
       />
-      {projeto.etapas.map((e) => (
+      {(projeto.etapas ?? []).map((e) => (
         <div key={e.id} className="rounded-2xl border border-line bg-panel/40 p-3">
           <label className="flex items-center gap-2 text-sm font-medium">
             <input
@@ -94,7 +94,7 @@ export function ProjetoPainel({ projeto, onToggle }: Props) {
           </label>
           {e.descricao && <p className="mt-1 text-xs text-mute">{e.descricao}</p>}
           <ul className="mt-2 space-y-1">
-            {e.tarefas.map((t) => (
+            {(e.tarefas ?? []).map((t) => (
               <li key={t.id} className="flex items-start gap-2 text-sm">
                 <input
                   type="checkbox"

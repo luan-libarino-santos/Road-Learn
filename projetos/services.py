@@ -389,7 +389,7 @@ def _carregar_aninhados(tipo, projeto_id, base):
             "descricao": e.descricao,
             "ordem": e.ordem,
             "concluida": e.concluida,
-            "tarefas": por_etapa.get(e.id, []),
+            "tarefas": por_etapa.get(e.codigo, []),
         }
         for e in etapas_db
     ]

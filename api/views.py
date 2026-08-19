@@ -373,7 +373,10 @@ def projetos_finais(request):
         rid = request.query_params.get("roadmapId") or ""
         if not rid.strip():
             return Response({"erro": "roadmapId é obrigatório"}, status=400)
-        return Response(obter_projeto_final_por_roadmap(rid.strip()))
+        projeto = obter_projeto_final_por_roadmap(rid.strip())
+        if projeto is None:
+            return Response(status=204)
+        return Response(projeto)
     try:
         rid = str((request.data or {}).get("roadmapId") or "").strip()
         if not rid:

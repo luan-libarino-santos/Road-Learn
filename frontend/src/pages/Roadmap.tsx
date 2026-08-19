@@ -34,8 +34,12 @@ export default function RoadmapPage() {
     if (!id) return;
     const r = await api.roadmaps.get(id);
     setRoadmap(r);
-    const pf = await api.pf.get(id);
-    setProjeto(pf);
+    try {
+      const pf = await api.pf.get(id);
+      setProjeto(pf?.id ? pf : null);
+    } catch {
+      setProjeto(null);
+    }
   }
 
   useEffect(() => {
